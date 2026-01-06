@@ -42,6 +42,17 @@ npm install
 npm run dev
 ```
 
+### Rust/WASM
+
+The generated WASM bundle lives in `src/wasm/pkg`. If you change
+`rust/openchaos_wasm`, rebuild with:
+
+```bash
+npm run wasm:build
+```
+
+Prereqs: `rustup` installed and `rustup target add wasm32-unknown-unknown`.
+
 ## Tech Stack
 
 - Next.js 16 (App Router)
