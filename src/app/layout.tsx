@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "A self-evolving open source project. Vote on PRs. Winner gets merged every Sunday.",
 };
 
+import { ChaosProvider } from "@/components/ChaosProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +29,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ChaosProvider>{children}</ChaosProvider>
       </body>
     </html>
   );
