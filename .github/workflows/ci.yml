@@ -18,6 +18,6 @@ jobs:
           cache: "npm"
       - name: Install wasm-pack
         run: cargo install wasm-pack --locked
-      - run: npm ci
       - run: npm run wasm:build
+      - run: npm ci
       - run: npm run build
