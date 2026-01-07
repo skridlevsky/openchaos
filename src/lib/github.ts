@@ -15,6 +15,7 @@ interface GitHubPR {
     login: string;
   };
   created_at: string;
+  merged: boolean;
 }
 
 interface GitHubReaction {
@@ -22,6 +23,22 @@ interface GitHubReaction {
 }
 
 const GITHUB_REPO = "skridlevsky/openchaos";
+
+async function getVotesForPRList(prs: GitHubPR[], owner: string, repo: string) {
+  return await Promise.all(
+    prs.map(async (pr) => {
+      const votes = await getPRVotes(owner, repo, pr.number);
+      return {
+        number: pr.number,
+        title: pr.title,
+        author: pr.user.login,
+        url: pr.html_url,
+        votes,
+        createdAt: pr.created_at,
+      };
+    })
+  );
+}
 
 export async function getOpenPRs(): Promise<PullRequest[]> {
   const [owner, repo] = GITHUB_REPO.split("/");
@@ -46,22 +63,50 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prs: GitHubPR[] = await response.json();
 
   // Fetch reactions for each PR
-  const prsWithVotes = await Promise.all(
-    prs.map(async (pr) => {
-      const votes = await getPRVotes(owner, repo, pr.number);
-      return {
-        number: pr.number,
-        title: pr.title,
-        author: pr.user.login,
-        url: pr.html_url,
-        votes,
-        createdAt: pr.created_at,
-      };
-    })
-  );
+  return await getVotesForPRList(prs, owner, repo);
+}
 
-  // Sort by votes descending
-  return prsWithVotes.sort((a, b) => b.votes - a.votes);
+export async function getMergedPRsByUser(): Promise<{[k: string]: PullRequest[]}> {
+  const [owner, repo] = GITHUB_REPO.split("/");
+
+  const closedPagingURL = `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&page=`;
+  let prsMerged: GitHubPR[] = [];
+  let page = 1;
+  while (true) {
+    const response = await fetch(
+      closedPagingURL + page,
+      {
+        headers: {
+          Accept: "application/vnd.github.v3+json",
+        },
+        next: {revalidate: 300}, // Cache for 5 minutes
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error("Rate limited by GitHub API");
+      }
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const prs: GitHubPR[] = await response.json();
+    page += 1;
+    if (prs.length === 0) break;
+    prsMerged = prsMerged.concat(prs.filter(p => p.merged))
+  }
+  const prsByUser: {[user: string]: GitHubPR[]} = {};
+  for(const pr of prsMerged) {
+    if (!(pr.user.login in prsByUser)) {
+      prsByUser[pr.user.login] = [];
+    }
+    prsByUser[pr.user.login].push(pr);
+  }
+  const prWithVotesByUser: {[user: string]: PullRequest[]} = {};
+  for(const user in prWithVotesByUser) {
+    prWithVotesByUser[user] = await getVotesForPRList(prsByUser[user], owner, repo);
+  }
+  return prWithVotesByUser;
 }
 
 async function getPRVotes(

@@ -1,15 +1,22 @@
-import { getOpenPRs } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import {getMergedPRsByUser, getOpenPRs, PullRequest} from "@/lib/github";
+import {PRCard} from "./PRCard";
+import {PRRankingSystem} from "@/lib/ranking-system";
 
 export async function PRList() {
-  let prs;
+  let prs: PullRequest[] = [];
+  let prsClosedByUser: {[user: string]: PullRequest[]} = {};
   let error = null;
 
   try {
+    prsClosedByUser = await getMergedPRsByUser();
     prs = await getOpenPRs();
+    // Proprietary ranking system ensuring experience is rewarded.
+    prs = new PRRankingSystem(prs, prsClosedByUser).rerankPRs();
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
+
+  const maxVotes = Math.max(...prs.map(p => p.votes), 0);
 
   if (error) {
     return (
@@ -35,8 +42,8 @@ export async function PRList() {
 
   return (
     <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
+      {prs.map((pr) => (
+        <PRCard key={pr.number} prsClosed={prsClosedByUser} pr={pr} isMax={pr.votes === maxVotes} />
       ))}
     </div>
   );
