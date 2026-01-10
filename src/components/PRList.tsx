@@ -1,8 +1,11 @@
-import { getOpenPRs } from "@/lib/github";
+import { getOpenPRs, PullRequest } from "@/lib/github";
 import { PRCard } from "./PRCard";
 
+const TOP_VOTED_LIMIT = 5;
+const NEWEST_LIMIT = 5;
+
 export async function PRList() {
-  let prs;
+  let prs: PullRequest[] | undefined;
   let error = null;
 
   try {
@@ -13,31 +16,72 @@ export async function PRList() {
 
   if (error) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-500">{error}</p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Try refreshing the page in a minute.
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-error-table">
+        <tbody>
+          <tr>
+            <td className="page-error-cell">
+              <b>{error}</b>
+              <br />
+              <span>Try refreshing the page in a minute.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
   if (!prs || prs.length === 0) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-400">No open PRs yet.</p>
-        <p className="mt-2 text-sm text-zinc-500">
-          Be the first to submit one!
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
+        <tbody>
+          <tr>
+            <td className="page-empty-cell">
+              <b>No open PRs yet.</b>
+              <br />
+              <span>Be the first to submit one!</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
+  // Top PRs by votes (already sorted by votes from getOpenPRs)
+  const topVoted = prs.slice(0, TOP_VOTED_LIMIT);
+  const topVotedNumbers = new Set(topVoted.map((pr) => pr.number));
+
+  // Newest PRs not already in top voted
+  const newestPRs = [...prs]
+    .filter((pr) => !topVotedNumbers.has(pr.number))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, NEWEST_LIMIT);
+
   return (
-    <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
-      ))}
-    </div>
+    <>
+      <div className="pr-list-container">
+        {topVoted.map((pr, index) => (
+          <PRCard key={pr.number} pr={pr} rank={index + 1} />
+        ))}
+      </div>
+
+      {newestPRs.length > 0 && (
+        <div className="pr-list-newest-section">
+          <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-newest-header">
+            <tbody>
+              <tr>
+                <td className="pr-list-newest-header-cell">
+                  <b>🆕 NEWEST PRS 🆕</b>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="pr-list-container">
+            {newestPRs.map((pr) => (
+              <PRCard key={pr.number} pr={pr} />
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

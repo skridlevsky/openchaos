@@ -3,7 +3,7 @@ import { TimeAgo } from "./TimeAgo";
 
 interface PRCardProps {
   pr: PullRequest;
-  rank: number;
+  rank?: number;
 }
 
 export function PRCard({ pr, rank }: PRCardProps) {
