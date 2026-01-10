@@ -3,6 +3,10 @@ import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
 
 export default function Home() {
+  if (Math.random() <= 0.01337) {
+    return null;
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
