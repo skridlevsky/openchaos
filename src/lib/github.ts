@@ -9,6 +9,35 @@ export interface PullRequest {
   createdAt: string;
   isMergeable: boolean;
   checksPassed: boolean;
+  hotScore: number;
+  isTrending: boolean;
+}
+
+/**
+ * Calculate a "hot score" for ranking PRs, inspired by Reddit's algorithm.
+ * Combines vote count (logarithmic) with recency (linear) so newer PRs
+ * with fewer votes can compete with older PRs that have more votes.
+ *
+ * @param votes - Number of 👍 reactions
+ * @param createdAt - ISO timestamp of PR creation
+ * @returns Hot score (higher = more prominent)
+ */
+function calculateHotScore(votes: number, createdAt: string): number {
+  // Use logarithmic scale for votes (diminishing returns)
+  const voteScore = Math.log10(Math.max(votes, 1) + 1);
+
+  // Convert creation time to seconds since epoch
+  const createdSeconds = new Date(createdAt).getTime() / 1000;
+
+  // Reference point: Jan 1, 2024 (keeps numbers reasonable)
+  const referenceTime = new Date("2024-01-01").getTime() / 1000;
+  const ageSeconds = createdSeconds - referenceTime;
+
+  // Decay constant: ~45000 seconds (~12.5 hours)
+  // This means a PR needs ~10x more votes every 12.5 hours to maintain position
+  const decayConstant = 45000;
+
+  return voteScore + ageSeconds / decayConstant;
 }
 
 export interface MergedPullRequest {
@@ -97,7 +126,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   const prs = allPRs;
 
-  // Fetch reactions and status for each PR
+  // Fetch reactions, status, and calculate hot score for each PR
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRVotes(owner, repo, pr.number);
@@ -113,6 +142,8 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
+        hotScore: calculateHotScore(votes, pr.created_at),
+        isTrending: false, // Set by getOrganizedPRs based on top 5 hot score
       };
     }),
   );
@@ -130,6 +161,53 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     // Ties broken by newest
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+}
+
+/**
+ * Get PRs organized into two lists:
+ * 1. Top 5 by votes (merge candidates)
+ * 2. Top 5 by hot score (trending), excluding those already in top 5 by votes
+ *
+ * The isTrending flag is set based on whether a PR is in the top 5 by hot score.
+ */
+export async function getOrganizedPRs(): Promise<{
+  topByVotes: PullRequest[];
+  trending: PullRequest[];
+}> {
+  const allPRs = await getOpenPRs();
+
+  // Determine which PRs are in top 5 by hot score (these are "trending")
+  const top5ByHotScore = [...allPRs]
+    .sort((a, b) => b.hotScore - a.hotScore)
+    .slice(0, 5);
+  const trendingNumbers = new Set(top5ByHotScore.map((pr) => pr.number));
+
+  // Update isTrending flag based on actual top 5 hot score
+  const prsWithTrending = allPRs.map((pr) => ({
+    ...pr,
+    isTrending: trendingNumbers.has(pr.number),
+  }));
+
+  // Top 5 by raw votes (these compete for merge)
+  // Secondary sort by creation date (newest wins) for tie-breaking
+  const topByVotes = [...prsWithTrending]
+    .sort((a, b) => {
+      if (b.votes !== a.votes) {
+        return b.votes - a.votes;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    })
+    .slice(0, 5);
+
+  const topByVotesNumbers = new Set(topByVotes.map((pr) => pr.number));
+
+  // Trending section: top 5 by hot score, excluding those already in top votes
+  const trending = [...prsWithTrending]
+    .sort((a, b) => b.hotScore - a.hotScore)
+    .filter((pr) => !topByVotesNumbers.has(pr.number))
+    .slice(0, 5);
+
+  return { topByVotes, trending };
 }
 
 async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {

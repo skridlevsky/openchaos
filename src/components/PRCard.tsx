@@ -207,6 +207,13 @@ export function PRCard({ pr, rank }: PRCardProps) {
                 </span>
               </div>
             )}
+            {pr.isTrending && (
+              <div className="pr-card-trending-badge">
+                <span className="pr-card-trending-badge-text">
+                  <b>🔥 TRENDING</b>
+                </span>
+              </div>
+            )}
           </td>
           <td className={rank === 1 ? 'pr-card-content-cell-leading' : 'pr-card-content-cell-normal'}>
             <table width="100%" border={0} cellPadding={0} cellSpacing={0}>

@@ -1,12 +1,12 @@
-import { getOpenPRs } from "@/lib/github";
+import { getOrganizedPRs } from "@/lib/github";
 import { PRCard } from "./PRCard";
 
 export async function PRList() {
-  let prs;
+  let data;
   let error = null;
 
   try {
-    prs = await getOpenPRs();
+    data = await getOrganizedPRs();
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
@@ -22,7 +22,9 @@ export async function PRList() {
     );
   }
 
-  if (!prs || prs.length === 0) {
+  const { topByVotes, trending } = data!;
+
+  if (topByVotes.length === 0 && trending.length === 0) {
     return (
       <div className="w-full max-w-xl text-center py-8">
         <p className="text-zinc-400">No open PRs yet.</p>
@@ -34,10 +36,32 @@ export async function PRList() {
   }
 
   return (
-    <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
-      ))}
+    <div className="w-full max-w-xl space-y-8">
+      {topByVotes.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-3">
+            Top by Votes
+          </h2>
+          <div className="space-y-3">
+            {topByVotes.map((pr, index) => (
+              <PRCard key={pr.number} pr={pr} rank={index + 1} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {trending.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-3">
+            Trending
+          </h2>
+          <div className="space-y-3">
+            {trending.map((pr) => (
+              <PRCard key={pr.number} pr={{ ...pr, isTrending: false }} rank={0} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
