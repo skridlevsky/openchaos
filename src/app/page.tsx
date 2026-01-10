@@ -20,10 +20,6 @@ export default function Home() {
           Community-Controlled Asteroids
         </h2>
         <AsteroidsGame physics={DEFAULT_PHYSICS} />
-        <p className="mt-4 text-sm text-zinc-500 text-center max-w-md">
-          Physics constants are determined by community vote.
-          Submit a PR modifying <code className="text-zinc-400">src/config/physics.ts</code> to propose changes.
-        </p>
       </section>
 
       <section className="mt-16 w-full flex flex-col items-center">
