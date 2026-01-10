@@ -17,11 +17,6 @@ export function PRCard({ pr, rank }: PRCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-zinc-500 text-sm">#{pr.number}</span>
-            {rank === 1 && (
-              <span className="px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded">
-                LEADING
-              </span>
-            )}
           </div>
           <h3 className="mt-1 font-medium truncate">{pr.title}</h3>
           <p className="mt-1 text-sm text-zinc-500">by @{pr.author}</p>

@@ -33,6 +33,11 @@ export async function PRList() {
     );
   }
 
+  for (let i = prs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [prs[i], prs[j]] = [prs[j], prs[i]];
+  }
+
   return (
     <div className="w-full max-w-xl space-y-3">
       {prs.map((pr, index) => (
