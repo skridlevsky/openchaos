@@ -2,11 +2,9 @@ import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
 import { AsteroidsGame } from "@/components/AsteroidsGame";
-import { getActivePhysics } from "@/lib/github";
+import { DEFAULT_PHYSICS } from "@/config/physics";
 
-export default async function Home() {
-  const physics = await getActivePhysics();
-
+export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
@@ -21,7 +19,7 @@ export default async function Home() {
         <h2 className="text-lg font-medium text-zinc-600 mb-4">
           Community-Controlled Asteroids
         </h2>
-        <AsteroidsGame physics={physics} />
+        <AsteroidsGame physics={DEFAULT_PHYSICS} />
         <p className="mt-4 text-sm text-zinc-500 text-center max-w-md">
           Physics constants are determined by community vote.
           Submit a PR modifying <code className="text-zinc-400">src/config/physics.ts</code> to propose changes.

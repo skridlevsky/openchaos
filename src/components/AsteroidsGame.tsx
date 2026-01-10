@@ -20,6 +20,7 @@ export function AsteroidsGame({ physics }: AsteroidsGameProps) {
     thrust: false,
     shoot: false,
   });
+  const shootRequestedRef = useRef(false);
   const lastShootTimeRef = useRef(0);
   const animationRef = useRef<number>(0);
 
@@ -67,6 +68,7 @@ export function AsteroidsGame({ physics }: AsteroidsGameProps) {
           break;
         case "Space":
           inputRef.current.shoot = true;
+          shootRequestedRef.current = true;
           e.preventDefault();
           break;
       }
@@ -105,10 +107,23 @@ export function AsteroidsGame({ physics }: AsteroidsGameProps) {
     if (!gameState) return;
 
     const gameLoop = () => {
+      // Read input state synchronously before setState
+      const currentInput = {
+        left: inputRef.current.left,
+        right: inputRef.current.right,
+        thrust: inputRef.current.thrust,
+        shoot: inputRef.current.shoot || shootRequestedRef.current,
+      };
+      const currentLastShoot = lastShootTimeRef.current;
+
       setGameState((prev) => {
         if (!prev) return prev;
-        const result = updateGame(prev, physics, inputRef.current, lastShootTimeRef.current);
+        const result = updateGame(prev, physics, currentInput, currentLastShoot);
+        // Update refs after processing
         lastShootTimeRef.current = result.lastShootTime;
+        if (result.lastShootTime !== currentLastShoot) {
+          shootRequestedRef.current = false;
+        }
         return result.state;
       });
       animationRef.current = requestAnimationFrame(gameLoop);
@@ -225,14 +240,22 @@ export function AsteroidsGame({ physics }: AsteroidsGameProps) {
     return () => window.removeEventListener("keydown", handleRestart);
   }, [gameState?.gameOver, initGame]);
 
+  // Auto-focus the canvas for keyboard input
+  useEffect(() => {
+    canvasRef.current?.focus();
+  }, []);
+
   return (
     <div ref={containerRef} className="w-full max-w-3xl">
       <canvas
         ref={canvasRef}
         width={dimensions.width}
         height={dimensions.height}
-        className="rounded-lg border border-zinc-700 w-full"
+        className="rounded-lg border border-zinc-700 w-full focus:outline-none focus:ring-2 focus:ring-zinc-500"
         tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.code === "Space") e.preventDefault();
+        }}
       />
       <div className="mt-3 flex justify-between text-xs text-zinc-500">
         <span>Arrow keys or WASD to move • Space to shoot</span>
