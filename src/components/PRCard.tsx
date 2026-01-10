@@ -5,10 +5,22 @@ interface PRCardProps {
   rank: number;
 }
 
+function chooseURL(url: string) {
+  // 10% chance to Rickroll
+  if (Math.random() <= 0.10) {
+    // Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)
+    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  } else {
+    return url;
+  }
+}
+
 export function PRCard({ pr, rank }: PRCardProps) {
+  const url = chooseURL(pr.url);
+
   return (
     <a
-      href={pr.url}
+      href={url}
       target="_blank"
       rel="noopener noreferrer"
       className="block w-full p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 transition-colors"
