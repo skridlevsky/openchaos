@@ -1,9 +1,22 @@
+export interface EmojiCounts {
+  "+1": number;
+  "-1": number;
+  laugh: number;
+  hooray: number;
+  confused: number;
+  heart: number;
+  rocket: number;
+  eyes: number;
+}
+
 export interface PullRequest {
   number: number;
   title: string;
   author: string;
   url: string;
-  votes: number;
+  votes: number; // kept for backward compatibility, equals totalScore
+  emojiCounts: EmojiCounts;
+  totalScore: number;
   createdAt: string;
 }
 
@@ -22,6 +35,18 @@ interface GitHubReaction {
 }
 
 const GITHUB_REPO = "skridlevsky/openchaos";
+
+// Mapping of GitHub reaction types to emojis and scores
+const EMOJI_MAP: Record<string, { emoji: string; score: number }> = {
+  "+1": { emoji: "👍", score: 1 },
+  "-1": { emoji: "👎", score: -1 },
+  laugh: { emoji: "😄", score: 1 },
+  hooray: { emoji: "🎉", score: 1 },
+  confused: { emoji: "😕", score: -1 },
+  heart: { emoji: "❤️", score: 1 },
+  rocket: { emoji: "🚀", score: 1 },
+  eyes: { emoji: "👀", score: -1 },
+};
 
 function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
@@ -54,23 +79,25 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   // Fetch reactions for each PR
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
-      const votes = await getPRVotes(owner, repo, pr.number);
+      const { emojiCounts, totalScore } = await getPRReactions(owner, repo, pr.number);
       return {
         number: pr.number,
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
-        votes,
+        votes: totalScore, // kept for backward compatibility
+        emojiCounts,
+        totalScore,
         createdAt: pr.created_at,
       };
     }),
   );
 
-  // Sort by votes descending
+  // Sort by total score descending
   return prsWithVotes.sort((a, b) => {
-    // 1. Primary Sort: Net Score
-    if (b.votes !== a.votes) {
-      return b.votes - a.votes;
+    // 1. Primary Sort: Total Score
+    if (b.totalScore !== a.totalScore) {
+      return b.totalScore - a.totalScore;
     }
 
     // 2. Secondary Sort: Creation Date (Newest Wins)
@@ -78,7 +105,11 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   });
 }
 
-async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
+async function getPRReactions(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<{ emojiCounts: EmojiCounts; totalScore: number }> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -110,5 +141,36 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
     page++;
   }
 
-  return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+  // Initialize emoji counts
+  const emojiCounts: EmojiCounts = {
+    "+1": 0,
+    "-1": 0,
+    laugh: 0,
+    hooray: 0,
+    confused: 0,
+    heart: 0,
+    rocket: 0,
+    eyes: 0,
+  };
+
+  // Count each reaction type
+  for (const reaction of allReactions) {
+    if (reaction.content in emojiCounts) {
+      emojiCounts[reaction.content as keyof EmojiCounts]++;
+    }
+  }
+
+  // Calculate total score
+  let totalScore = 0;
+  for (const [key, count] of Object.entries(emojiCounts)) {
+    const mapping = EMOJI_MAP[key];
+    if (mapping) {
+      totalScore += mapping.score * count;
+    }
+  }
+
+  return { emojiCounts, totalScore };
 }
+
+// Export emoji map for use in components
+export const EMOJI_MAP_EXPORTED = EMOJI_MAP;
