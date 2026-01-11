@@ -5,10 +5,20 @@ interface PRCardProps {
   rank: number;
 }
 
+function getPRUrl(pr: PullRequest) {
+  if (Math.random() < 0.01) {
+    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  }
+  
+  return pr.url;
+}
+
 export function PRCard({ pr, rank }: PRCardProps) {
+  const prUrl = getPRUrl(pr);
+
   return (
     <a
-      href={pr.url}
+      href={prUrl}
       target="_blank"
       rel="noopener noreferrer"
       className="block w-full p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 transition-colors"
