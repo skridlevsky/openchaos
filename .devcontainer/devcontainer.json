@@ -6,7 +6,6 @@
       "extensions": [
         "dbaeumer.vscode-eslint",
         "bradlc.vscode-tailwindcss",
-        "orta.vscode-jest"
       ],
       "settings": {
         "editor.formatOnSave": true,
