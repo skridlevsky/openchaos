@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
+import { AutoRefreshWrapper } from "@/components/AutoRefreshWrapper";
 
 export default function Home() {
   return (
@@ -17,15 +18,17 @@ export default function Home() {
         <h2 className="text-xl font-medium text-zinc-600 mb-6">
           Open PRs — Vote to merge
         </h2>
-        <Suspense
-          fallback={
-            <div className="w-full max-w-xl text-center py-8">
-              <p className="text-zinc-500">Loading PRs...</p>
-            </div>
-          }
-        >
-          <PRList />
-        </Suspense>
+        <AutoRefreshWrapper>
+          <Suspense
+            fallback={
+              <div className="w-full max-w-xl text-center py-8">
+                <p className="text-zinc-500">Loading PRs...</p>
+              </div>
+            }
+          >
+            <PRList />
+          </Suspense>
+        </AutoRefreshWrapper>
       </section>
 
       <footer className="mt-16 flex flex-col items-center gap-4 text-sm text-zinc-500">
