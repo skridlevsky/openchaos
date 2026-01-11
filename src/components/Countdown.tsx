@@ -58,21 +58,21 @@ export function Countdown() {
 
   if (!mounted) {
     return (
-      <div className="text-center">
-        <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
+      <div className="text-left">
+        <div className="text-3xl sm:text-5xl font-mono font-bold tracking-tight text-white/90 whitespace-nowrap">
           --d --h --m --s
         </div>
-        <p className="mt-4 text-zinc-500 text-lg">until next merge</p>
+        <p className="mt-2 text-white/60 text-sm font-medium font-sans">until next merge</p>
       </div>
     );
   }
 
   return (
-    <div className="text-center">
-      <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
+    <div className="text-left">
+      <div className="text-3xl sm:text-5xl font-mono font-bold tracking-tight text-white/90 whitespace-nowrap tabular-nums">
         {time.days}d {pad(time.hours)}h {pad(time.minutes)}m {pad(time.seconds)}s
       </div>
-      <p className="mt-4 text-zinc-400 text-lg">until next merge</p>
+      <p className="mt-2 text-white/60 text-sm font-medium font-sans">until next merge</p>
     </div>
   );
 }
