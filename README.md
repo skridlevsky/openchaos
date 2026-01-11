@@ -9,17 +9,15 @@ A self-evolving open source project. Every week, the community votes on PRs, and
 ## How It Works
 
 1. Anyone submits a PR
-2. Community votes via reactions on the PR:
-  - 👍 (Thumbs Up) counts as +1
-  - 👎 (Thumbs Down) counts as -1
-3. Every **Sunday at 09:00 UTC**, the most-voted PR gets merged
+2. Community votes by approving the changes on the PR
+3. Every **Sunday at 09:00 UTC**, the most-approved PR gets merged
 4. Vercel auto-deploys
 5. Repeat forever
 
 ## Rules
 
-- **Vote**: Add a 👍 reaction to support a change, or a 👎 reaction to oppose it
-- **Highest Score Wins**: The winner is determined by (Total 👍) - (Total 👎)
+- **Vote**: Review the submitted PR, and approve it to cast a vote
+- **Highest Score Wins**: The winner is determined by the number of approvals on the most recent commit
 - **Ties favor the New**: If scores are equal, the **newest PR** (created most recently) wins
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins

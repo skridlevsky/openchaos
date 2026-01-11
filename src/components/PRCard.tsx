@@ -27,7 +27,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
           <p className="mt-1 text-sm text-zinc-500">{pr.sha.substring(0, 7)} — by @{pr.author}</p>
         </div>
         <div className="flex items-center gap-1.5 text-lg font-medium">
-          <span className="text-green-400">🗹</span>
+          <span className="text-2xl font-bold text-green-600">✓</span>
           <span>{pr.approvals}</span>
         </div>
       </div>

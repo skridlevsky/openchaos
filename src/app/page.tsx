@@ -15,7 +15,7 @@ export default function Home() {
 
       <section className="mt-16 w-full flex flex-col items-center">
         <h2 className="text-xl font-medium text-zinc-600 mb-6">
-          Open PRs — Vote to merge
+          Open PRs — Approve to merge
         </h2>
         <Suspense
           fallback={
