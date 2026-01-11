@@ -58,6 +58,15 @@ export async function PRList() {
 
   return (
     <>
+      <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+        <tbody>
+          <tr>
+            <td className="pr-list-section-header-cell">
+              <b>🏆 TOP BY VOTES 🏆</b>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <div className="pr-list-container">
         {topVoted.map((pr, index) => (
           <PRCard key={pr.number} pr={pr} rank={index + 1} />
@@ -66,10 +75,10 @@ export async function PRList() {
 
       {newestPRs.length > 0 && (
         <div className="pr-list-newest-section">
-          <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-newest-header">
+          <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
             <tbody>
               <tr>
-                <td className="pr-list-newest-header-cell">
+                <td className="pr-list-section-header-cell">
                   <b>🆕 NEWEST PRS 🆕</b>
                 </td>
               </tr>
