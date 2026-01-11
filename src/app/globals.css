@@ -1,18 +1,222 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
+  --background: #f8f3ea;
+  --foreground: #111111;
+  --chaos-magenta: #ff3dcd;
+  --chaos-lime: #c7ff4e;
+  --chaos-cyan: #4de2ff;
+  --chaos-orange: #ffb547;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+::selection {
+  background: var(--chaos-lime);
+  color: #111111;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.chaos-noise {
+  background-image: linear-gradient(
+      115deg,
+      rgba(255, 214, 153, 0.15),
+      transparent 42%
+    ),
+    radial-gradient(circle at 20% 20%, rgba(0, 0, 0, 0.07), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(0, 0, 0, 0.06), transparent 45%),
+    radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.08), transparent 40%);
+  mix-blend-mode: multiply;
+}
+
+.chaos-marquee {
+  animation: marquee 22s linear infinite;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+  50% {
+    transform: translateY(4px) rotate(1.8deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(0.6deg);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-chaos {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-18px) translateX(10px);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.2;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes hue-spin {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes jitter {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-2px, 0);
+  }
+  80% {
+    transform: translate(2px, 1px);
+  }
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+  20% {
+    clip-path: inset(8% 0 65% 0);
+  }
+  40% {
+    clip-path: inset(35% 0 30% 0);
+  }
+  60% {
+    clip-path: inset(55% 0 15% 0);
+  }
+  80% {
+    clip-path: inset(10% 0 55% 0);
+  }
+}
+
+.chaos-wobble {
+  animation: wobble 6s ease-in-out infinite;
+}
+
+.chaos-spin {
+  animation: spin-slow 18s linear infinite;
+}
+
+.chaos-float {
+  animation: float-chaos 12s ease-in-out infinite;
+}
+
+.chaos-ring {
+  animation: pulse-ring 5s ease-in-out infinite;
+}
+
+.chaos-hue {
+  animation: hue-spin 16s linear infinite;
+}
+
+.chaos-jitter {
+  animation: jitter 1.4s steps(2, end) infinite;
+}
+
+.chaos-glitch {
+  position: relative;
+}
+
+.chaos-glitch::before,
+.chaos-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  color: inherit;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.chaos-glitch::before {
+  transform: translate(2px, -1px);
+  text-shadow: -2px 0 var(--chaos-cyan);
+  animation: glitch 2s infinite;
+}
+
+.chaos-glitch::after {
+  transform: translate(-2px, 1px);
+  text-shadow: 2px 0 var(--chaos-magenta);
+  animation: glitch 1.6s infinite reverse;
 }
