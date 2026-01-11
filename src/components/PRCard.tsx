@@ -24,7 +24,9 @@ export function PRCard({ pr, rank }: PRCardProps) {
             )}
           </div>
           <h3 className="mt-1 font-medium truncate">{pr.title}</h3>
-          <p className="mt-1 text-sm text-zinc-500">by @{pr.author}</p>
+          <p className="mt-1 text-sm text-zinc-500">
+            by @{pr.author} <span className="text-zinc-400">({pr.priorMergedPRs} merged, {pr.totalSubmittedPRs} total)</span>
+          </p>
         </div>
         <div className="flex items-center gap-1.5 text-lg font-medium">
           <span>👍</span>

@@ -5,6 +5,8 @@ export interface PullRequest {
   url: string;
   votes: number;
   createdAt: string;
+  priorMergedPRs: number;
+  totalSubmittedPRs: number;
 }
 
 interface GitHubPR {
@@ -51,17 +53,26 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   const prs: GitHubPR[] = await response.json();
 
+  // Get merged PRs count and total submitted PRs count by author
+  const [mergedPRsCountByAuthor, totalSubmittedPRsCountByAuthor] = await Promise.all([
+    getMergedPRsCountByAuthor(owner, repo),
+    getTotalSubmittedPRsCountByAuthor(owner, repo),
+  ]);
+
   // Fetch reactions for each PR
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRVotes(owner, repo, pr.number);
+      const author = pr.user.login;
       return {
         number: pr.number,
         title: pr.title,
-        author: pr.user.login,
+        author,
         url: pr.html_url,
         votes,
         createdAt: pr.created_at,
+        priorMergedPRs: mergedPRsCountByAuthor[author] || 0,
+        totalSubmittedPRs: totalSubmittedPRsCountByAuthor[author] || 0,
       };
     }),
   );
@@ -111,4 +122,84 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
   }
 
   return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+}
+
+async function getMergedPRsCountByAuthor(owner: string, repo: string): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  let page = 1;
+
+  while (true) {
+    // Use GitHub search API to find merged PRs
+    const response = await fetch(
+      `https://api.github.com/search/issues?q=repo:${owner}/${repo}+is:merged+is:pr&per_page=100&page=${page}`,
+      {
+        headers: getHeaders("application/vnd.github.v3+json"),
+        next: { revalidate: 300 },
+      },
+    );
+
+    if (!response.ok) {
+      break;
+    }
+
+    const data: { items: Array<{ user: { login: string } }> } = await response.json();
+    const items = data.items || [];
+
+    if (items.length === 0) {
+      break;
+    }
+
+    for (const item of items) {
+      const author = item.user.login;
+      counts[author] = (counts[author] || 0) + 1;
+    }
+
+    if (items.length < 100) {
+      break;
+    }
+
+    page++;
+  }
+
+  return counts;
+}
+
+async function getTotalSubmittedPRsCountByAuthor(owner: string, repo: string): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  let page = 1;
+
+  while (true) {
+    // Use GitHub search API to find all PRs (all states)
+    const response = await fetch(
+      `https://api.github.com/search/issues?q=repo:${owner}/${repo}+is:pr&per_page=100&page=${page}`,
+      {
+        headers: getHeaders("application/vnd.github.v3+json"),
+        next: { revalidate: 300 },
+      },
+    );
+
+    if (!response.ok) {
+      break;
+    }
+
+    const data: { items: Array<{ user: { login: string } }> } = await response.json();
+    const items = data.items || [];
+
+    if (items.length === 0) {
+      break;
+    }
+
+    for (const item of items) {
+      const author = item.user.login;
+      counts[author] = (counts[author] || 0) + 1;
+    }
+
+    if (items.length < 100) {
+      break;
+    }
+
+    page++;
+  }
+
+  return counts;
 }
