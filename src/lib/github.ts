@@ -3,7 +3,8 @@ export interface PullRequest {
   title: string;
   author: string;
   url: string;
-  votes: number;
+  approvals: number;
+  sha: string;
   createdAt: string;
 }
 
@@ -14,11 +15,16 @@ interface GitHubPR {
   user: {
     login: string;
   };
+  head: {
+    sha: string;
+  };
   created_at: string;
 }
 
-interface GitHubReaction {
-  content: string;
+interface GitHubApproval {
+  state: string;
+  commit_id: string;
+  submitted_at: string;
 }
 
 const GITHUB_REPO = "skridlevsky/openchaos";
@@ -52,25 +58,26 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prs: GitHubPR[] = await response.json();
 
   // Fetch reactions for each PR
-  const prsWithVotes = await Promise.all(
+  const prsWithApprovals = await Promise.all(
     prs.map(async (pr) => {
-      const votes = await getPRVotes(owner, repo, pr.number);
+      const approvals = await getPRApprovals(owner, repo, pr.number, pr.head.sha);
       return {
         number: pr.number,
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
-        votes,
+        approvals,
+        sha: pr.head.sha,
         createdAt: pr.created_at,
       };
     }),
   );
 
-  // Sort by votes descending
-  return prsWithVotes.sort((a, b) => {
+  // Sort by approvals descending
+  return prsWithApprovals.sort((a, b) => {
     // 1. Primary Sort: Net Score
-    if (b.votes !== a.votes) {
-      return b.votes - a.votes;
+    if (b.approvals !== a.approvals) {
+      return b.approvals - a.approvals;
     }
 
     // 2. Secondary Sort: Creation Date (Newest Wins)
@@ -78,15 +85,15 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   });
 }
 
-async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
-  let allReactions: GitHubReaction[] = [];
+async function getPRApprovals(owner: string, repo: string, prNumber: number, sha: string): Promise<number> {
+  let allApprovals: GitHubApproval[] = [];
   let page = 1;
 
   while (true) {
     const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions?per_page=100&page=${page}`,
+      `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews?per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.squirrel-girl-preview+json"),
+        headers: getHeaders("application/vnd.github.v3+json"),
         next: { revalidate: 300 },
       },
     );
@@ -95,20 +102,20 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
       break;
     }
 
-    const reactions: GitHubReaction[] = await response.json();
+    const approvals: GitHubApproval[] = await response.json();
 
-    if (reactions.length === 0) {
+    if (approvals.length === 0) {
       break;
     }
 
-    allReactions = allReactions.concat(reactions);
+    allApprovals = allApprovals.concat(approvals.filter(r => r.commit_id === sha));
 
-    if (reactions.length < 100) {
+    if (approvals.length < 100) {
       break;
     }
 
     page++;
   }
 
-  return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+  return allApprovals.filter((r) => r.state === "APPROVED").length
 }
