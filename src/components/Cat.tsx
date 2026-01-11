@@ -16,12 +16,11 @@ export function Cat() {
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
+  const lastX = useRef(0);
 
   useEffect(() => {
     const handleWindowMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
-
-      e.preventDefault();
 
       const newX = e.clientX - dragOffset.current.x;
       const newY = e.clientY - dragOffset.current.y;
@@ -34,7 +33,25 @@ export function Cat() {
       }
     };
 
-    const handleWindowMouseUp = () => {
+    const handleWindowTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      const movementX = touch.clientX - lastX.current;
+      lastX.current = touch.clientX;
+
+      const newX = touch.clientX - dragOffset.current.x;
+      const newY = touch.clientY - dragOffset.current.y;
+
+      setPosition({ x: newX, y: newY });
+
+      if (Math.abs(movementX) > 0) {
+        setIsFlipped(movementX < 0);
+      }
+    };
+
+    const handleWindowEnd = () => {
       if (!isDragging) return;
       setIsDragging(false);
 
@@ -71,12 +88,16 @@ export function Cat() {
 
     if (isDragging) {
       window.addEventListener("mousemove", handleWindowMouseMove);
-      window.addEventListener("mouseup", handleWindowMouseUp);
+      window.addEventListener("mouseup", handleWindowEnd);
+      window.addEventListener("touchmove", handleWindowTouchMove, { passive: false });
+      window.addEventListener("touchend", handleWindowEnd);
     }
 
     return () => {
       window.removeEventListener("mousemove", handleWindowMouseMove);
-      window.removeEventListener("mouseup", handleWindowMouseUp);
+      window.removeEventListener("mouseup", handleWindowEnd);
+      window.removeEventListener("touchmove", handleWindowTouchMove);
+      window.removeEventListener("touchend", handleWindowEnd);
     };
   }, [isDragging]);
 
@@ -91,6 +112,25 @@ export function Cat() {
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
       };
+      lastX.current = e.clientX;
+
+      setPosition({ x: rect.left, y: rect.top });
+    }
+
+    setIsDragging(true);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsSettling(false);
+
+    if (catRef.current) {
+      const rect = catRef.current.getBoundingClientRect();
+      const touch = e.touches[0];
+      dragOffset.current = {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      };
+      lastX.current = touch.clientX;
 
       setPosition({ x: rect.left, y: rect.top });
     }
@@ -102,6 +142,7 @@ export function Cat() {
     <div
       ref={catRef}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       className={`fixed z-50 cursor-grab active:cursor-grabbing select-none touch-none
         ${!position ? "bottom-0 right-0" : "top-0 left-0"}
         ${isSettling ? "transition-transform duration-500 ease-out" : ""}
