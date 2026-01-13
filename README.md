@@ -48,4 +48,4 @@ npm run dev
 - Next.js 16 (App Router)
 - Tailwind CSS v4
 - Vercel (auto-deploy)
-- GitHub API (PR reactions for voting)
+- GitHub API (PR code reviews for voting)

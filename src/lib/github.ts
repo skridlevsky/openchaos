@@ -75,7 +75,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   // Sort by approvals descending
   return prsWithApprovals.sort((a, b) => {
-    // 1. Primary Sort: Net Score
+    // 1. Primary Sort: Code approvals (Highest Wins)
     if (b.approvals !== a.approvals) {
       return b.approvals - a.approvals;
     }
@@ -108,7 +108,7 @@ async function getPRApprovals(owner: string, repo: string, prNumber: number, sha
       break;
     }
 
-    allApprovals = allApprovals.concat(approvals.filter(r => r.commit_id === sha));
+    allApprovals = allApprovals.concat(approvals.filter(a => a.commit_id === sha));
 
     if (approvals.length < 100) {
       break;
@@ -117,5 +117,5 @@ async function getPRApprovals(owner: string, repo: string, prNumber: number, sha
     page++;
   }
 
-  return allApprovals.filter((r) => r.state === "APPROVED").length
+  return allApprovals.filter((a) => a.state === "APPROVED").length
 }
