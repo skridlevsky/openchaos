@@ -1,0 +1,84 @@
+name: Instant Override Merge
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  check-override:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check for instant override
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch last merged PR
+          LAST_MERGED=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&sort=updated&direction=desc&per_page=10" \
+            | jq -r '[.[] | select(.merged_at != null)] | first')
+          
+          LAST_PR_NUMBER=$(echo "$LAST_MERGED" | jq -r '.number // 0')
+          
+          # Get last merged PR score
+          if [ "$LAST_PR_NUMBER" != "0" ] && [ "$LAST_PR_NUMBER" != "null" ]; then
+            LAST_REACTIONS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$LAST_PR_NUMBER/reactions?per_page=100")
+            
+            LAST_THUMBS_UP=$(echo "$LAST_REACTIONS" | jq '[.[] | select(.content == "+1")] | length')
+            LAST_THUMBS_DOWN=$(echo "$LAST_REACTIONS" | jq '[.[] | select(.content == "-1")] | length')
+            LAST_SCORE=$((LAST_THUMBS_UP - LAST_THUMBS_DOWN))
+          else
+            LAST_SCORE=0
+          fi
+          
+          echo "Last merged PR: #$LAST_PR_NUMBER with score: $LAST_SCORE"
+          
+          # Fetch open PRs
+          OPEN_PRS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&per_page=50")
+          
+          # Check each open PR
+          echo "$OPEN_PRS" | jq -r '.[].number' | while read PR_NUM; do
+            # Get PR reactions
+            REACTIONS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUM/reactions?per_page=100")
+            
+            THUMBS_UP=$(echo "$REACTIONS" | jq '[.[] | select(.content == "+1")] | length')
+            THUMBS_DOWN=$(echo "$REACTIONS" | jq '[.[] | select(.content == "-1")] | length')
+            SCORE=$((THUMBS_UP - THUMBS_DOWN))
+            
+            echo "PR #$PR_NUM has score: $SCORE"
+            
+            # Check override conditions
+            if [ "$SCORE" -gt "$LAST_SCORE" ] && [ "$SCORE" -ge 5 ]; then
+              echo "🚀 PR #$PR_NUM qualifies for instant override! (Score: $SCORE > Last: $LAST_SCORE)"
+              
+              # Check if CI passed
+              CI_STATUS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
+                "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUM" \
+                | jq -r '.mergeable_state')
+              
+              if [ "$CI_STATUS" = "clean" ]; then
+                echo "✅ CI passed, merging PR #$PR_NUM..."
+                curl -s -X PUT -H "Authorization: Bearer $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUM/merge" \
+                  -d '{"merge_method": "squash", "commit_title": "⚡ Instant Override Merge: PR #'"$PR_NUM"'"}'
+                echo "🎉 PR #$PR_NUM merged via instant override!"
+                exit 0
+              else
+                echo "⏳ CI not yet clean for PR #$PR_NUM (state: $CI_STATUS)"
+              fi
+            fi
+          done
+          
+          echo "No PRs qualify for instant override at this time."

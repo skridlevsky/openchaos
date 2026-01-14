@@ -62,7 +62,9 @@ export function Countdown() {
         <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
           --d --h --m --s
         </div>
-        <p className="mt-4 text-zinc-500 text-lg">until next merge</p>
+        <p className="mt-4 text-zinc-500 text-lg">
+          until next merge <span className="text-zinc-500">(or instant override ⚡)</span>
+        </p>
       </div>
     );
   }
@@ -72,7 +74,9 @@ export function Countdown() {
       <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
         {time.days}d {pad(time.hours)}h {pad(time.minutes)}m {pad(time.seconds)}s
       </div>
-      <p className="mt-4 text-zinc-400 text-lg">until next merge</p>
+      <p className="mt-4 text-zinc-400 text-lg">
+        until next merge <span className="text-zinc-500">(or instant override ⚡)</span>
+      </p>
     </div>
   );
 }

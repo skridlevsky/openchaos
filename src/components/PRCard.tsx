@@ -22,6 +22,22 @@ export function PRCard({ pr, rank }: PRCardProps) {
                 LEADING
               </span>
             )}
+            {rank === 1 && pr.votesNeeded <= 0 && (
+              <span 
+                className="px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded"
+                title="This PR's vote score has surpassed the last merged PR! It can be merged instantly without waiting for the weekly countdown."
+              >
+                ⚡ OVERRIDE READY
+              </span>
+            )}
+            {rank === 1 && pr.votesNeeded > 0 && (
+              <span 
+                className="px-1.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded"
+                title={`${pr.votesNeeded} more vote${pr.votesNeeded === 1 ? '' : 's'} needed to trigger instant override merge`}
+              >
+                ⚡ {pr.votesNeeded} to override
+              </span>
+            )}
           </div>
           <h3 className="mt-1 font-medium truncate">{pr.title}</h3>
           <p className="mt-1 text-sm text-zinc-500">by @{pr.author}</p>
