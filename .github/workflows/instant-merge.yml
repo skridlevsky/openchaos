@@ -46,7 +46,7 @@ jobs:
             "https://api.github.com/repos/${{ github.repository }}/pulls?state=open&per_page=50")
           
           # Check each open PR
-          echo "$OPEN_PRS" | jq -r '.[].number' | while read PR_NUM; do
+          echo "$OPEN_PRS" | jq -r '.[].number' | while read -r PR_NUM; do
             # Get PR reactions
             REACTIONS=$(curl -s -H "Authorization: Bearer $GITHUB_TOKEN" \
               -H "Accept: application/vnd.github.squirrel-girl-preview+json" \
