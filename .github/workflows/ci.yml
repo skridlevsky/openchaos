@@ -9,15 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-      - name: Install wasm-pack
-        run: cargo install wasm-pack --locked
-      - run: npm run wasm:build
       - run: npm ci
       - run: npm run build

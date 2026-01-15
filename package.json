@@ -3,12 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
-    "predev": "node ./scripts/copy-wasm.js",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "wasm:build": "PATH=\"$HOME/.cargo/bin:$PATH\" wasm-pack build rust/openchaos_wasm --target web --out-dir ../../src/wasm/pkg"
+    "lint": "eslint"
   },
   "dependencies": {
     "next": "16.1.1",
