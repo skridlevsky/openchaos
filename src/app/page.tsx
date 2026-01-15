@@ -1,17 +1,16 @@
-import { Suspense } from "react";
 import { DoomsdaySection } from "@/components/DoomsdaySection";
 import { PRList } from "@/components/PRList";
-import { getOpenPRs } from "@/lib/github";
+import { getOpenPRs, type PullRequest } from "@/lib/github";
 
 export default async function Home() {
-  // Fetch PRs server-side to get the winning PR
-  let winningPR = null;
+  let prs: PullRequest[] = [];
+  let error: string | null = null;
   try {
-    const prs = await getOpenPRs();
-    winningPR = prs.length > 0 ? prs[0] : null;
-  } catch {
-    // Silently fail, winningPR stays null
+    prs = await getOpenPRs();
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
+  const winningPR = prs.length > 0 ? prs[0] : null;
 
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
@@ -25,15 +24,7 @@ export default async function Home() {
         <h2 className="text-xl font-medium text-zinc-600 mb-6">
           Open PRs — Vote to merge
         </h2>
-        <Suspense
-          fallback={
-            <div className="w-full max-w-xl text-center py-8">
-              <p className="text-zinc-500">Loading PRs...</p>
-            </div>
-          }
-        >
-          <PRList />
-        </Suspense>
+        <PRList prs={prs} error={error} />
       </section>
 
       <footer className="mt-16 flex flex-col items-center gap-4 text-sm text-zinc-500">
