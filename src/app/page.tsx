@@ -1,17 +1,25 @@
 import { Suspense } from "react";
-import { Countdown } from "@/components/Countdown";
+import { DoomsdaySection } from "@/components/DoomsdaySection";
 import { PRList } from "@/components/PRList";
+import { getOpenPRs } from "@/lib/github";
 
-export default function Home() {
+export default async function Home() {
+  // Fetch PRs server-side to get the winning PR
+  let winningPR = null;
+  try {
+    const prs = await getOpenPRs();
+    winningPR = prs.length > 0 ? prs[0] : null;
+  } catch {
+    // Silently fail, winningPR stays null
+  }
+
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
         OPENCHAOS.DEV
       </h1>
 
-      <div className="mt-12">
-        <Countdown />
-      </div>
+      <DoomsdaySection winningPR={winningPR} />
 
       <section className="mt-16 w-full flex flex-col items-center">
         <h2 className="text-xl font-medium text-zinc-600 mb-6">
