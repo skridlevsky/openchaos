@@ -1,10 +1,12 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
+import { GuyFieri } from "@/components/GuyFieri";
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
+      <GuyFieri />
       <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
         OPENCHAOS.DEV
       </h1>
