@@ -25,6 +25,10 @@ A self-evolving open source project. Every week, the community votes on PRs, and
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
 
+## How Are Pull Requests Merged By The Maintainer?
+
+https://github.com/user-attachments/assets/3e2c8558-ffd9-4528-b0fe-a21363375895
+
 ## What Can Be Changed
 
 Everything. Including these rules.
