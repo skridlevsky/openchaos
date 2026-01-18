@@ -2,7 +2,8 @@
 
 :root {
   --background: #fafafa;
-  --foreground: #0a0a0a;
+  --foreground: #ffffff;
+  --foreground: #ffffff;
 }
 
 @theme inline {
@@ -13,6 +14,19 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: transparent;
+  color: white;
+}
+
+main {
+  mix-blend-mode: difference;
+  color: white;
+}
+
+main > div > div[class*="bg-"],
+main > div > div[class*="border"],
+[class*="bg-gray"],
+[class*="bg-white"] {
+  mix-blend-mode: normal;
+  isolation: isolate;
 }
