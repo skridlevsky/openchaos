@@ -31,7 +31,9 @@ function getHeaders(accept: string): Record<string, string> {
   return headers;
 }
 
-export async function getOpenPRs(): Promise<PullRequest[]> {
+export type SortOrder = "votes" | "recent";
+
+export async function getOpenPRs(sortBy: SortOrder = "votes"): Promise<PullRequest[]> {
   const [owner, repo] = GITHUB_REPO.split("/");
 
   let allPRs: GitHubPR[] = [];
@@ -85,10 +87,9 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     }),
   );
 
-  // Sort by votes descending
   return prsWithVotes.sort((a, b) => {
     // 1. Primary Sort: Net Score
-    if (b.votes !== a.votes) {
+    if (sortBy === "votes" && b.votes !== a.votes) {
       return b.votes - a.votes;
     }
 

@@ -1,11 +1,12 @@
-import type { PullRequest } from "@/lib/github";
+import type { PullRequest, SortOrder } from "@/lib/github";
 
 interface PRCardProps {
   pr: PullRequest;
   rank: number;
+  sortBy: SortOrder;
 }
 
-export function PRCard({ pr, rank }: PRCardProps) {
+export function PRCard({ pr, rank, sortBy }: PRCardProps) {
   return (
     <a
       href={pr.url}
@@ -17,7 +18,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="text-zinc-500 text-sm">#{pr.number}</span>
-            {rank === 1 && (
+            {sortBy === "votes" && rank === 1 && (
               <span className="px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded">
                 LEADING
               </span>

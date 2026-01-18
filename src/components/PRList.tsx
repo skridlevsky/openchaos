@@ -1,12 +1,16 @@
-import { getOpenPRs } from "@/lib/github";
+import { getOpenPRs, type SortOrder } from "@/lib/github";
 import { PRCard } from "./PRCard";
 
-export async function PRList() {
+interface PRListProps {
+  sortBy?: SortOrder;
+}
+
+export async function PRList({ sortBy = "votes" }: PRListProps) {
   let prs;
   let error = null;
 
   try {
-    prs = await getOpenPRs();
+    prs = await getOpenPRs(sortBy);
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
@@ -36,7 +40,7 @@ export async function PRList() {
   return (
     <div className="w-full max-w-xl space-y-3">
       {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
+        <PRCard key={pr.number} pr={pr} rank={index + 1} sortBy={sortBy} />
       ))}
     </div>
   );
