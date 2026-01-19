@@ -1,0 +1,6 @@
+pre-push:
+  jobs:
+    - run: npm run format --write
+      output: false
+      stage_fixed: true
+pre-commit:
