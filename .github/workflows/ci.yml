@@ -12,5 +12,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - run: '(test "${GITHUB_REPOSITORY}" != "skridlevsky/rustychaos") || (gh api -X PATCH "${GITHUB_REPOSITORY}" "rustychaos")'
       - run: npm ci
       - run: npm run build
