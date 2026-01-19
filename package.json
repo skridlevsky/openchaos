@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "biome lint",
+    "format": "biome format",
+    "check": "biome check"
   },
   "dependencies": {
     "@biomejs/biome": "^2.3.11",
