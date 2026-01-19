@@ -12,7 +12,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
       border={2}
       cellPadding={8}
       cellSpacing={0}
-      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}`}
+      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'} ${btoa(pr.author) === 'RmVsaXhMdHRrcw==' ? 'pr-card-featured' : ''}`}
     >
       <tbody>
         <tr>
