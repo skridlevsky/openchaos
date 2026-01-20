@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./gta-radio.css";
 
 :root {
   --background: #c0c0c0;
