@@ -8,36 +8,77 @@ interface PRCardProps {
 
 export function PRCard({ pr, rank }: PRCardProps) {
   return (
-    <a
-      href={pr.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block w-full p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 transition-colors"
+    <table 
+      width="100%" 
+      border={2}
+      cellPadding={8}
+      cellSpacing={0}
+      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}`}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-zinc-500 text-sm">#{pr.number}</span>
+      <tbody>
+        <tr>
+          <td className={rank === 1 ? 'pr-card-number-cell-leading' : 'pr-card-number-cell-normal'}>
+            <span className={rank === 1 ? 'pr-card-number-text-leading' : 'pr-card-number-text-normal'}>
+              <b>#{pr.number}</b>
+            </span>
             {rank === 1 && (
-              <span className="px-1.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded">
-                LEADING
-              </span>
+              <div className="pr-card-leading-badge">
+                <span className="pr-card-leading-badge-text">
+                  <b>LEADING</b>
+                </span>
+              </div>
             )}
-          </div>
-          <h3 className="mt-1 font-medium truncate">{pr.title}</h3>
-          <p className="mt-1 text-sm text-zinc-500">
-            by @{pr.author} · <TimeAgo isoDate={pr.createdAt} />
-          </p>
-        </div>
-        <div className="flex items-center gap-1.5 text-lg font-medium">
-          <span>👍</span>
-          <span>{pr.votes}</span>
-        </div>
-      </div>
-      <div className="mt-3 text-sm text-zinc-500 flex items-center gap-1">
-        View &amp; Vote on GitHub
-        <span aria-hidden="true">→</span>
-      </div>
-    </a>
+          </td>
+          <td className={rank === 1 ? 'pr-card-content-cell-leading' : 'pr-card-content-cell-normal'}>
+            <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
+              <tbody>
+                <tr>
+                  <td>
+                    <span className="pr-card-title">
+                      <b>{pr.title}</b>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="pr-card-author-row">
+                    <span className="pr-card-author-text">
+                      by <a
+                        href={`https://github.com/${pr.author}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="pr-card-author-link"
+                      >
+                        <b>@{pr.author}</b>
+                      </a> · <TimeAgo isoDate={pr.createdAt} />
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="pr-card-link-row">
+                    <a
+                      href={pr.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="pr-card-link"
+                    >
+                      <b>[View &amp; Vote on GitHub →]</b>
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+          <td className={rank === 1 ? 'pr-card-votes-cell-leading' : 'pr-card-votes-cell-normal'}>
+            <span className="pr-card-votes-emoji">
+              👍
+            </span>
+            <br />
+            <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
+              <b>{pr.votes}</b>
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 }

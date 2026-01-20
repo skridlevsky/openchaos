@@ -2,20 +2,16 @@
 
 import { useState, useEffect } from "react";
 
-function getNextSunday8PM(): Date {
+function getNextMergeTime(): Date {
   const now = new Date();
   const target = new Date(now);
 
-  // Set to next Sunday
-  const daysUntilSunday = (7 - now.getUTCDay()) % 7;
-  target.setUTCDate(now.getUTCDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
-
-  // Set to 09:00 UTC
+  // Set to 9:00:00 UTC today
   target.setUTCHours(9, 0, 0, 0);
 
-  // If it's Sunday but before 09:00 UTC, use today
-  if (now.getUTCDay() === 0 && now.getUTCHours() < 9) {
-    target.setUTCDate(now.getUTCDate());
+  // If we've already passed 9:00 UTC today, use 9:00 UTC tomorrow
+  if (now.getTime() >= target.getTime()) {
+    target.setUTCDate(target.getUTCDate() + 1);
   }
 
   return target;
@@ -43,14 +39,22 @@ function pad(n: number): string {
 }
 
 export function Countdown() {
-  const [target] = useState(() => getNextSunday8PM());
+  const [target, setTarget] = useState(() => getNextMergeTime());
   const [time, setTime] = useState(() => getTimeRemaining(target));
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const interval = setInterval(() => {
-      setTime(getTimeRemaining(target));
+      const now = new Date();
+      // If we've passed the target time, recalculate for the next day
+      if (now.getTime() >= target.getTime()) {
+        const newTarget = getNextMergeTime();
+        setTarget(newTarget);
+        setTime(getTimeRemaining(newTarget));
+      } else {
+        setTime(getTimeRemaining(target));
+      }
     }, 1000);
 
     return () => clearInterval(interval);
@@ -58,21 +62,155 @@ export function Countdown() {
 
   if (!mounted) {
     return (
-      <div className="text-center">
-        <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
-          --d --h --m --s
-        </div>
-        <p className="mt-4 text-zinc-500 text-lg">until next merge</p>
-      </div>
+      <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
+        <tbody>
+          <tr>
+            <td className="countdown-header-cell">
+              <div className="countdown-header">
+                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+                <marquee behavior="alternate" scrollamount="8">
+                  <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
+                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+                </marquee>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td className="countdown-content-cell">
+              <table width="100%" border={0} cellPadding={8} cellSpacing={10}>
+                <tbody>
+                  <tr>
+                    <td className="countdown-digit-cell">
+                      <div className="countdown-digit-value">
+                        <b>--</b>
+                      </div>
+                      <div className="countdown-digit-label">
+                        <b>DAYS</b>
+                      </div>
+                    </td>
+                    <td className="countdown-separator-cell">
+                      <span className="countdown-separator sparkle-pulse">⭐</span>
+                    </td>
+                    <td className="countdown-digit-cell">
+                      <div className="countdown-digit-value">
+                        <b>--</b>
+                      </div>
+                      <div className="countdown-digit-label">
+                        <b>HOURS</b>
+                      </div>
+                    </td>
+                    <td className="countdown-separator-cell">
+                      <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
+                    </td>
+                    <td className="countdown-digit-cell">
+                      <div className="countdown-digit-value">
+                        <b>--</b>
+                      </div>
+                      <div className="countdown-digit-label">
+                        <b>MINS</b>
+                      </div>
+                    </td>
+                    <td className="countdown-separator-cell">
+                      <span className="countdown-separator sparkle-pulse">⭐</span>
+                    </td>
+                    <td className="countdown-digit-cell">
+                      <div className="countdown-digit-value">
+                        <b>--</b>
+                      </div>
+                      <div className="countdown-digit-label">
+                        <b>SECS</b>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td className="countdown-footer-cell">
+              <div className="countdown-footer">
+                <b>HURRY! TIME IS RUNNING OUT!</b>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
   return (
-    <div className="text-center">
-      <div className="text-5xl sm:text-7xl font-mono font-bold tracking-tight">
-        {time.days}d {pad(time.hours)}h {pad(time.minutes)}m {pad(time.seconds)}s
-      </div>
-      <p className="mt-4 text-zinc-400 text-lg">until next merge</p>
-    </div>
+    <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
+      <tbody>
+        <tr>
+          <td className="countdown-header-cell">
+            <div className="countdown-header">
+              {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+              <marquee behavior="alternate" scrollamount="8">
+                <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
+              {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+              </marquee>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td className="countdown-content-cell">
+            <table width="100%" border={0} cellPadding={8} cellSpacing={10}>
+              <tbody>
+                <tr>
+                  <td className="countdown-digit-cell">
+                    <div className="countdown-digit-value blink-countdown">
+                      <b>{time.days}</b>
+                    </div>
+                    <div className="countdown-digit-label">
+                      <b>DAYS</b>
+                    </div>
+                  </td>
+                  <td className="countdown-separator-cell">
+                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                  </td>
+                  <td className="countdown-digit-cell">
+                    <div className="countdown-digit-value blink-countdown">
+                      <b>{pad(time.hours)}</b>
+                    </div>
+                    <div className="countdown-digit-label">
+                      <b>HOURS</b>
+                    </div>
+                  </td>
+                  <td className="countdown-separator-cell">
+                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
+                  </td>
+                  <td className="countdown-digit-cell">
+                    <div className="countdown-digit-value blink-countdown">
+                      <b>{pad(time.minutes)}</b>
+                    </div>
+                    <div className="countdown-digit-label">
+                      <b>MINS</b>
+                    </div>
+                  </td>
+                  <td className="countdown-separator-cell">
+                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                  </td>
+                  <td className="countdown-digit-cell">
+                    <div className="countdown-digit-value blink-countdown">
+                      <b>{pad(time.seconds)}</b>
+                    </div>
+                    <div className="countdown-digit-label">
+                      <b>SECS</b>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td className="countdown-footer-cell">
+            <div className="countdown-footer">
+              <b>HURRY! TIME IS RUNNING OUT!</b>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   );
 }
