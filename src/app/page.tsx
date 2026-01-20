@@ -3,6 +3,7 @@ import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
 import { IE6Layout } from "@/components/IE6Layout";
 import { WebCounter } from "@/components/WebCounter";
+import { DVDPlayer } from "@/components/DVDplayer";
 
 export default function Home() {
   return (
@@ -53,6 +54,10 @@ export default function Home() {
       </div>
       
       <WebCounter />
+      
+      <div className="fixed inset-0 pointer-events-none z-50 opacity-80">
+        <DVDPlayer />
+      </div>
     </IE6Layout>
   );
 }
