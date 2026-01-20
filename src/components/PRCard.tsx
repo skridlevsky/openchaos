@@ -7,11 +7,12 @@ interface PRCardProps {
 
 export function PRCard({ pr, rank }: PRCardProps) {
   return (
-    <a
-      href={pr.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block w-full p-4 rounded-lg border border-zinc-200 hover:border-zinc-400 transition-colors"
+    <table 
+      width="100%" 
+      border={2}
+      cellPadding={8}
+      cellSpacing={0}
+      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
