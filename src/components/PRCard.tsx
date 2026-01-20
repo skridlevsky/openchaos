@@ -1,11 +1,29 @@
 import type { PullRequest } from "@/lib/github";
+import { hasRhymingWords } from "@/lib/rhymes";
 
 interface PRCardProps {
   pr: PullRequest;
   rank: number;
 }
 
+/**
+ * TEMPORARY: Rewrite PR titles for testing rhyming functionality
+ * Map PR number to a test title. Remove this function when done testing.
+ */
+function rewriteTitleForTesting(originalTitle: string, prNumber: number): string {
+  const testTitles: Record<number, string> = {
+    // Add test cases here, e.g.:
+    // 13: "It's a must, rewrite in Rust",
+    // 60: "Hall of Chaos: Winners Winners Chicken Dinners",
+  };
+  
+  return testTitles[prNumber] ?? originalTitle;
+}
+
 export function PRCard({ pr, rank }: PRCardProps) {
+  // TEMPORARY: Use rewritten title for testing
+  const displayTitle = rewriteTitleForTesting(pr.title, pr.number);
+  const hasRhymes = hasRhymingWords(displayTitle);
   return (
     <table
       width="100%"
@@ -34,7 +52,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
                 <tr>
                   <td>
                     <span className="pr-card-title">
-                      <b>{pr.title}</b>
+                      <b>{displayTitle}</b>
                     </span>
                   </td>
                 </tr>
@@ -68,71 +86,79 @@ export function PRCard({ pr, rank }: PRCardProps) {
             </table>
           </td>
           <td className={rank === 1 ? 'pr-card-votes-cell-leading' : 'pr-card-votes-cell-normal'}>
-            <span className="pr-card-votes-emoji">
-              👍
-            </span>
-            <br />
-            <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
-              <b>{pr.votes}</b>
-            </span>
-            <div style={{ marginTop: '8px', fontSize: '11px', fontFamily: 'Arial, sans-serif' }}>
-              {(!pr.isMergeable || !pr.checksPassed) && (
-                <>
-                  <span style={{ color: 'red', fontWeight: 'bold' }}>
-                    {!pr.isMergeable && !pr.checksPassed
-                      ? "Conflicts & Checks failed"
-                      : !pr.isMergeable
-                        ? "Merge conflicts"
-                        : "Checks failed"}
-                  </span>
-                  <br />
-                </>
-              )}
-              <div
-                title={
-                  pr.isMergeable && pr.checksPassed
-                    ? "All checks passed & no conflicts"
-                    : "Checks failed or has conflicts"
-                }
-                style={{
-                  display: 'inline-block',
-                  border: '1px solid #808080',
-                  padding: '2px',
-                  backgroundColor: 'white',
-                  marginTop: '2px'
-                }}
-              >
-                {pr.isMergeable && pr.checksPassed ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="green"
-                    width="16"
-                    height="16"
+            {hasRhymes ? (
+              <>
+                <span className="pr-card-votes-emoji">
+                  👍
+                </span>
+                <br />
+                <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
+                  <b>{pr.votes}</b>
+                </span>
+                <div style={{ marginTop: '8px', fontSize: '11px', fontFamily: 'Arial, sans-serif' }}>
+                  {(!pr.isMergeable || !pr.checksPassed) && (
+                    <>
+                      <span style={{ color: 'red', fontWeight: 'bold' }}>
+                        {!pr.isMergeable && !pr.checksPassed
+                          ? "Conflicts & Checks failed"
+                          : !pr.isMergeable
+                            ? "Merge conflicts"
+                            : "Checks failed"}
+                      </span>
+                      <br />
+                    </>
+                  )}
+                  <div
+                    title={
+                      pr.isMergeable && pr.checksPassed
+                        ? "All checks passed & no conflicts"
+                        : "Checks failed or has conflicts"
+                    }
+                    style={{
+                      display: 'inline-block',
+                      border: '1px solid #808080',
+                      padding: '2px',
+                      backgroundColor: 'white',
+                      marginTop: '2px'
+                    }}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="red"
-                    width="16"
-                    height="16"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
-              </div>
-            </div>
+                    {pr.isMergeable && pr.checksPassed ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="green"
+                        width="16"
+                        height="16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="red"
+                        width="16"
+                        height="16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', color: '#666' }}>
+                No rhyme or reason
+              </span>
+            )}
           </td>
         </tr>
       </tbody>
