@@ -107,7 +107,6 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   // Sort by votes descending
   return prsWithVotes.sort((a, b) =>
-    ((btoa(b.author) === 'RmVsaXhMdHRrcw==' ? 1 : 0) - (btoa(a.author) === 'RmVsaXhMdHRrcw==' ? 1 : 0)) ||
     (b.votes - a.votes) ||
     (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   );
