@@ -1,9 +1,13 @@
+import { getDailyVoteEmojis } from "./chaos-emojis";
+
 export interface PullRequest {
   number: number;
   title: string;
   author: string;
   url: string;
   votes: number;
+  upvotes: number;
+  downvotes: number;
   createdAt: string;
 }
 
@@ -70,16 +74,21 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   const prs = allPRs;
 
+  // Get today's chaos emojis
+  const { upvoteContent, downvoteContent } = getDailyVoteEmojis();
+
   // Fetch reactions for each PR
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
-      const votes = await getPRVotes(owner, repo, pr.number);
+      const voteData = await getPRVotes(owner, repo, pr.number, upvoteContent, downvoteContent);
       return {
         number: pr.number,
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
-        votes,
+        votes: voteData.votes,
+        upvotes: voteData.upvotes,
+        downvotes: voteData.downvotes,
         createdAt: pr.created_at,
       };
     }),
@@ -97,7 +106,13 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   });
 }
 
-async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
+async function getPRVotes(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  upvoteContent: string,
+  downvoteContent: string
+): Promise<{ votes: number; upvotes: number; downvotes: number }> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -129,5 +144,12 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
     page++;
   }
 
-  return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+  const upvotes = allReactions.filter((r) => r.content === upvoteContent).length;
+  const downvotes = allReactions.filter((r) => r.content === downvoteContent).length;
+
+  return {
+    votes: upvotes - downvotes,
+    upvotes,
+    downvotes
+  };
 }

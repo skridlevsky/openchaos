@@ -1,4 +1,5 @@
 import type { PullRequest } from "@/lib/github";
+import { getDailyVoteEmojis } from "@/lib/chaos-emojis";
 
 interface PRCardProps {
   pr: PullRequest;
@@ -6,6 +7,7 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, rank }: PRCardProps) {
+  const { upvote, downvote } = getDailyVoteEmojis();
   return (
     <table 
       width="100%" 
@@ -68,13 +70,20 @@ export function PRCard({ pr, rank }: PRCardProps) {
             </table>
           </td>
           <td className={rank === 1 ? 'pr-card-votes-cell-leading' : 'pr-card-votes-cell-normal'}>
-            <span className="pr-card-votes-emoji">
-              👍
-            </span>
-            <br />
-            <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
-              <b>{pr.votes}</b>
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="pr-card-votes-emoji">{upvote}</span>
+                <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
+                  <b>{pr.upvotes}</b>
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="pr-card-votes-emoji">{downvote}</span>
+                <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
+                  <b>{pr.downvotes}</b>
+                </span>
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>
