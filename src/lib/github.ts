@@ -1,5 +1,3 @@
-import { Console } from "console";
-
 export interface PullRequest {
   number: number;
   title: string;
@@ -165,8 +163,8 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
 /**
  * Get PRs organized into two lists:
- * 1. Top 5 by votes (merge candidates)
- * 2. Top 5 by hot score (trending), excluding those already in top 5 by votes
+ * 1. All PRs sorted by votes (merge candidates)
+ * 2. All PRs sorted by hot score (trending), excluding those in top 5 by votes
  *
  * The isTrending flag is set based on whether a PR is in the top 5 by hot score.
  */
@@ -188,7 +186,7 @@ export async function getOrganizedPRs(): Promise<{
     isTrending: trendingNumbers.has(pr.number),
   }));
 
-  // Top 5 by raw votes (these compete for merge)
+  // All PRs sorted by votes (these compete for merge)
   // Secondary sort by creation date (newest wins) for tie-breaking
   const topByVotes = [...prsWithTrending]
     .sort((a, b) => {
@@ -196,16 +194,14 @@ export async function getOrganizedPRs(): Promise<{
         return b.votes - a.votes;
       }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    })
-    .slice(0, 5);
+    });
 
-  const topByVotesNumbers = new Set(topByVotes.map((pr) => pr.number));
+  const top5ByVotesNumbers = new Set(topByVotes.slice(0, 5).map((pr) => pr.number));
 
-  // Trending section: top 5 by hot score, excluding those already in top votes
+  // Trending section: sorted by hot score, excluding those in top 5 by votes
   const trending = [...prsWithTrending]
     .sort((a, b) => b.hotScore - a.hotScore)
-    .filter((pr) => !topByVotesNumbers.has(pr.number))
-    .slice(0, 5);
+    .filter((pr) => !top5ByVotesNumbers.has(pr.number));
 
   return { topByVotes, trending };
 }
