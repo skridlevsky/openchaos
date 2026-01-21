@@ -7,6 +7,7 @@ import { MidiPlayer } from "./MidiPlayer";
 import { TreeGame } from "./TreeGame";
 import { StatusBar } from "./StatusBar";
 import { IE6BrowserChrome } from "./IE6BrowserChrome";
+import { Clippy } from "./Clippy";
 
 interface IE6LayoutProps {
   children: ReactNode;
@@ -172,6 +173,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
       </main>
       <MidiPlayer />
       <StatusBar />
+      <Clippy />
       </IE6BrowserChrome>
     </>
   );
