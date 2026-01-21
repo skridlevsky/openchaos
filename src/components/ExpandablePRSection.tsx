@@ -21,11 +21,17 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
   }
 
   return (
-    <section>
-      <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wide mb-3">
-        {title}
-      </h2>
-      <div className="space-y-3">
+    <div className="pr-list-section">
+      <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+        <tbody>
+          <tr>
+            <td className="pr-list-section-header-cell">
+              <b>{title}</b>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="pr-list-container">
         {displayedPRs.map((pr, index) => (
           <PRCard
             key={pr.number}
@@ -35,13 +41,22 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
         ))}
       </div>
       {hasMore && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-3 text-sm text-zinc-400 hover:text-zinc-300 transition-colors"
-        >
-          {expanded ? "Show less" : `Show all (${prs.length})`}
-        </button>
+        <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '16px' }}>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '12px',
+              padding: '4px 12px',
+              cursor: 'pointer',
+              border: '2px outset #ffffff',
+              backgroundColor: '#c0c0c0',
+            }}
+          >
+            <b>{expanded ? "Show Less" : `Show All (${prs.length})`}</b>
+          </button>
+        </div>
       )}
-    </section>
+    </div>
   );
 }

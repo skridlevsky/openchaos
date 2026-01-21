@@ -13,12 +13,17 @@ export async function PRList() {
 
   if (error) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-500">{error}</p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Try refreshing the page in a minute.
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-error-table">
+        <tbody>
+          <tr>
+            <td className="page-error-cell">
+              <b>{error}</b>
+              <br />
+              <span>Try refreshing the page in a minute.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
@@ -26,19 +31,24 @@ export async function PRList() {
 
   if (topByVotes.length === 0 && trending.length === 0) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-400">No open PRs yet.</p>
-        <p className="mt-2 text-sm text-zinc-500">
-          Be the first to submit one!
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
+        <tbody>
+          <tr>
+            <td className="page-empty-cell">
+              <b>No open PRs yet.</b>
+              <br />
+              <span>Be the first to submit one!</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
   return (
-    <div className="w-full max-w-xl space-y-8">
-      <ExpandablePRSection title="Top by Votes" prs={topByVotes} showRank />
-      <ExpandablePRSection title="Trending" prs={trending} />
-    </div>
+    <>
+      <ExpandablePRSection title="🏆 TOP BY VOTES 🏆" prs={topByVotes} showRank />
+      <ExpandablePRSection title="🔥 TRENDING 🔥" prs={trending} />
+    </>
   );
 }
