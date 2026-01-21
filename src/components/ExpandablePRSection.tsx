@@ -41,27 +41,21 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
         ))}
       </div>
       {hasMore && (
-        <table width="100%" border={1} cellPadding={4} cellSpacing={0}>
-          <tbody>
-            <tr>
-              <td align="center" style={{ backgroundColor: '#c0c0c0' }}>
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  style={{
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: '12px',
-                    padding: '4px 12px',
-                    cursor: 'pointer',
-                    border: '2px outset #ffffff',
-                    backgroundColor: '#c0c0c0',
-                  }}
-                >
-                  <b>{expanded ? "Show Less" : `Show All (${prs.length})`}</b>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '16px' }}>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            style={{
+              fontFamily: 'Arial, sans-serif',
+              fontSize: '12px',
+              padding: '4px 12px',
+              cursor: 'pointer',
+              border: '2px outset #ffffff',
+              backgroundColor: '#c0c0c0',
+            }}
+          >
+            <b>{expanded ? "Show Less" : `Show All (${prs.length})`}</b>
+          </button>
+        </div>
       )}
     </div>
   );
