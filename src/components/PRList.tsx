@@ -1,7 +1,7 @@
 import { getOpenPRs, PullRequest } from "@/lib/github";
+import { ExpandablePRSection } from "./ExpandablePRSection";
 import { PRCard } from "./PRCard";
 
-const TOP_VOTED_LIMIT = 5;
 const NEWEST_LIMIT = 5;
 
 export async function PRList() {
@@ -47,10 +47,9 @@ export async function PRList() {
   }
 
   // Top PRs by votes (already sorted by votes from getOpenPRs)
-  const topVoted = prs.slice(0, TOP_VOTED_LIMIT);
-  const topVotedNumbers = new Set(topVoted.map((pr) => pr.number));
+  const topVotedNumbers = new Set(prs.slice(0, 5).map((pr) => pr.number));
 
-  // Newest PRs not already in top voted
+  // Newest PRs not already in top 5 by votes (limited to 5)
   const newestPRs = [...prs]
     .filter((pr) => !topVotedNumbers.has(pr.number))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -58,20 +57,7 @@ export async function PRList() {
 
   return (
     <>
-      <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
-        <tbody>
-          <tr>
-            <td className="pr-list-section-header-cell">
-              <b>🏆 TOP BY VOTES 🏆</b>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div className="pr-list-container">
-        {topVoted.map((pr, index) => (
-          <PRCard key={pr.number} pr={pr} rank={index + 1} />
-        ))}
-      </div>
+      <ExpandablePRSection title="🏆 TOP BY VOTES 🏆" prs={prs} showRank />
 
       {newestPRs.length > 0 && (
         <div className="pr-list-newest-section">
