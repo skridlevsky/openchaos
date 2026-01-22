@@ -7,6 +7,9 @@ export interface PullRequest {
   author: string;
   url: string;
   votes: number;
+  upvotes: number;
+  downvotes: number;
+  comments: number;
   createdAt: string;
   isMergeable: boolean;
   checksPassed: boolean;
@@ -16,6 +19,8 @@ export interface PullRequest {
 
 interface PRVotes {
   total: number;
+  upvotes: number;
+  downvotes: number;
   recentPositive: number;
   recentNegative: number;
 }
@@ -44,6 +49,7 @@ interface GitHubPR {
     login: string;
   };
   created_at: string;
+  comments: number;
   head: {
     sha: string;
   };
@@ -131,6 +137,9 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         author: pr.user.login,
         url: pr.html_url,
         votes: votes.total,
+        upvotes: votes.upvotes,
+        downvotes: votes.downvotes,
+        comments: pr.comments ?? 0,
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
@@ -161,17 +170,25 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   return prsWithVotes;
 }
 
+export interface OrganizedPRs {
+  topByVotes: PullRequest[];
+  rising: PullRequest[];
+  newest: PullRequest[];
+  discussed: PullRequest[];
+  controversial: PullRequest[];
+}
+
 /**
- * Get PRs organized into two lists:
- * 1. All PRs sorted by votes (merge candidates)
- * 2. All PRs sorted by hot score (trending), excluding those in top 5 by votes
+ * Get PRs organized into multiple lists for the frames navigation:
+ * 1. Top by votes (merge candidates)
+ * 2. Rising (sorted by hot score - recent voting activity)
+ * 3. Newest (sorted by creation date)
+ * 4. Discussed (sorted by comment count)
+ * 5. Controversial (PRs with both upvotes and downvotes)
  *
  * The isTrending flag is set based on whether a PR is in the top 5 by hot score.
  */
-export async function getOrganizedPRs(): Promise<{
-  topByVotes: PullRequest[];
-  trending: PullRequest[];
-}> {
+export async function getOrganizedPRs(): Promise<OrganizedPRs> {
   const allPRs = await getOpenPRs();
 
   // Determine which PRs are in top 5 by hot score (these are "trending")
@@ -199,23 +216,28 @@ export async function getOrganizedPRs(): Promise<{
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const top10ByVotesNumbers = new Set(topByVotes.slice(0, 10).map((pr) => pr.number));
+  // Rising: sorted by hot score (recent voting activity)
+  const rising = [...prsWithTrending]
+    .sort((a, b) => b.hotScore - a.hotScore)
+    .slice(0, 10);
 
-  // Trending section: sorted by hot score (7-day votes), excluding those in top 5 by votes
-  // PRs with conflicts go to the bottom
-  const trending = [...prsWithTrending]
-    .filter((pr) => !top10ByVotesNumbers.has(pr.number))
-    .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) {
-        return a.isMergeable ? -1 : 1;
-      }
-      if (b.hotScore !== a.hotScore) {
-        return b.hotScore - a.hotScore;
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+  // Newest: sorted by creation date, limited to 10
+  const newest = [...prsWithTrending]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
 
-  return { topByVotes, trending };
+  // Discussed: sorted by comment count, limited to 10
+  const discussed = [...prsWithTrending]
+    .sort((a, b) => b.comments - a.comments)
+    .slice(0, 10);
+
+  // Controversial: PRs with both upvotes and downvotes, sorted by min(up, down)
+  const controversial = [...prsWithTrending]
+    .filter((pr) => pr.upvotes > 0 && pr.downvotes > 0)
+    .sort((a, b) => Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes))
+    .slice(0, 10);
+
+  return { topByVotes, rising, newest, discussed, controversial };
 }
 
 async function getPRReactions(owner: string, repo: string, prNumber: number): Promise<PRVotes> {
@@ -232,7 +254,6 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     );
 
     if (!response.ok) {
-      // console.error(`Failed to fetch reactions for PR #${prNumber}: ${response.status} with message ${await response.text()}`);
       break;
     }
 
@@ -251,13 +272,18 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     page++;
   }
 
+  const upvotes = allReactions.filter((r) => r.content === "+1").length;
+  const downvotes = allReactions.filter((r) => r.content === "-1").length;
+
   const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
   const recentReactions = allReactions.filter(
     (r) => new Date(r.created_at).getTime() >= sevenDaysAgo,
   );
 
   return {
-    total: allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length,
+    total: upvotes - downvotes,
+    upvotes,
+    downvotes,
     recentPositive: recentReactions.filter((r) => r.content === "+1").length,
     recentNegative: recentReactions.filter((r) => r.content === "-1").length,
   };
