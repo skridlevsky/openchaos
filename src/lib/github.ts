@@ -113,11 +113,19 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     }),
   );
 
-  // Sort by votes descending
-  return prsWithVotes.sort((a, b) =>
-    (b.votes - a.votes) ||
-    (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  );
+  // Sort: mergeable PRs first, then by votes descending, ties by newest
+  return prsWithVotes.sort((a, b) => {
+    // PRs with conflicts go to the bottom (they can't win anyway)
+    if (a.isMergeable !== b.isMergeable) {
+      return a.isMergeable ? -1 : 1;
+    }
+    // Within same mergeability, sort by votes
+    if (b.votes !== a.votes) {
+      return b.votes - a.votes;
+    }
+    // Ties broken by newest
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 }
 
 async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
