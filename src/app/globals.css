@@ -1,44 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #c0c0c0;
-  --foreground: #000000;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Comic Sans MS', cursive;
-  --font-mono: 'Courier New', monospace;
+  --background: #000000;
+  --foreground: #00ff00;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Comic Sans MS', cursive;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+pre {
+  white-space: pre;
 }
 
-/* Classic IE6 styles */
-marquee {
-  display: inline-block;
+* {
+  color: var(--foreground);
 }
 
-/* Restore classic HTML elements styling */
-table {
-  border-collapse: separate;
+.container {
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: 20px;
 }
-
-font {
-  display: inline;
-}
-
-center {
-  display: block;
-  text-align: center;
-}
-
-/* Add some retro animations */
-@keyframes rotate-hue {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+.container a {
+  text-decoration: underline;
 }
