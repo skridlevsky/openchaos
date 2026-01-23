@@ -1429,6 +1429,74 @@
   font-family: 'Comic Sans MS';
 }
 
+[data-theme="dark"] .hall-error-table {
+  background-color: #330000;
+  border-color: #ff6666;
+}
+
+[data-theme="dark"] .hall-error-cell {
+  color: #ff9999;
+}
+
+[data-theme="dark"] .hall-empty-table {
+  background-color: #332200;
+  border-color: #ffcc66;
+}
+
+[data-theme="dark"] .hall-empty-cell {
+  color: #ffcc99;
+}
+
+[data-theme="dark"] .hall-card {
+  background-color: #003300;
+  border-color: #00ff66;
+}
+
+[data-theme="dark"] .hall-card-number-cell {
+  background-color: #001a00;
+}
+
+[data-theme="dark"] .hall-card-number-text {
+  color: #66ff99;
+}
+
+[data-theme="dark"] .hall-card-merged-badge-text {
+  color: #ffffff;
+  background-color: #00cc44;
+}
+
+[data-theme="dark"] .hall-card-content-cell {
+  background-color: #002200;
+}
+
+[data-theme="dark"] .hall-card-title {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .hall-card-author-text {
+  color: #cccccc;
+}
+
+[data-theme="dark"] .hall-card-author-link {
+  color: #00ff66;
+}
+
+[data-theme="dark"] .hall-card-date {
+  color: #aaaaaa;
+}
+
+[data-theme="dark"] .hall-card-link {
+  color: #00ff66;
+}
+
+[data-theme="dark"] .hall-card-trophy-cell {
+  background-color: #332200;
+}
+
+[data-theme="dark"] .hall-card-winner-text {
+  color: #ffcc66;
+}
+
 /* ===== GUESTBOOK COMPONENT ===== */
 .guestbook-button {
   background-color: #00ffff;
