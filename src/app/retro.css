@@ -509,94 +509,140 @@
 
 /* ===== ANIMATIONS ===== */
 @keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes blink-countdown {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0.7; }
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes spin-horizontal {
-  from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
+  from {
+    transform: rotateY(0deg);
+  }
+
+  to {
+    transform: rotateY(360deg);
+  }
 }
 
 /* Sparkle animations for stars and sparkle emojis */
 @keyframes sparkle-glint {
-  0%, 100% { 
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
-  50% { 
+
+  50% {
     opacity: 0.6;
     transform: scale(1.2);
   }
 }
 
 @keyframes sparkle-pulse {
-  0%, 100% { 
+
+  0%,
+  100% {
     opacity: 1;
     filter: brightness(1);
   }
-  25% { 
+
+  25% {
     opacity: 0.8;
     filter: brightness(1.3);
   }
-  50% { 
+
+  50% {
     opacity: 1;
     filter: brightness(1.5);
   }
-  75% { 
+
+  75% {
     opacity: 0.8;
     filter: brightness(1.3);
   }
 }
 
 @keyframes sparkle-twinkle {
-  0%, 100% { 
+
+  0%,
+  100% {
     opacity: 1;
     filter: brightness(1) saturate(1);
   }
-  20% { 
+
+  20% {
     opacity: 0.5;
     filter: brightness(1.5) saturate(1.2);
   }
-  40% { 
+
+  40% {
     opacity: 1;
     filter: brightness(1) saturate(1);
   }
 }
 
 @keyframes sparkle-rotate-glint {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: rotate(0deg);
     opacity: 1;
   }
-  25% { 
+
+  25% {
     transform: rotate(90deg);
     opacity: 0.7;
   }
-  50% { 
+
+  50% {
     transform: rotate(180deg);
     opacity: 1;
   }
-  75% { 
+
+  75% {
     transform: rotate(270deg);
     opacity: 0.7;
   }
 }
 
 @keyframes sparkle-shine {
-  0%, 100% {
+
+  0%,
+  100% {
     text-shadow: 0 0 2px currentColor;
   }
+
   50% {
     text-shadow: 0 0 8px currentColor, 0 0 12px currentColor;
   }
@@ -606,6 +652,7 @@
   0% {
     opacity: 0.9;
   }
+
   100% {
     opacity: 0;
   }
@@ -856,33 +903,44 @@
 
 /* ===== COUNTDOWN COMPONENT ===== */
 @keyframes countdown-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, 0 0 60px #ff00ff;
   }
+
   50% {
     box-shadow: 0 0 40px #ff00ff, 0 0 80px #00ffff, 0 0 120px #ff00ff, 0 0 160px #00ffff;
   }
 }
 
 @keyframes countdown-border-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     border-color: #ffff00;
   }
+
   25% {
     border-color: #ff0000;
   }
+
   50% {
     border-color: #00ff00;
   }
+
   75% {
     border-color: #00ffff;
   }
 }
 
 @keyframes digit-bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.03);
   }
@@ -917,6 +975,7 @@
   0% {
     background-position: 0% 0%;
   }
+
   100% {
     background-position: 200% 0%;
   }
@@ -1043,6 +1102,34 @@
 .pr-card {
   margin-bottom: 10px;
   font-family: 'Comic Sans MS', cursive;
+}
+
+@keyframes blink-border {
+  0% {
+    border-color: #ff0000;
+  }
+
+  25% {
+    border-color: #ffff00;
+  }
+
+  50% {
+    border-color: #00ff00;
+  }
+
+  75% {
+    border-color: #00ffff;
+  }
+
+  100% {
+    border-color: #ff0000;
+  }
+}
+
+.pr-card-featured {
+  border-width: 4px !important;
+  border-style: dashed !important;
+  animation: blink-border 0.8s step-end infinite;
 }
 
 .pr-card-leading {
@@ -1220,6 +1307,126 @@
 
 [data-theme="dark"] .pr-card-votes-count-normal {
   color: #66ff66;
+}
+/* ===== HALL OF CHAOS COMPONENT ===== */
+.hall-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.hall-error-table {
+  background-color: #ffcccc;
+  border-color: #ff0000;
+  max-width: 600px;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.hall-error-cell {
+  text-align: center;
+  color: #cc0000;
+}
+
+.hall-empty-table {
+  background-color: #ffffcc;
+  border-color: #ffcc00;
+  max-width: 600px;
+  font-family: 'Comic Sans MS', cursive;
+}
+
+.hall-empty-cell {
+  text-align: center;
+  color: #996600;
+}
+
+.hall-card {
+  margin-bottom: 10px;
+  font-family: 'Comic Sans MS', cursive;
+  background-color: #ccffcc;
+  border-color: #009900;
+}
+
+.hall-card-number-cell {
+  background-color: #99ff99;
+  text-align: center;
+  width: 15%;
+}
+
+.hall-card-number-text {
+  font-size: 20px;
+  color: #006600;
+  font-family: 'Comic Sans MS';
+}
+
+.hall-card-merged-badge {
+  margin-top: 5px;
+}
+
+.hall-card-merged-badge-text {
+  font-size: 12px;
+  color: #ffffff;
+  font-family: Arial;
+  background-color: #009900;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.hall-card-content-cell {
+  background-color: #e6ffe6;
+  padding: 10px;
+}
+
+.hall-card-title {
+  font-size: 16px;
+  font-family: 'Comic Sans MS';
+  color: #000000;
+}
+
+.hall-card-author-row {
+  padding-top: 5px;
+}
+
+.hall-card-author-text {
+  font-size: 14px;
+  font-family: Arial;
+  color: #666666;
+}
+
+.hall-card-author-link {
+  color: #006600;
+  text-decoration: underline;
+}
+
+.hall-card-date {
+  color: #888888;
+  font-size: 12px;
+}
+
+.hall-card-link-row {
+  padding-top: 8px;
+}
+
+.hall-card-link {
+  color: #006600;
+  text-decoration: underline;
+  font-family: Arial;
+  font-size: 12px;
+}
+
+.hall-card-trophy-cell {
+  background-color: #ffff00;
+  text-align: center;
+  width: 15%;
+}
+
+.hall-card-trophy-emoji {
+  font-size: 24px;
+  font-family: Arial;
+}
+
+.hall-card-winner-text {
+  font-size: 12px;
+  color: #cc6600;
+  font-family: 'Comic Sans MS';
 }
 
 /* ===== GUESTBOOK COMPONENT ===== */
@@ -1550,8 +1757,15 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
 .tree-game-button:hover {
