@@ -1152,6 +1152,53 @@
   border-color: #00ffff;
 }
 
+.pr-card-conflict {
+  background-color: #d0d0d0;
+  border-color: #808080;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .pr-card-conflict {
+  background-color: #404040;
+  border-color: #606060;
+}
+
+.pr-card-conflict .pr-card-title,
+.pr-card-conflict .pr-card-author-text,
+.pr-card-conflict .pr-card-link {
+  color: #666666;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-title,
+[data-theme="dark"] .pr-card-conflict .pr-card-author-text,
+[data-theme="dark"] .pr-card-conflict .pr-card-link {
+  color: #999999;
+}
+
+.pr-card-conflict .pr-card-number-cell-normal {
+  background-color: #b0b0b0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-number-cell-normal {
+  background-color: #333333;
+}
+
+.pr-card-conflict .pr-card-content-cell-normal {
+  background-color: #d0d0d0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-content-cell-normal {
+  background-color: #404040;
+}
+
+.pr-card-conflict .pr-card-votes-cell-normal {
+  background-color: #c0c0c0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-votes-cell-normal {
+  background-color: #383838;
+}
+
 .pr-card-number-cell-leading {
   background-color: #ffcc00;
   text-align: center;

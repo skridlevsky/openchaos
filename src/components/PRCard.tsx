@@ -20,16 +20,17 @@ export function PRCard({ pr, rank }: PRCardProps) {
   const url = chooseURL(pr.url);
 
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
-  
+  const hasConflict = !pr.isMergeable;
+  const cardClass = hasConflict
+    ? `pr-card pr-card-normal pr-card-conflict ${isSixtySeven ? "sixseven-shake" : ""}`
+    : `pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'} ${isSixtySeven ? "sixseven-shake" : ""}`;
   return (
     <table
       width="100%"
       border={2}
       cellPadding={8}
       cellSpacing={0}
-      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}
-        ${isSixtySeven ? "sixseven-shake" : ""}
-      `}
+      className={cardClass}
     >
       <tbody>
         <tr>
