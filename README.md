@@ -2,7 +2,7 @@
 
 **[openchaos.dev](https://openchaos.dev)**
 
-A self-evolving open source project. Every week, the community votes on PRs, and the winner gets merged.
+A self-evolving open source project. Each day, the community votes on PRs, and the top-voted one is merged.
 
 **The website IS the repo. The repo IS the website.**
 
@@ -12,7 +12,7 @@ A self-evolving open source project. Every week, the community votes on PRs, and
 2. Community votes via reactions on the PR:
   - 👍 (Thumbs Up) counts as +1
   - 👎 (Thumbs Down) counts as -1
-3. Every **Sunday at 09:00 UTC**, the most-voted PR gets merged
+3. Every **day at 19:00 UTC**, the most-voted PR gets merged
 4. Vercel auto-deploys
 5. Repeat forever
 
