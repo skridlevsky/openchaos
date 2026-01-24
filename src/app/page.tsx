@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/HallOfChaos";
 
 const title = `
@@ -16,6 +17,9 @@ export default function Home() {
   return (
     <>
     <pre >{title}</pre>
+      <div className="absolute top-8 right-4">
+        <ThemeToggle />
+      </div>
       <Countdown />
 
       <div>
