@@ -1,4 +1,5 @@
 import type { MergedPullRequest } from "@/lib/github";
+import { stripEmojis } from "@/lib/utils";
 
 interface HallOfChaosCardProps {
   pr: MergedPullRequest;
@@ -13,7 +14,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
 
   return (
     <div>
-      #{pr.number} [MERGED] {pr.title}
+      #{pr.number} [MERGED] {stripEmojis(pr.title)}
       <br />
       by @{pr.author} · {mergedDate}
       <br />

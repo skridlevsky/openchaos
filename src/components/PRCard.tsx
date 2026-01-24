@@ -1,4 +1,5 @@
 import type { PullRequest } from "@/lib/github";
+import { stripEmojis } from "@/lib/utils";
 import { TimeAgo } from "./TimeAgo";
 
 interface PRCardProps {
@@ -9,7 +10,7 @@ interface PRCardProps {
 export function PRCard({ pr, rank }: PRCardProps) {
   return (
     <div>
-      {rank}. {rank === 1 && "[LEADING]"} {pr.title} (#{pr.number})
+      {rank}. {rank === 1 && "[LEADING]"} {stripEmojis(pr.title)} (#{pr.number})
       <br />
       &nbsp;&nbsp;&nbsp;by @{pr.author} · <TimeAgo isoDate={pr.createdAt} />
       <br />
