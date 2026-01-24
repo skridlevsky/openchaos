@@ -12,5 +12,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+      - run: echo "I love democracy"
       - run: npm ci
       - run: npm run build
