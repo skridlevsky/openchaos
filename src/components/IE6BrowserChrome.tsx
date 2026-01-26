@@ -125,7 +125,7 @@ export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
           <span className="ie6-addressbar-icon">🔒</span>
           <span className="ie6-addressbar-url">http://openchaos.dev</span>
         </div>
-        <button className="ie6-addressbar-go">Go</button>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" className="ie6-addressbar-go">Go</a>
       </div>
 
       {/* Content Area with Side Panels */}
