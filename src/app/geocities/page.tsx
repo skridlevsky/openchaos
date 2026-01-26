@@ -6,10 +6,18 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { IE6Layout } from "@/components/IE6Layout";
 import { WebCounter } from "@/components/WebCounter";
 import { HallOfChaos } from "@/components/HallOfChaos";
+import { getRandomFeatureFlags } from "@/lib/chaos-router";
 
 export default function Home() {
+  const flags = getRandomFeatureFlags();
+
   return (
-    <IE6Layout>
+    <IE6Layout
+      showGuestbook={flags.guestbook}
+      showTreeGame={flags.treeGame}
+      showMidiPlayer={flags.midiPlayer}
+      showClippy={flags.clippy}
+    >
       <Countdown />
       <div className="absolute top-8 right-4">
         <ThemeToggle />

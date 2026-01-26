@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { PRList } from "@/components/PRList";
-import { HallOfChaos } from "@/components/HallOfChaos";
 import { getRandomFeatureFlags } from "@/lib/chaos-router";
 
 export default function TeletextHome() {
@@ -15,16 +14,6 @@ export default function TeletextHome() {
         </div>
         <Suspense fallback={<div>Loading...</div>}>
           <PRList />
-        </Suspense>
-      </div>
-
-      {/* Hall of Chaos */}
-      <div className="teletext-section">
-        <div className="teletext-section-header">
-          &gt; HALL OF CHAOS - PAST WINNERS
-        </div>
-        <Suspense fallback={<div>Loading...</div>}>
-          <HallOfChaos />
         </Suspense>
       </div>
 

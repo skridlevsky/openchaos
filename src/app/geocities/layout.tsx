@@ -1,4 +1,3 @@
-import { Cat } from "@/components/Cat";
 import "../retro.css";
 
 export default function GeoCitiesLayout({
@@ -6,10 +5,5 @@ export default function GeoCitiesLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <>
-      {children}
-      <Cat />
-    </>
-  );
+  return <>{children}</>;
 }
