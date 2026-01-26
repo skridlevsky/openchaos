@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Cat } from "@/components/Cat";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({
       <body>
         <div className="container">
           {children}
+          <Cat />
         </div>
       </body>
     </html>
