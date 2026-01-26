@@ -10,9 +10,19 @@ import { IE6BrowserChrome } from "./IE6BrowserChrome";
 
 interface IE6LayoutProps {
   children: ReactNode;
+  showGuestbook?: boolean;
+  showTreeGame?: boolean;
+  showMidiPlayer?: boolean;
+  showClippy?: boolean;
 }
 
-export function IE6Layout({ children }: IE6LayoutProps) {
+export function IE6Layout({
+  children,
+  showGuestbook = true,
+  showTreeGame = true,
+  showMidiPlayer = true,
+  showClippy = false,
+}: IE6LayoutProps) {
   return (
     <>
       <CursorTrail />
@@ -85,7 +95,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                         </span>
                         <br />
                         <div style={{ marginTop: "10px" }}>
-                          <Guestbook />
+                          {showGuestbook && <Guestbook />}
                           <a
                             href="https://discord.gg/6S5T5DyzZq"
                             target="_blank"
@@ -94,7 +104,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                           >
                             <b>💬 JOIN THE CHAOS! 💬</b>
                           </a>
-                          <TreeGame />
+                          {showTreeGame && <TreeGame />}
                         </div>
                       </td>
                     </tr>
@@ -170,7 +180,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
           </tbody>
         </table>
       </main>
-      <MidiPlayer />
+      {showMidiPlayer && <MidiPlayer />}
       <StatusBar />
       </IE6BrowserChrome>
     </>
