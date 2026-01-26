@@ -191,7 +191,7 @@ export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
                   <span className="ie6-favorite-icon">🏠</span>
                   <span>OpenChaos Home</span>
                 </div>
-                <div className="ie6-favorite-item" onClick={() => window.open('https://github.com/bpottle/openchaos', '_blank')}>
+                <div className="ie6-favorite-item" onClick={() => window.open('https://github.com/skridlevsky/openchaos', '_blank')}>
                   <span className="ie6-favorite-icon">📁</span>
                   <span>GitHub Repository</span>
                 </div>
