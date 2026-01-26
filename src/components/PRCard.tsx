@@ -1,5 +1,6 @@
 import type { PullRequest } from "@/lib/github";
 import { getDailyVoteEmojis } from "@/lib/chaos-emojis";
+import { TimeAgo } from "./TimeAgo";
 
 interface PRCardProps {
   pr: PullRequest;
@@ -50,7 +51,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
                         className="pr-card-author-link"
                       >
                         <b>@{pr.author}</b>
-                      </a>
+                      </a> · <TimeAgo isoDate={pr.createdAt} />
                     </span>
                   </td>
                 </tr>

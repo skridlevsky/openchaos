@@ -11,7 +11,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 1. Anyone submits a PR
 2. Community votes via reactions on the PR
 3. The upvote/downvote emojis shuffle every day (using GitHub's reaction set: 👍 👎 😄 😕 ❤️ 🎉 🚀 👀)
-4. Every **day at 09:00 UTC**, the most-voted PR gets merged
+4. Every **day at 19:00 UTC**, the most-voted PR gets merged
 5. Vercel auto-deploys
 6. Repeat forever
 
