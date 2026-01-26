@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cat } from "@/components/Cat";
 import "./globals.css";
-import "./retro.css";
 
 export const metadata: Metadata = {
   title: "OpenChaos.dev",

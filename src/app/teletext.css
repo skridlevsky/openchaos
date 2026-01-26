@@ -1,0 +1,129 @@
+/* Simple Teletext demo - terminal aesthetic */
+[data-variant="teletext"] {
+  --bg: #000000;
+  --fg: #00ff00;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* CRT scanline effect */
+.teletext-crt::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    transparent 50%,
+    rgba(0, 255, 0, 0.05) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.teletext-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.teletext-header {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.teletext-page {
+  padding: 20px 0;
+}
+
+.teletext-section {
+  margin-bottom: 40px;
+}
+
+.teletext-section-header {
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* Override max-width constraints from other components */
+[data-variant="teletext"] .w-full {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Table overrides for clean layout */
+[data-variant="teletext"] table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  border: none !important;
+}
+
+[data-variant="teletext"] td {
+  padding: 8px;
+  border: none !important;
+  vertical-align: top;
+}
+
+/* PR Card structure */
+[data-variant="teletext"] .pr-card {
+  border-bottom: 1px solid rgba(0, 255, 0, 0.3) !important;
+  margin-bottom: 15px;
+}
+
+[data-variant="teletext"] .pr-card:last-child {
+  border-bottom: none !important;
+}
+
+/* PR number column - fixed width */
+[data-variant="teletext"] .pr-card-number-cell-leading,
+[data-variant="teletext"] .pr-card-number-cell-normal {
+  width: 80px;
+  text-align: left;
+}
+
+/* PR content column - flexible */
+[data-variant="teletext"] .pr-card-content-cell-leading,
+[data-variant="teletext"] .pr-card-content-cell-normal {
+  width: auto;
+}
+
+/* PR votes column - fixed width */
+[data-variant="teletext"] .pr-card-votes-cell-leading,
+[data-variant="teletext"] .pr-card-votes-cell-normal {
+  width: 150px;
+  text-align: right;
+}
+
+/* Clean up nested tables */
+[data-variant="teletext"] .pr-card table {
+  margin-bottom: 0;
+}
+
+/* Basic component overrides */
+[data-variant="teletext"] a {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
+[data-variant="teletext"] button {
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--fg);
+  padding: 8px 16px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+[data-variant="teletext"] button:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
