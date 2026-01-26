@@ -1,7 +1,38 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+
+const ASCII_FRAMES = [
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n / /    \\ \\",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  \\ \\  / /",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
+];
+
+// Function to flip ASCII art horizontally
+function flipAscii(ascii: string): string {
+  const lines = ascii.split("\n");
+  const maxWidth = Math.max(...lines.map((line) => line.length));
+  
+  return lines
+    .map((line) => {
+      const padded = line.padEnd(maxWidth, " ");
+      return padded
+        .split("")
+        .reverse()
+        .map((char) => {
+          // Swap mirror characters
+          if (char === "/") return "\\";
+          if (char === "\\") return "/";
+          if (char === "(") return ")";
+          if (char === ")") return "(";
+          return char;
+        })
+        .join("")
+        .trimEnd();
+    })
+    .join("\n");
+}
 
 export function Cat() {
   // starts in the corner
@@ -13,10 +44,20 @@ export function Cat() {
   const [isSettling, setIsSettling] = useState(false);
   // default true (facing left) because it starts on the right
   const [isFlipped, setIsFlipped] = useState(true);
+  const [currentFrame, setCurrentFrame] = useState(0);
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const lastX = useRef(0);
+
+  // Animate ASCII frames
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % ASCII_FRAMES.length);
+    }, 200); // Change frame every 200ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleWindowMouseMove = (e: MouseEvent) => {
@@ -153,15 +194,18 @@ export function Cat() {
           : undefined,
       }}
     >
-      <Image
-        src="/cat.gif" // 16KB
-        alt="Chaos Cat"
-        width={128}
-        height={128}
-        className={`h-auto w-32 ${isFlipped ? "-scale-x-100" : "scale-x-100"}`}
-        unoptimized
+      <pre
+        className="font-mono text-xs leading-tight whitespace-pre text-center"
+        style={{ 
+          width: "128px", 
+          height: "128px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          margin: 0,
+        }}
         draggable={false}
-      />
+      >{isFlipped ? flipAscii(ASCII_FRAMES[currentFrame]) : ASCII_FRAMES[currentFrame]}</pre>
     </div>
   );
 }
