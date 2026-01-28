@@ -11,6 +11,7 @@ import { IE6BrowserChrome } from "./IE6BrowserChrome";
 import {Doom} from "./Doom";
 import { Clippy } from "./Clippy";
 import { Cat } from "./Cat";
+import { FakeErrors } from "./FakeErrors";
 
 interface IE6LayoutProps {
   children: ReactNode;
@@ -190,6 +191,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
       <StatusBar />
       <Clippy />
       </IE6BrowserChrome>
+      <FakeErrors />
     </>
   );
 }
