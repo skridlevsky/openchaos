@@ -25,13 +25,16 @@ export function PRCard({ pr, rank }: PRCardProps) {
   // TEMPORARY: Use rewritten title for testing
   const displayTitle = rewriteTitleForTesting(pr.title, pr.number);
   const hasRhymes = hasRhymingWords(displayTitle);
+  const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   return (
     <table
       width="100%"
       border={2}
       cellPadding={8}
       cellSpacing={0}
-      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}`}
+      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}
+        ${isSixtySeven ? "sixseven-shake" : ""}
+      `}
     >
       <tbody>
         <tr>

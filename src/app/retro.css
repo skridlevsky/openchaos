@@ -2045,3 +2045,92 @@
   border-right: none;
   box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
 }
+
+/* ===== DISCORD BUTTON STYLES ===== */
+
+/* "JOIN THE CHAOS" button - matches Guestbook button style */
+.discord-chat-button {
+  display: inline-block;
+  background: linear-gradient(to bottom, #7289da 0%, #5865f2 50%, #4752c4 100%);
+  color: #ffffff;
+  border: 3px solid #23272a;
+  padding: 8px 16px;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  margin: 5px;
+  animation: discord-pulse 1.5s ease-in-out infinite;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.discord-chat-button:hover {
+  background: linear-gradient(to bottom, #8ea1e1 0%, #7289da 50%, #5865f2 100%);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+@keyframes discord-pulse {
+  0%, 100% {
+    box-shadow: 2px 2px 0px #000000, 0 0 5px #5865f2;
+  }
+  50% {
+    box-shadow: 2px 2px 0px #000000, 0 0 15px #5865f2, 0 0 25px #7289da;
+  }
+}
+
+/* 88x31 Discord button - animated glow effect */
+.discord-button-88x31 {
+  image-rendering: pixelated;
+  animation: button-88x31-glow 2s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+.discord-button-88x31:hover {
+  transform: scale(1.1);
+  animation: button-88x31-rainbow 0.5s linear infinite;
+}
+
+@keyframes button-88x31-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px #5865f2);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #5865f2) drop-shadow(0 0 12px #7289da);
+  }
+}
+
+@keyframes button-88x31-rainbow {
+  0% { filter: hue-rotate(0deg) drop-shadow(0 0 5px #ff00ff); }
+  25% { filter: hue-rotate(90deg) drop-shadow(0 0 5px #00ffff); }
+  50% { filter: hue-rotate(180deg) drop-shadow(0 0 5px #ffff00); }
+  75% { filter: hue-rotate(270deg) drop-shadow(0 0 5px #00ff00); }
+  100% { filter: hue-rotate(360deg) drop-shadow(0 0 5px #ff00ff); }
+}
+
+/* Discord item in Favorites panel - make it stand out */
+.ie6-favorite-discord {
+  background: linear-gradient(to right, #5865f2, #7289da);
+  color: #ffffff !important;
+  border: 1px solid #5865f2;
+  animation: discord-favorite-blink 1s ease-in-out infinite;
+}
+
+.ie6-favorite-discord:hover {
+  background: linear-gradient(to right, #7289da, #8ea1e1);
+  color: #ffffff !important;
+  border: 1px solid #7289da;
+}
+
+.ie6-favorite-discord span {
+  color: #ffffff !important;
+}
+
+@keyframes discord-favorite-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
