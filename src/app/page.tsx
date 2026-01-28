@@ -27,6 +27,11 @@ export default function Home() {
               </td>
             </tr>
             <tr>
+              <td>
+                <img src="/dickbutt.gif" style={{ width: "321px", display: "block", margin: "0 auto" }} />
+              </td>
+            </tr>
+            <tr>
               <td className="page-content-cell">
                 <div className="page-content-flex">
                   <Suspense
