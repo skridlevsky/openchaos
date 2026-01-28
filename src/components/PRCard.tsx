@@ -1,4 +1,5 @@
 import type { PullRequest } from "@/lib/github";
+import { TimeAgo } from "./TimeAgo";
 
 interface PRCardProps {
   pr: PullRequest;
@@ -6,13 +7,16 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, rank }: PRCardProps) {
+  const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   return (
     <table
       width="100%"
       border={2}
       cellPadding={8}
       cellSpacing={0}
-      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}`}
+      className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}
+        ${isSixtySeven ? "sixseven-shake" : ""}
+      `}
     >
       <tbody>
         <tr>
@@ -48,7 +52,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
                         className="pr-card-author-link"
                       >
                         <b>@{pr.author}</b>
-                      </a>
+                      </a> · <TimeAgo isoDate={pr.createdAt} />
                     </span>
                   </td>
                 </tr>

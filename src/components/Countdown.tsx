@@ -6,10 +6,10 @@ function getNextMergeTime(): Date {
   const now = new Date();
   const target = new Date(now);
 
-  // Set to 9:00:00 UTC today
-  target.setUTCHours(9, 0, 0, 0);
+  // Set to 19:00:00 UTC today
+  target.setUTCHours(19, 0, 0, 0);
 
-  // If we've already passed 9:00 UTC today, use 9:00 UTC tomorrow
+  // If we've already passed 19:00 UTC today, use 19:00 UTC tomorrow
   if (now.getTime() >= target.getTime()) {
     target.setUTCDate(target.getUTCDate() + 1);
   }
