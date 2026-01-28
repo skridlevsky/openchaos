@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Guestbook } from "./Guestbook";
 import { CursorTrail } from "./CursorTrail";
 import { MidiPlayer } from "./MidiPlayer";
@@ -8,12 +8,14 @@ import { TreeGame } from "./TreeGame";
 import { StatusBar } from "./StatusBar";
 import { IE6BrowserChrome } from "./IE6BrowserChrome";
 import { Clippy } from "./Clippy";
+import { Cat } from "./Cat";
 
 interface IE6LayoutProps {
   children: ReactNode;
 }
 
 export function IE6Layout({ children }: IE6LayoutProps) {
+  const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
   return (
     <>
       <CursorTrail />
@@ -171,7 +173,8 @@ export function IE6Layout({ children }: IE6LayoutProps) {
           </tbody>
         </table>
       </main>
-      <MidiPlayer />
+      <MidiPlayer isOpen={isMidiPlayerOpen} onClose={() => setIsMidiPlayerOpen(false)} />
+      <Cat isMidiPlayerOpen={isMidiPlayerOpen} />
       <StatusBar />
       <Clippy />
       </IE6BrowserChrome>

@@ -18,6 +18,9 @@ const CLIPPY_TIPS = [
   "Have you tried turning it off and on again?",
   "It looks like you're trying to write a PR. Would you like help making it chaotic?",
   "Remember: In OpenChaos, the community decides. Democracy is beautiful! 🦅",
+  // Clippy's conspiracy theories
+  "Did you know the top PR always has exactly the votes needed to win? 🤔 Coincidence?",
+  "I've been tracking the vote patterns. They follow the Fibonacci sequence. Wake up, sheeple!",
 ];
 
 function getRandomTip(currentIndex: number): number {
