@@ -8,8 +8,10 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, rank }: PRCardProps) {
+  const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   return (
-    <div>
+    <div className={`${isSixtySeven ? "sixseven-shake" : ""}
+  `}>
       {rank}. {rank === 1 && "[LEADING]"} {stripEmojis(pr.title)} (#{pr.number})
       <br />
       &nbsp;&nbsp;&nbsp;by @{pr.author} · <TimeAgo isoDate={pr.createdAt} />
