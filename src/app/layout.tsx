@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Cat } from "@/components/Cat";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +15,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <Cat />
       </body>
     </html>
   );
