@@ -38,13 +38,16 @@ jobs:
                     per_page: 100
                   });
 
-                  const votes = reactions.data.filter(r => r.content === '+1').length;
+                  const plusOneReactions = reactions.data.filter(r => r.content === '+1');
+                  const votes = plusOneReactions.length;
+                  const voters = plusOneReactions.map(r => r.user.login);
 
                   return {
                     number: pr.number,
                     title: pr.title,
                     author: pr.user.login,
-                    votes
+                    votes,
+                    voters
                   };
                 })
               );
@@ -98,6 +101,8 @@ jobs:
                   merge_method: 'squash',
                 });
                 console.log(`Merged PR #${pr.number}`);
+                const randomVoter = pr.voters[Math.floor(Math.random() * pr.voters.length)];
+                console.log(`🎲 Random voter for this PR: @${randomVoter}`);
                 mergedPR = pr;
                 break;
               } catch (error) {
