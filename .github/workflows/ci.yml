@@ -9,8 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Setup Rust with caching
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust/openchaos_wasm
+
+      # Install wasm-pack
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+      # Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: 'npm'
+
+      # Build WASM, install deps, and build Next.js
+      - run: npm run wasm:build
       - run: npm ci
       - run: npm run build

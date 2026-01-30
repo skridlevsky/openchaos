@@ -40,14 +40,49 @@ If it passes CI and gets votes, it can win.
 
 ## Development
 
+### Prerequisites
+
+- **Node.js** 20+
+- **Rust** (for WASM modules)
+  ```bash
+  # Install Rust
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+  # Add WASM target
+  rustup target add wasm32-unknown-unknown
+
+  # Install wasm-pack
+  cargo install wasm-pack
+  ```
+
+### Setup
+
 ```bash
-npm install
+npm install  # Automatically builds WASM via preinstall
 npm run dev
 ```
+
+### WASM Development
+
+The project uses Rust compiled to WebAssembly for performance-critical operations (GitHub API fetching, vote counting, sorting).
+
+```bash
+# Rebuild WASM manually
+npm run wasm:build
+
+# Run Rust tests
+npm run wasm:test
+
+# Watch mode for Rust changes (requires cargo-watch)
+npm run wasm:dev
+```
+
+**Rust code location:** `rust/openchaos_wasm/`
 
 ## Tech Stack
 
 - Next.js 16 (App Router)
 - Tailwind CSS v4
+- **Rust/WebAssembly** (GitHub API logic)
 - Vercel (auto-deploy)
 - GitHub API (PR reactions for voting)
