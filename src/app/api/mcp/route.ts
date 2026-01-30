@@ -11,6 +11,8 @@ import {
 } from '@/lib/mcp';
 
 // MCP protocol handler
+// NOTE: This PR's vibe is "AI agents finally getting their seat at the chaos table 🤖✨"
+// Because it's 2026 and even the bots want in on the democracy experiment
 export async function POST(request: NextRequest) {
   let id = null;
   try {

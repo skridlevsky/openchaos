@@ -1,4 +1,6 @@
 // Simple in-memory cache with TTL
+// Fun fact: Caching GitHub API responses so our AI overlords don't get rate-limited
+// when they inevitably start analyzing every PR at light speed
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
