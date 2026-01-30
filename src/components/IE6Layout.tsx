@@ -1,18 +1,21 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { Guestbook } from "./Guestbook";
 import { CursorTrail } from "./CursorTrail";
 import { MidiPlayer } from "./MidiPlayer";
 import { TreeGame } from "./TreeGame";
 import { StatusBar } from "./StatusBar";
 import { IE6BrowserChrome } from "./IE6BrowserChrome";
+import { Clippy } from "./Clippy";
+import { Cat } from "./Cat";
 
 interface IE6LayoutProps {
   children: ReactNode;
 }
 
 export function IE6Layout({ children }: IE6LayoutProps) {
+  const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
   return (
     <>
       <CursorTrail />
@@ -86,6 +89,14 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                         <br />
                         <div style={{ marginTop: "10px" }}>
                           <Guestbook />
+                          <a
+                            href="https://discord.gg/6S5T5DyzZq"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="discord-chat-button"
+                          >
+                            <b>💬 JOIN THE CHAOS! 💬</b>
+                          </a>
                           <TreeGame />
                         </div>
                       </td>
@@ -111,6 +122,9 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                     <tr>
                       <td className="ie6-footer-cell" style={{ textAlign: "center", padding: "10px" }}>
                         <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+                          <a href="https://discord.gg/6S5T5DyzZq" target="_blank" rel="noopener noreferrer" title="Join our Discord!">
+                            <img src="/buttons/discord88x31.gif" alt="Join OpenChaos Discord!" width="88" height="31" className="discord-button-88x31" />
+                          </a>
                           <a href="https://blog.openchaos.dev/" target="_blank" rel="noopener noreferrer">
                             <img src="/buttons/2cows.gif" alt="2 Cows and a Chicken button - visit our site" width="88" height="31" />
                           </a>
@@ -159,8 +173,10 @@ export function IE6Layout({ children }: IE6LayoutProps) {
           </tbody>
         </table>
       </main>
-      <MidiPlayer />
+      <MidiPlayer isOpen={isMidiPlayerOpen} onClose={() => setIsMidiPlayerOpen(false)} />
+      <Cat isMidiPlayerOpen={isMidiPlayerOpen} />
       <StatusBar />
+      <Clippy />
       </IE6BrowserChrome>
     </>
   );

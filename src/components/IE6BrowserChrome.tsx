@@ -207,6 +207,10 @@ export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
                   <span className="ie6-favorite-icon">⚡</span>
                   <span>Zombocom</span>
                 </div>
+                <div className="ie6-favorite-item ie6-favorite-discord" onClick={() => window.open('https://discord.gg/6S5T5DyzZq', '_blank')}>
+                  <span className="ie6-favorite-icon">💬</span>
+                  <span>OpenChaos Discord!!!</span>
+                </div>
               </div>
             </div>
           </div>
