@@ -7,6 +7,14 @@ export interface PullRequest {
   createdAt: string;
 }
 
+export interface MergedPullRequest {
+  number: number;
+  title: string;
+  author: string;
+  url: string;
+  mergedAt: string;
+}
+
 interface GitHubPR {
   number: number;
   title: string;
@@ -15,15 +23,18 @@ interface GitHubPR {
     login: string;
   };
   created_at: string;
+  head: {
+    sha: string;
+  };
 }
 
 interface GitHubReaction {
   content: string;
 }
 
-const GITHUB_REPO = "skridlevsky/openchaos";
+export const GITHUB_REPO = "skridlevsky/openchaos";
 
-function getHeaders(accept: string): Record<string, string> {
+export function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
@@ -74,6 +85,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRVotes(owner, repo, pr.number);
+
       return {
         number: pr.number,
         title: pr.title,
@@ -130,4 +142,48 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
   }
 
   return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+}
+
+interface GitHubMergedPR {
+  number: number;
+  title: string;
+  html_url: string;
+  user: {
+    login: string;
+  };
+  merged_at: string | null;
+}
+
+export async function getMergedPRs(): Promise<MergedPullRequest[]> {
+  const [owner, repo] = GITHUB_REPO.split("/");
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=20`,
+    {
+      headers: getHeaders("application/vnd.github.v3+json"),
+      next: { revalidate: 300 },
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("Rate limited by GitHub API");
+    }
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
+
+  const prs: GitHubMergedPR[] = await response.json();
+
+  // Filter to only merged PRs (not just closed), exclude repo owner's maintenance PRs
+  const REPO_OWNER = owner;
+  return prs
+    .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
+    .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
+    .map((pr) => ({
+      number: pr.number,
+      title: pr.title,
+      author: pr.user.login,
+      url: pr.html_url,
+      mergedAt: pr.merged_at!,
+    }));
 }
