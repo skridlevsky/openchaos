@@ -39,20 +39,18 @@ jobs:
             const oldestPr = prs[0];
             console.log(`Found oldest PR: #${oldestPr.number} "${oldestPr.title}" created at ${oldestPr.created_at}`);
 
-            // Add a comment explaining why it's being closed
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: oldestPr.number,
-              body: "🧹 This PR is being automatically closed as part of our weekly cleanup policy to keep the backlog fresh. We close the single oldest open PR once a week.\n\nThank you for your contribution! If this is still relevant, please feel free to reopen or submit a new PR."
-            });
-
-            // Close the PR
             await github.rest.pulls.update({
               owner,
               repo,
               pull_number: oldestPr.number,
               state: 'closed'
+            });
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: oldestPr.number,
+              body: "🧹 This PR is being automatically closed as part of our weekly cleanup policy to keep the backlog fresh. We close the single oldest open PR once a week.\n\nThank you for your contribution! If this is still relevant, please feel free to reopen or submit a new PR."
             });
 
             console.log(`Successfully closed PR #${oldestPr.number}`);
