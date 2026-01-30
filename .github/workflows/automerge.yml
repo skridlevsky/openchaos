@@ -21,6 +21,27 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
+            // 🎉 FUN RANDOM MESSAGES 🎉
+            const celebrationMessages = [
+              "🎉 JACKPOT! 🎉",
+              "🎰 WINNER WINNER CHICKEN DINNER! 🍗",
+              "💎 DIAMOND HANDS! 💎",
+              "🚀 TO THE MOON! 🌕",
+              "🏆 CROWN JEWEL! 👑",
+              "⚡ LIGHTNING STRIKE! ⚡",
+              "🎪 BIG TOP WINNER! 🎪",
+              "🎲 ROLLING IN IT! 🎲",
+              "💰 BIG BUCKS! 💸",
+              "🔥 FIRE ROUND WINNER! 🔥"
+            ];
+
+            const memeEmojis = [
+              ["💎", "🚀", "🌙", "🎯", "💸", "🎲", "🎪", "🎨", "🎭", "🎮"],
+              ["🎵", "🎸", "🎺", "🎻", "🥁", "🎹", "🎷", "🎤", "🎧", "🎬"],
+              ["🎉", "🎊", "🎁", "🎈", "🎆", "🎇", "✨", "🌟", "⭐", "💫"],
+              ["🦾", "🦿", "🧠", "🦸", "🦹", "🧛", "🧜", "🧚", "🧝", "🧞"]
+            ];
+
             async function getOpenPRs() {
               const prs = await github.rest.pulls.list({
                 owner,
@@ -55,6 +76,77 @@ jobs:
               prsWithVotes.sort((a,b) => b.votes - a.votes);
 
               return prsWithVotes;
+            }
+
+            // 🎰 POST WINNER COMMENT 🎰
+            async function announceWinner(pr, winner) {
+              const celebration = celebrationMessages[Math.floor(Math.random() * celebrationMessages.length)];
+              const randomEmoji1 = memeEmojis[0][Math.floor(Math.random() * memeEmojis[0].length)];
+              const randomEmoji2 = memeEmojis[2][Math.floor(Math.random() * memeEmojis[2].length)];
+              const randomEmoji3 = memeEmojis[3][Math.floor(Math.random() * memeEmojis[3].length)];
+
+              const commentBody =
+`# ${celebration}
+
+---
+
+## 🎰 **RANDOM WINNER SELECTED!** 🎰
+
+### 🏆 **@${winner}** 
+
+---
+
+## 🎲 **THE NUMBERS:**
+- **PR #${pr.number}**: "${pr.title}" by @${pr.author}
+- **Total Votes**: ${pr.votes} 👍
+- **Total Voters**: ${pr.voters.length} people
+- **Your Odds**: 1 in ${pr.voters.length} (${(100/pr.voters.length).toFixed(1)}%)
+
+---
+
+## 🎊 **YOUR PRIZE AWAITS!** 🎊
+
+💵 **$100 USD** OR 🪙 **CRYPTO EQUIVALENT**
+
+Paid by @${owner} via the community bounty program!
+
+---
+
+## 📜 **HOW TO CLAIM:**
+
+1. 📧 Check your GitHub notifications for DM from @${owner}
+2. 💬 Or open an issue titled "🎰 BOUNTY CLAIM: @${winner}"
+3. ✅ Include your payment preference (PayPal, Venmo, crypto wallet, etc.)
+4. 🎁 Prize sent within 24 hours!
+
+---
+
+## 🎭 **THANKS TO ALL VOTERS!** 🎭
+
+${pr.voters.map(v => `@${v} ${randomEmoji1}`).join(' • ')}
+
+---
+
+## 🎪 **NEXT TIME...**
+
+👍 Upvote upcoming PRs for your shot at $100!
+🎲 Random winner EVERY merge!
+💸 May the odds be ever in your favor!
+
+---
+
+${randomEmoji2}${randomEmoji2}${randomEmoji2} **CHAOS REIGNS!** ${randomEmoji3}${randomEmoji3}${randomEmoji3}
+
+> *Winner selected via cryptographically secure random selection* 🎲🔒`;
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: commentBody
+              });
+
+              console.log(`✅ Posted winner announcement on PR #${pr.number}`);
             }
 
             const openPRs = await getOpenPRs();
@@ -101,8 +193,16 @@ jobs:
                   merge_method: 'squash',
                 });
                 console.log(`Merged PR #${pr.number}`);
-                const randomVoter = pr.voters[Math.floor(Math.random() * pr.voters.length)];
-                console.log(`🎲 Random voter for this PR: @${randomVoter}`);
+
+                // 🎲 SELECT AND ANNOUNCE RANDOM WINNER 🎲
+                if (pr.voters.length > 0) {
+                  const randomVoter = pr.voters[Math.floor(Math.random() * pr.voters.length)];
+                  console.log(`🎲 Random voter for this PR: @${randomVoter}`);
+                  await announceWinner(pr, randomVoter);
+                } else {
+                  console.log("⚠️ No voters to select from, skipping winner announcement");
+                }
+
                 mergedPR = pr;
                 break;
               } catch (error) {
