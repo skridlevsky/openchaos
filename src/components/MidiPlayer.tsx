@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from 'react';
 
 interface MidiPlayerProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export function MidiPlayer({ isOpen, onClose }: MidiPlayerProps) {
         setIsPlaying(false);
       } else {
         audioRef.current.play().catch((error) => {
-          console.error("Playback failed:", error);
+          console.error('Playback failed:', error);
         });
         setIsPlaying(true);
       }
@@ -38,8 +38,8 @@ export function MidiPlayer({ isOpen, onClose }: MidiPlayerProps) {
     const audio = audioRef.current;
     if (audio) {
       const handleEnded = () => setIsPlaying(false);
-      audio.addEventListener("ended", handleEnded);
-      return () => audio.removeEventListener("ended", handleEnded);
+      audio.addEventListener('ended', handleEnded);
+      return () => audio.removeEventListener('ended', handleEnded);
     }
   }, []);
 
@@ -49,7 +49,12 @@ export function MidiPlayer({ isOpen, onClose }: MidiPlayerProps) {
 
   return (
     <div className="midi-player-container">
-      <table border={3} cellPadding={8} cellSpacing={0} className="midi-player-table">
+      <table
+        border={3}
+        cellPadding={8}
+        cellSpacing={0}
+        className="midi-player-table"
+      >
         <tbody>
           <tr>
             <td className="midi-player-header" colSpan={2}>
@@ -67,20 +72,18 @@ export function MidiPlayer({ isOpen, onClose }: MidiPlayerProps) {
                   <span>⏸ Ready</span>
                 )}
               </div>
-              <div className="midi-player-filename">
-                openchaos.mid
-              </div>
+              <div className="midi-player-filename">openchaos.mid</div>
             </td>
           </tr>
           <tr>
             <td className="midi-player-controls">
-              <button 
+              <button
                 onClick={togglePlay}
                 className="midi-player-control-button"
               >
-                {isPlaying ? "⏸ PAUSE" : "▶ PLAY"}
+                {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
               </button>
-              <button 
+              <button
                 onClick={stopMusic}
                 className="midi-player-control-button"
               >

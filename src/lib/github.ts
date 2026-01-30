@@ -1,4 +1,4 @@
-import { Console } from "console";
+import { Console } from 'console';
 
 export interface PullRequest {
   number: number;
@@ -41,10 +41,10 @@ interface GitHubPRDetail {
 }
 
 interface GitHubCommitStatus {
-  state: "failure" | "pending" | "success" | "error";
+  state: 'failure' | 'pending' | 'success' | 'error';
 }
 
-const GITHUB_REPO = "skridlevsky/openchaos";
+const GITHUB_REPO = 'skridlevsky/openchaos';
 
 function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
@@ -55,7 +55,7 @@ function getHeaders(accept: string): Record<string, string> {
 }
 
 export async function getOpenPRs(): Promise<PullRequest[]> {
-  const [owner, repo] = GITHUB_REPO.split("/");
+  const [owner, repo] = GITHUB_REPO.split('/');
 
   let allPRs: GitHubPR[] = [];
   let page = 1;
@@ -64,14 +64,14 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.v3+json"),
+        headers: getHeaders('application/vnd.github.v3+json'),
         next: { revalidate: 300 }, // Cache for 5 minutes
-      }
+      },
     );
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error("Rate limited by GitHub API");
+        throw new Error('Rate limited by GitHub API');
       }
       throw new Error(`GitHub API error: ${response.status}`);
     }
@@ -114,13 +114,18 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   );
 
   // Sort by votes descending
-  return prsWithVotes.sort((a, b) =>
-    (b.votes - a.votes) ||
-    (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  return prsWithVotes.sort(
+    (a, b) =>
+      b.votes - a.votes ||
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 }
 
-async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
+async function getPRVotes(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<number> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -128,7 +133,9 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions?per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.squirrel-girl-preview+json"),
+        headers: getHeaders(
+          'application/vnd.github.squirrel-girl-preview+json',
+        ),
         next: { revalidate: 300 },
       },
     );
@@ -153,20 +160,23 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
     page++;
   }
 
-  return allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length;
+  return (
+    allReactions.filter((r) => r.content === '+1').length -
+    allReactions.filter((r) => r.content === '-1').length
+  );
 }
 
 async function getPRMergeStatus(
   owner: string,
   repo: string,
-  prNumber: number
+  prNumber: number,
 ): Promise<boolean> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: getHeaders('application/vnd.github.v3+json'),
       next: { revalidate: 300 },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -180,14 +190,14 @@ async function getPRMergeStatus(
 async function getCommitStatus(
   owner: string,
   repo: string,
-  sha: string
+  sha: string,
 ): Promise<boolean> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/status`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: getHeaders('application/vnd.github.v3+json'),
       next: { revalidate: 300 },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -195,7 +205,7 @@ async function getCommitStatus(
   }
 
   const data: GitHubCommitStatus = await response.json();
-  return data.state === "success";
+  return data.state === 'success';
 }
 
 interface GitHubMergedPR {
@@ -209,19 +219,19 @@ interface GitHubMergedPR {
 }
 
 export async function getMergedPRs(): Promise<MergedPullRequest[]> {
-  const [owner, repo] = GITHUB_REPO.split("/");
+  const [owner, repo] = GITHUB_REPO.split('/');
 
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=20`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: getHeaders('application/vnd.github.v3+json'),
       next: { revalidate: 300 },
-    }
+    },
   );
 
   if (!response.ok) {
     if (response.status === 403) {
-      throw new Error("Rate limited by GitHub API");
+      throw new Error('Rate limited by GitHub API');
     }
     throw new Error(`GitHub API error: ${response.status}`);
   }
@@ -233,7 +243,10 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
   const REPO_OWNER = owner;
   return prs
     .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
-    .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime(),
+    )
     .map((pr) => ({
       number: pr.number,
       title: pr.title,

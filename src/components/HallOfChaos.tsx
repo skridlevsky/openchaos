@@ -1,5 +1,5 @@
-import { getMergedPRs } from "@/lib/github";
-import { HallOfChaosCard } from "./HallOfChaosCard";
+import { getMergedPRs } from '@/lib/github';
+import { HallOfChaosCard } from './HallOfChaosCard';
 
 export async function HallOfChaos() {
   let prs;
@@ -8,12 +8,17 @@ export async function HallOfChaos() {
   try {
     prs = await getMergedPRs();
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch merged PRs";
+    error = e instanceof Error ? e.message : 'Failed to fetch merged PRs';
   }
 
   if (error) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="hall-error-table">
+      <table
+        width="90%"
+        border={1}
+        cellPadding={10}
+        className="hall-error-table"
+      >
         <tbody>
           <tr>
             <td className="hall-error-cell">
@@ -29,7 +34,12 @@ export async function HallOfChaos() {
 
   if (!prs || prs.length === 0) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="hall-empty-table">
+      <table
+        width="90%"
+        border={1}
+        cellPadding={10}
+        className="hall-empty-table"
+      >
         <tbody>
           <tr>
             <td className="hall-empty-cell">

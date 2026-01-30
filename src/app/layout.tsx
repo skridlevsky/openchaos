@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import "./retro.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import './retro.css';
 
 export const metadata: Metadata = {
-  title: "OpenChaos.dev",
-  description: "A self-evolving open source project. Vote on PRs. Winner gets merged every Sunday.",
+  title: 'OpenChaos.dev',
+  description:
+    'A self-evolving open source project. Vote on PRs. Winner gets merged every Sunday.',
 };
 
 export default function RootLayout({
@@ -14,9 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

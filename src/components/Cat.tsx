@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 interface CatProps {
   isMidiPlayerOpen: boolean;
@@ -12,7 +12,9 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
   // drag it around
   // drops back down
   // looks where it goes
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
   // default false (facing right) because it starts on the left now
@@ -94,17 +96,19 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
     };
 
     if (isDragging) {
-      window.addEventListener("mousemove", handleWindowMouseMove);
-      window.addEventListener("mouseup", handleWindowEnd);
-      window.addEventListener("touchmove", handleWindowTouchMove, { passive: false });
-      window.addEventListener("touchend", handleWindowEnd);
+      window.addEventListener('mousemove', handleWindowMouseMove);
+      window.addEventListener('mouseup', handleWindowEnd);
+      window.addEventListener('touchmove', handleWindowTouchMove, {
+        passive: false,
+      });
+      window.addEventListener('touchend', handleWindowEnd);
     }
 
     return () => {
-      window.removeEventListener("mousemove", handleWindowMouseMove);
-      window.removeEventListener("mouseup", handleWindowEnd);
-      window.removeEventListener("touchmove", handleWindowTouchMove);
-      window.removeEventListener("touchend", handleWindowEnd);
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowEnd);
+      window.removeEventListener('touchmove', handleWindowTouchMove);
+      window.removeEventListener('touchend', handleWindowEnd);
     };
   }, [isDragging]);
 
@@ -184,9 +188,9 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
 
   // Determine default position based on midi player state
   const getDefaultPositionClass = () => {
-    if (position) return "top-0 left-0"; // being dragged or fallen
-    if (isMidiPlayerOpen) return ""; // will use style for precise positioning
-    return "bottom-0 left-5"; // player closed, sit at bottom-left
+    if (position) return 'top-0 left-0'; // being dragged or fallen
+    if (isMidiPlayerOpen) return ''; // will use style for precise positioning
+    return 'bottom-0 left-5'; // player closed, sit at bottom-left
   };
 
   return (
@@ -196,14 +200,16 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
       onTouchStart={handleTouchStart}
       className={`fixed z-[1001] cursor-grab active:cursor-grabbing select-none touch-none
         ${getDefaultPositionClass()}
-        ${isSettling ? "transition-transform duration-500 ease-out" : ""}
+        ${isSettling ? 'transition-transform duration-500 ease-out' : ''}
       `}
       style={{
         // When not dragged and player is open, position on top of the player
-        ...(!position && isMidiPlayerOpen ? {
-          bottom: "200px", // above the midi player
-          left: "20px",
-        } : {}),
+        ...(!position && isMidiPlayerOpen
+          ? {
+              bottom: '200px', // above the midi player
+              left: '20px',
+            }
+          : {}),
         transform: position
           ? `translate3d(${position.x}px, ${position.y}px, 0)`
           : undefined,
@@ -214,11 +220,10 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
         alt="Chaos Cat"
         width={128}
         height={128}
-        className={`h-auto w-32 ${isFlipped ? "-scale-x-100" : "scale-x-100"}`}
+        className={`h-auto w-32 ${isFlipped ? '-scale-x-100' : 'scale-x-100'}`}
         unoptimized
         draggable={false}
       />
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
-import type { PullRequest } from "@/lib/github";
-import { TimeAgo } from "./TimeAgo";
+import type { PullRequest } from '@/lib/github';
+import { TimeAgo } from './TimeAgo';
 
 interface PRCardProps {
   pr: PullRequest;
@@ -15,13 +15,25 @@ export function PRCard({ pr, rank }: PRCardProps) {
       cellPadding={8}
       cellSpacing={0}
       className={`pr-card ${rank === 1 ? 'pr-card-leading' : 'pr-card-normal'}
-        ${isSixtySeven ? "sixseven-shake" : ""}
+        ${isSixtySeven ? 'sixseven-shake' : ''}
       `}
     >
       <tbody>
         <tr>
-          <td className={rank === 1 ? 'pr-card-number-cell-leading' : 'pr-card-number-cell-normal'}>
-            <span className={rank === 1 ? 'pr-card-number-text-leading' : 'pr-card-number-text-normal'}>
+          <td
+            className={
+              rank === 1
+                ? 'pr-card-number-cell-leading'
+                : 'pr-card-number-cell-normal'
+            }
+          >
+            <span
+              className={
+                rank === 1
+                  ? 'pr-card-number-text-leading'
+                  : 'pr-card-number-text-normal'
+              }
+            >
               <b>#{pr.number}</b>
             </span>
             {rank === 1 && (
@@ -32,7 +44,13 @@ export function PRCard({ pr, rank }: PRCardProps) {
               </div>
             )}
           </td>
-          <td className={rank === 1 ? 'pr-card-content-cell-leading' : 'pr-card-content-cell-normal'}>
+          <td
+            className={
+              rank === 1
+                ? 'pr-card-content-cell-leading'
+                : 'pr-card-content-cell-normal'
+            }
+          >
             <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
               <tbody>
                 <tr>
@@ -45,14 +63,16 @@ export function PRCard({ pr, rank }: PRCardProps) {
                 <tr>
                   <td className="pr-card-author-row">
                     <span className="pr-card-author-text">
-                      by <a
+                      by{' '}
+                      <a
                         href={`https://github.com/${pr.author}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="pr-card-author-link"
                       >
                         <b>@{pr.author}</b>
-                      </a> · <TimeAgo isoDate={pr.createdAt} />
+                      </a>{' '}
+                      · <TimeAgo isoDate={pr.createdAt} />
                     </span>
                   </td>
                 </tr>
@@ -71,23 +91,39 @@ export function PRCard({ pr, rank }: PRCardProps) {
               </tbody>
             </table>
           </td>
-          <td className={rank === 1 ? 'pr-card-votes-cell-leading' : 'pr-card-votes-cell-normal'}>
-            <span className="pr-card-votes-emoji">
-              👍
-            </span>
+          <td
+            className={
+              rank === 1
+                ? 'pr-card-votes-cell-leading'
+                : 'pr-card-votes-cell-normal'
+            }
+          >
+            <span className="pr-card-votes-emoji">👍</span>
             <br />
-            <span className={rank === 1 ? 'pr-card-votes-count-leading' : 'pr-card-votes-count-normal'}>
+            <span
+              className={
+                rank === 1
+                  ? 'pr-card-votes-count-leading'
+                  : 'pr-card-votes-count-normal'
+              }
+            >
               <b>{pr.votes}</b>
             </span>
-            <div style={{ marginTop: '8px', fontSize: '11px', fontFamily: 'Arial, sans-serif' }}>
+            <div
+              style={{
+                marginTop: '8px',
+                fontSize: '11px',
+                fontFamily: 'Arial, sans-serif',
+              }}
+            >
               {(!pr.isMergeable || !pr.checksPassed) && (
                 <>
                   <span style={{ color: 'red', fontWeight: 'bold' }}>
                     {!pr.isMergeable && !pr.checksPassed
-                      ? "Conflicts & Checks failed"
+                      ? 'Conflicts & Checks failed'
                       : !pr.isMergeable
-                        ? "Merge conflicts"
-                        : "Checks failed"}
+                        ? 'Merge conflicts'
+                        : 'Checks failed'}
                   </span>
                   <br />
                 </>
@@ -95,15 +131,15 @@ export function PRCard({ pr, rank }: PRCardProps) {
               <div
                 title={
                   pr.isMergeable && pr.checksPassed
-                    ? "All checks passed & no conflicts"
-                    : "Checks failed or has conflicts"
+                    ? 'All checks passed & no conflicts'
+                    : 'Checks failed or has conflicts'
                 }
                 style={{
                   display: 'inline-block',
                   border: '1px solid #808080',
                   padding: '2px',
                   backgroundColor: 'white',
-                  marginTop: '2px'
+                  marginTop: '2px',
                 }}
               >
                 {pr.isMergeable && pr.checksPassed ? (

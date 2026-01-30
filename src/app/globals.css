@@ -16,14 +16,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Comic Sans MS', cursive;
-  --font-mono: 'Courier New', monospace;
+  --font-sans: "Comic Sans MS", cursive;
+  --font-mono: "Courier New", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 /* Classic IE6 styles */
@@ -47,8 +47,12 @@ center {
 
 /* Add some retro animations */
 @keyframes rotate-hue {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
 }
 
 @keyframes sixseven-shake {

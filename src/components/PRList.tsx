@@ -1,5 +1,5 @@
-import { getOpenPRs } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { getOpenPRs } from '@/lib/github';
+import { PRCard } from './PRCard';
 
 export async function PRList() {
   let prs;
@@ -8,7 +8,7 @@ export async function PRList() {
   try {
     prs = await getOpenPRs();
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch PRs";
+    error = e instanceof Error ? e.message : 'Failed to fetch PRs';
   }
 
   if (error) {

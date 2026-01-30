@@ -1,14 +1,14 @@
-import type { MergedPullRequest } from "@/lib/github";
+import type { MergedPullRequest } from '@/lib/github';
 
 interface HallOfChaosCardProps {
   pr: MergedPullRequest;
 }
 
 export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
-  const mergedDate = new Date(pr.mergedAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  const mergedDate = new Date(pr.mergedAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
 
   return (
@@ -44,7 +44,8 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
                 <tr>
                   <td className="hall-card-author-row">
                     <span className="hall-card-author-text">
-                      by <a
+                      by{' '}
+                      <a
                         href={`https://github.com/${pr.author}`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -52,7 +53,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
                       >
                         <b>@{pr.author}</b>
                       </a>
-                      {" · "}
+                      {' · '}
                       <span className="hall-card-date">{mergedDate}</span>
                     </span>
                   </td>
@@ -73,9 +74,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
             </table>
           </td>
           <td className="hall-card-trophy-cell">
-            <span className="hall-card-trophy-emoji">
-              🏆
-            </span>
+            <span className="hall-card-trophy-emoji">🏆</span>
             <br />
             <span className="hall-card-winner-text">
               <b>WINNER</b>

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 function getNextMergeTime(): Date {
   const now = new Date();
@@ -35,7 +35,7 @@ function getTimeRemaining(target: Date): {
 }
 
 function pad(n: number): string {
-  return n.toString().padStart(2, "0");
+  return n.toString().padStart(2, '0');
 }
 
 export function Countdown() {
@@ -62,15 +62,22 @@ export function Countdown() {
 
   if (!mounted) {
     return (
-      <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
+      <table
+        border={5}
+        cellPadding={0}
+        cellSpacing={0}
+        className="countdown-table"
+      >
         <tbody>
           <tr>
             <td className="countdown-header-cell">
               <div className="countdown-header">
                 {/* @ts-expect-error marquee is deprecated but used for retro styling */}
                 <marquee behavior="alternate" scrollamount="8">
-                  <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
-                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+                  <span className="sparkle-pulse">🔥</span>{' '}
+                  <b>⏰ NEXT MERGE COUNTDOWN ⏰</b>{' '}
+                  <span className="sparkle-pulse sparkle-delay-2">🔥</span>
+                  {/* @ts-expect-error marquee is deprecated but used for retro styling */}
                 </marquee>
               </div>
             </td>
@@ -89,7 +96,9 @@ export function Countdown() {
                       </div>
                     </td>
                     <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse">⭐</span>
+                      <span className="countdown-separator sparkle-pulse">
+                        ⭐
+                      </span>
                     </td>
                     <td className="countdown-digit-cell">
                       <div className="countdown-digit-value">
@@ -100,7 +109,9 @@ export function Countdown() {
                       </div>
                     </td>
                     <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
+                      <span className="countdown-separator sparkle-pulse sparkle-delay-2">
+                        ⭐
+                      </span>
                     </td>
                     <td className="countdown-digit-cell">
                       <div className="countdown-digit-value">
@@ -111,7 +122,9 @@ export function Countdown() {
                       </div>
                     </td>
                     <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse">⭐</span>
+                      <span className="countdown-separator sparkle-pulse">
+                        ⭐
+                      </span>
                     </td>
                     <td className="countdown-digit-cell">
                       <div className="countdown-digit-value">
@@ -139,15 +152,22 @@ export function Countdown() {
   }
 
   return (
-    <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
+    <table
+      border={5}
+      cellPadding={0}
+      cellSpacing={0}
+      className="countdown-table"
+    >
       <tbody>
         <tr>
           <td className="countdown-header-cell">
             <div className="countdown-header">
               {/* @ts-expect-error marquee is deprecated but used for retro styling */}
               <marquee behavior="alternate" scrollamount="8">
-                <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
-              {/* @ts-expect-error marquee is deprecated but used for retro styling */}
+                <span className="sparkle-pulse">🔥</span>{' '}
+                <b>⏰ NEXT MERGE COUNTDOWN ⏰</b>{' '}
+                <span className="sparkle-pulse sparkle-delay-2">🔥</span>
+                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
               </marquee>
             </div>
           </td>
@@ -166,7 +186,9 @@ export function Countdown() {
                     </div>
                   </td>
                   <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                    <span className="countdown-separator sparkle-pulse">
+                      ⭐
+                    </span>
                   </td>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">
@@ -177,7 +199,9 @@ export function Countdown() {
                     </div>
                   </td>
                   <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
+                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">
+                      ⭐
+                    </span>
                   </td>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">
@@ -188,7 +212,9 @@ export function Countdown() {
                     </div>
                   </td>
                   <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                    <span className="countdown-separator sparkle-pulse">
+                      ⭐
+                    </span>
                   </td>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">

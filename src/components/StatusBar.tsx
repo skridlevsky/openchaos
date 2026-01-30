@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 const STATUS_MESSAGES = [
-  "Welcome to my homepage! Sign my guestbook!",
-  "This site is best viewed at 800x600 resolution",
-  "Webmaster: skridlevsky@geocities.com",
-  "You are visitor #1,337!",
-  "Made with Microsoft FrontPage 2000",
-  "Optimized for Internet Explorer 6.0",
-  "© 1999-2000 All Rights Reserved",
-  "Email me if anything is broken!",
-  "Right-click to add to favorites!",
-  "JavaScript enabled",
+  'Welcome to my homepage! Sign my guestbook!',
+  'This site is best viewed at 800x600 resolution',
+  'Webmaster: skridlevsky@geocities.com',
+  'You are visitor #1,337!',
+  'Made with Microsoft FrontPage 2000',
+  'Optimized for Internet Explorer 6.0',
+  '© 1999-2000 All Rights Reserved',
+  'Email me if anything is broken!',
+  'Right-click to add to favorites!',
+  'JavaScript enabled',
 ];
 
 export function StatusBar() {
-  const [currentMessage, setCurrentMessage] = useState("");
+  const [currentMessage, setCurrentMessage] = useState('');
   const [messageIndex, setMessageIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
 
   // Scroll through messages character by character
   useEffect(() => {
     const message = STATUS_MESSAGES[messageIndex];
-    
+
     if (charIndex < message.length) {
       const timer = setTimeout(() => {
         setCurrentMessage(message.substring(0, charIndex + 1));
@@ -34,7 +34,7 @@ export function StatusBar() {
       // Pause at end of message
       const timer = setTimeout(() => {
         setCharIndex(0);
-        setCurrentMessage("");
+        setCurrentMessage('');
         setMessageIndex((messageIndex + 1) % STATUS_MESSAGES.length);
       }, 1337);
       return () => clearTimeout(timer);
