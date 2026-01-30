@@ -24,6 +24,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
+- **Code is Law**: Rules are for human guidance. If a GitHub workflow contradicts written rules, the **workflow (code) takes precedence**. Always inspect the codebase to understand the actual system behavior.
 
 ## What Can Be Changed
 
