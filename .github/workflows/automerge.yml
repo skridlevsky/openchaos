@@ -60,19 +60,52 @@ jobs:
               return;
             }
 
-            const topPR = openPRs[0];
-            console.log(`Top PR (#${topPR.number}) by @${topPR.author}: ${topPR.title} with ${topPR.votes} votes`);
+            let mergedPR = null;
 
-            if (topPR.votes === 0) {
-              console.log("No votes — skipping merge.");
-              return;
+            for (const pr of openPRs) {
+              console.log(`Checking PR (#${pr.number}) by @${pr.author}: ${pr.title} with ${pr.votes} votes`);
+
+              if (pr.votes === 0) {
+                console.log("No votes — skipping merge.");
+                continue;
+              }
+
+              const prDetails = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number
+              });
+
+              const { mergeable, mergeable_state, draft } = prDetails.data;
+
+              console.log(`  - mergeable: ${mergeable}, mergeable_state: ${mergeable_state}, draft: ${draft}`);
+
+              if (draft) {
+                console.log(`  - Draft PR, skipping`);
+                continue;
+              }
+
+              if (mergeable !== true || mergeable_state !== 'clean') {
+                console.log(`  - Not ready to merge (${mergeable_state}), skipping`);
+                continue;
+              }
+
+              try {
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash',
+                });
+                console.log(`Merged PR #${pr.number}`);
+                mergedPR = pr;
+                break;
+              } catch (error) {
+                console.log(`  - Merge failed: ${error.message}`);
+                continue;
+              }
             }
 
-            await github.rest.pulls.merge({
-              owner,
-              repo,
-              pull_number: topPR.number,
-              merge_method: 'squash',
-            });
-
-            console.log(`Merged PR #${topPR.number}`);
+            if (!mergedPR) {
+              console.log("No mergeable PR found with votes.");
+            }
