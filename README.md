@@ -24,6 +24,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
+- **Note on RULES.md**: The RULES.md file is deprecated and no longer maintained. All current rules are documented here in the README.
 
 ## What Can Be Changed
 
