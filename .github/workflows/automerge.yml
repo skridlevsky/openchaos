@@ -1,0 +1,108 @@
+name: Merge top-voted PR weekly
+
+on:
+  schedule:
+    - cron: "0 12 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge-top-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge highest-voted PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            async function getOpenPRs() {
+              const prs = await github.rest.pulls.list({
+                owner,
+                repo,
+                state: "open",
+                per_page: 100
+              });
+
+              const prsWithVotes = await Promise.all(
+                prs.data.map(async (pr) => {
+                  const reactions = await github.rest.reactions.listForIssue({
+                    owner,
+                    repo,
+                    issue_number: pr.number,
+                    per_page: 100
+                  });
+
+                  const votes = reactions.data.filter(r => r.content === '+1').length;
+
+                  return {
+                    number: pr.number,
+                    title: pr.title,
+                    author: pr.user.login,
+                    votes
+                  };
+                })
+              );
+
+              prsWithVotes.sort((a,b) => b.votes - a.votes);
+
+              return prsWithVotes;
+            }
+
+            const openPRs = await getOpenPRs();
+            if (openPRs.length === 0) {
+              console.log("No open PRs found.");
+              return;
+            }
+
+            // Try PRs in vote order until one merges successfully
+            for (const pr of openPRs) {
+              console.log(`Checking PR #${pr.number} by @${pr.author}: ${pr.title} (${pr.votes} votes)`);
+
+              if (pr.votes === 0) {
+                console.log("  No votes — skipping.");
+                continue;
+              }
+
+              // Check if PR is mergeable
+              const prDetails = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number
+              });
+
+              const { mergeable, mergeable_state, draft } = prDetails.data;
+              console.log(`  Status: mergeable=${mergeable}, state=${mergeable_state}, draft=${draft}`);
+
+              if (draft) {
+                console.log("  Draft PR — skipping.");
+                continue;
+              }
+
+              if (mergeable !== true || mergeable_state !== 'clean') {
+                console.log(`  Not ready to merge (${mergeable_state}) — skipping.`);
+                continue;
+              }
+
+              // Try to merge
+              try {
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash',
+                });
+                console.log(`✅ Merged PR #${pr.number}`);
+                return;
+              } catch (error) {
+                console.log(`  Merge failed: ${error.message}`);
+                continue;
+              }
+            }
+
+            console.log("No mergeable PR found with votes.");
