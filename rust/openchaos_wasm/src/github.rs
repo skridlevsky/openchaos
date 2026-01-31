@@ -1,11 +1,46 @@
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{Request, RequestInit, RequestMode, Response};
+use web_sys::{Request, RequestInit, RequestMode, Response, Storage};
 use crate::types::*;
 use crate::utils::{log, log_error};
 
 const GITHUB_REPO: &str = "skridlevsky/openchaos";
 const GITHUB_API: &str = "https://api.github.com";
+
+// Get localStorage for caching
+fn get_local_storage() -> Option<Storage> {
+    web_sys::window()?.local_storage().ok()?
+}
+
+// Get cached ETag for a URL
+fn get_cached_etag(url: &str) -> Option<String> {
+    let storage = get_local_storage()?;
+    let key = format!("etag:{}", url);
+    storage.get_item(&key).ok()?
+}
+
+// Store ETag for a URL
+fn store_etag(url: &str, etag: &str) {
+    if let Some(storage) = get_local_storage() {
+        let key = format!("etag:{}", url);
+        let _ = storage.set_item(&key, etag);
+    }
+}
+
+// Get cached data for a URL
+fn get_cached_data(url: &str) -> Option<String> {
+    let storage = get_local_storage()?;
+    let key = format!("cache:{}", url);
+    storage.get_item(&key).ok()?
+}
+
+// Store cached data for a URL
+fn store_cached_data(url: &str, data: &str) {
+    if let Some(storage) = get_local_storage() {
+        let key = format!("cache:{}", url);
+        let _ = storage.set_item(&key, data);
+    }
+}
 
 pub async fn fetch_open_prs_with_votes(token: Option<String>) -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
     let (owner, repo) = GITHUB_REPO.split_once('/').ok_or("Invalid repo format")?;
@@ -195,6 +230,15 @@ async fn fetch_json<T: serde::de::DeserializeOwned>(
         }
     }
 
+    // Add ETag header if we have cached data
+    if let Some(etag) = get_cached_etag(url) {
+        log(&format!("Using cached ETag: {}", etag));
+        request
+            .headers()
+            .set("If-None-Match", &etag)
+            .map_err(|e| format!("ETag header set failed: {:?}", e))?;
+    }
+
     let resp_value = JsFuture::from(window.fetch_with_request(&request))
         .await
         .map_err(|e| format!("Fetch failed: {:?}", e))?;
@@ -203,10 +247,30 @@ async fn fetch_json<T: serde::de::DeserializeOwned>(
         .dyn_into()
         .map_err(|_| "Response type error")?;
 
+    let status = resp.status();
+
+    // 304 Not Modified - use cached data
+    if status == 304 {
+        log("304 Not Modified - using cached data");
+        if let Some(cached) = get_cached_data(url) {
+            return serde_json::from_str(&cached)
+                .map_err(|e| format!("Cache deserialization failed: {:?}", e).into());
+        } else {
+            return Err("304 but no cached data found".into());
+        }
+    }
+
     if !resp.ok() {
-        let status = resp.status();
         log_error(&format!("HTTP error: {}", status));
         return Err(format!("HTTP error: {}", status).into());
+    }
+
+    // Store new ETag if present
+    if let Ok(headers) = resp.headers().get("etag") {
+        if let Some(etag) = headers {
+            log(&format!("Storing new ETag: {}", etag));
+            store_etag(url, &etag);
+        }
     }
 
     let json = JsFuture::from(
@@ -215,6 +279,13 @@ async fn fetch_json<T: serde::de::DeserializeOwned>(
     )
     .await
     .map_err(|e| format!("JSON parse failed: {:?}", e))?;
+
+    // Store response as JSON string for 304 responses
+    if let Ok(text) = serde_wasm_bindgen::from_value::<serde_json::Value>(json.clone()) {
+        if let Ok(text_str) = serde_json::to_string(&text) {
+            store_cached_data(url, &text_str);
+        }
+    }
 
     serde_wasm_bindgen::from_value(json)
         .map_err(|e| format!("Deserialization failed: {:?}", e).into())
