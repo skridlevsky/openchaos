@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
-export function MidiPlayer() {
-  const [isOpen, setIsOpen] = useState(true);
+interface MidiPlayerProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function MidiPlayer({ isOpen, onClose }: MidiPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -82,10 +86,10 @@ export function MidiPlayer() {
               >
                 ⏹ STOP
               </button>
-              <button 
+              <button
                 onClick={() => {
                   stopMusic();
-                  setIsOpen(false);
+                  onClose();
                 }}
                 className="midi-player-close-button"
               >
