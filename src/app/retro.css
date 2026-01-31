@@ -9,21 +9,41 @@
 ::-webkit-scrollbar-track {
   background: #d4d0c8;
   border: 1px solid #808080;
-  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #808080;
+  box-shadow:
+    inset 1px 1px 0 #ffffff,
+    inset -1px -1px 0 #808080;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to right, #ece9d8 0%, #ece9d8 50%, #e3dfd8 50%, #e3dfd8 100%);
+  background: linear-gradient(
+    to right,
+    #ece9d8 0%,
+    #ece9d8 50%,
+    #e3dfd8 50%,
+    #e3dfd8 100%
+  );
   border: 1px outset #ffffff;
   box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to right, #f5f3ec 0%, #f5f3ec 50%, #ebe8e0 50%, #ebe8e0 100%);
+  background: linear-gradient(
+    to right,
+    #f5f3ec 0%,
+    #f5f3ec 50%,
+    #ebe8e0 50%,
+    #ebe8e0 100%
+  );
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(to right, #ccc9bc 0%, #ccc9bc 50%, #c4c0b8 50%, #c4c0b8 100%);
+  background: linear-gradient(
+    to right,
+    #ccc9bc 0%,
+    #ccc9bc 50%,
+    #c4c0b8 50%,
+    #c4c0b8 100%
+  );
   border: 1px inset #808080;
 }
 
@@ -84,12 +104,119 @@
   display: flex;
   flex-direction: column;
   background: #c0c0c0;
-  font-family: 'Tahoma', 'Arial', sans-serif;
+  font-family: "Tahoma", "Arial", sans-serif;
   overflow: hidden;
 }
 
 [data-theme="dark"] .ie6-browser-window {
   background: #3f3f3f;
+}
+
+/* Minimized: desktop and taskbar */
+.ie6-desktop {
+  position: fixed;
+  inset: 0;
+  background: #0080c0;
+}
+
+.ie6-taskbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, #c0c0c0 0%, #808080 100%);
+  border-top: 1px solid #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  gap: 4px;
+}
+
+.ie6-taskbar-tray {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ie6-taskbar-countdown {
+  font-family: "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+}
+
+.ie6-taskbar-clock {
+  height: 22px;
+  padding: 0 8px;
+  background: linear-gradient(to bottom, #808080 0%, #c0c0c0 100%);
+  border: 1px solid;
+  border-color: #000000 #ffffff #ffffff #000000;
+  font-family: "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+.ie6-taskbar-start {
+  height: 22px;
+  padding: 0 12px;
+  background: linear-gradient(to bottom, #c0c0c0 0%, #808080 100%);
+  border: 1px solid;
+  border-color: #ffffff #000000 #000000 #ffffff;
+  font-family: "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #000000;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+}
+
+.ie6-taskbar-start:hover {
+  background: linear-gradient(to bottom, #c0c0c0 0%, #808080 100%);
+}
+
+.ie6-taskbar-start:active {
+  border-color: #000000 #ffffff #ffffff #000000;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+.ie6-taskbar-task {
+  height: 22px;
+  padding: 0 8px;
+  background: linear-gradient(to bottom, #c0c0c0 0%, #808080 100%);
+  border: 1px solid;
+  border-color: #ffffff #000000 #000000 #ffffff;
+  font-family: "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: none;
+}
+
+.ie6-taskbar-task:hover {
+  background: linear-gradient(to bottom, #d4d4d4 0%, #909090 100%);
+}
+
+.ie6-taskbar-task:active {
+  border-color: #000000 #ffffff #ffffff #000000;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+.ie6-taskbar-task-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.ie6-taskbar-task-text {
+  font-weight: bold;
 }
 
 /* Title Bar */
@@ -402,7 +529,7 @@
   border: 2px solid;
   border-color: #808080 #ffffff #ffffff #808080;
   background: #ffffff;
-  font-family: 'MS Sans Serif', 'Tahoma', 'Arial', sans-serif;
+  font-family: "MS Sans Serif", "Tahoma", "Arial", sans-serif;
   font-size: 11px;
   margin-bottom: 8px;
   box-shadow: inset 1px 1px 0 #000000;
@@ -509,7 +636,6 @@
 
 /* ===== ANIMATIONS ===== */
 @keyframes blink {
-
   0%,
   49% {
     opacity: 1;
@@ -522,7 +648,6 @@
 }
 
 @keyframes blink-countdown {
-
   0%,
   50% {
     opacity: 1;
@@ -556,7 +681,6 @@
 
 /* Sparkle animations for stars and sparkle emojis */
 @keyframes sparkle-glint {
-
   0%,
   100% {
     opacity: 1;
@@ -570,7 +694,6 @@
 }
 
 @keyframes sparkle-pulse {
-
   0%,
   100% {
     opacity: 1;
@@ -594,7 +717,6 @@
 }
 
 @keyframes sparkle-twinkle {
-
   0%,
   100% {
     opacity: 1;
@@ -613,7 +735,6 @@
 }
 
 @keyframes sparkle-rotate-glint {
-
   0%,
   100% {
     transform: rotate(0deg);
@@ -637,14 +758,15 @@
 }
 
 @keyframes sparkle-shine {
-
   0%,
   100% {
     text-shadow: 0 0 2px currentColor;
   }
 
   50% {
-    text-shadow: 0 0 8px currentColor, 0 0 12px currentColor;
+    text-shadow:
+      0 0 8px currentColor,
+      0 0 12px currentColor;
   }
 }
 
@@ -728,7 +850,7 @@
   background: linear-gradient(to right, #ff00ff, #00ffff, #ffff00);
   padding: 4px;
   text-align: center;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 12px;
   font-weight: bold;
 }
@@ -736,7 +858,7 @@
 .ie6-main {
   min-height: 100vh;
   background: #c0c0c0;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   padding: 20px;
 }
 
@@ -762,7 +884,7 @@
 .ie6-header-text {
   font-size: 36px;
   color: #ffff00;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 .ie6-marquee-cell {
@@ -804,13 +926,13 @@
 .ie6-visitor-text {
   font-size: 12px;
   color: #000000;
-  font-family: 'Courier New';
+  font-family: "Courier New";
 }
 
 .ie6-warning-text {
   font-size: 12px;
   color: #ffff00;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 .ie6-spacer {
@@ -823,7 +945,7 @@
 
 .ie6-bottom-banner-text {
   color: #0000ff;
-  font-family: 'Courier New';
+  font-family: "Courier New";
   font-size: 14px;
   font-weight: bold;
 }
@@ -853,7 +975,7 @@
 .page-header-text {
   font-size: 24px;
   color: #0000ff;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .page-header-text {
@@ -903,19 +1025,24 @@
 
 /* ===== COUNTDOWN COMPONENT ===== */
 @keyframes countdown-glow {
-
   0%,
   100% {
-    box-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, 0 0 60px #ff00ff;
+    box-shadow:
+      0 0 20px #ff00ff,
+      0 0 40px #00ffff,
+      0 0 60px #ff00ff;
   }
 
   50% {
-    box-shadow: 0 0 40px #ff00ff, 0 0 80px #00ffff, 0 0 120px #ff00ff, 0 0 160px #00ffff;
+    box-shadow:
+      0 0 40px #ff00ff,
+      0 0 80px #00ffff,
+      0 0 120px #ff00ff,
+      0 0 160px #00ffff;
   }
 }
 
 @keyframes countdown-border-pulse {
-
   0%,
   100% {
     border-color: #ffff00;
@@ -935,7 +1062,6 @@
 }
 
 @keyframes digit-bounce {
-
   0%,
   100% {
     transform: scale(1);
@@ -947,7 +1073,14 @@
 }
 
 .countdown-table {
-  background: linear-gradient(45deg, #ff00ff 0%, #ff0066 25%, #ff00ff 50%, #cc00ff 75%, #ff00ff 100%);
+  background: linear-gradient(
+    45deg,
+    #ff00ff 0%,
+    #ff0066 25%,
+    #ff00ff 50%,
+    #cc00ff 75%,
+    #ff00ff 100%
+  );
   background-size: 200% 200%;
   border-color: #ffff00;
   border-width: 6px;
@@ -955,7 +1088,9 @@
   animation: countdown-border-pulse 3s linear infinite;
   transform: scale(1.1);
   position: relative;
-  box-shadow: 0 0 20px #ff00ff, 0 0 35px #00ffff;
+  box-shadow:
+    0 0 20px #ff00ff,
+    0 0 35px #00ffff;
   overflow: hidden;
   backface-visibility: hidden;
   will-change: border-color;
@@ -964,7 +1099,14 @@
 }
 
 .countdown-header-cell {
-  background: linear-gradient(90deg, #ff0000 0%, #ff00ff 25%, #ff0000 50%, #ff00ff 75%, #ff0000 100%);
+  background: linear-gradient(
+    90deg,
+    #ff0000 0%,
+    #ff00ff 25%,
+    #ff0000 50%,
+    #ff00ff 75%,
+    #ff0000 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
   padding: 15px;
@@ -984,8 +1126,11 @@
 .countdown-header {
   font-size: 20px;
   color: #ffff00;
-  font-family: 'Comic Sans MS', cursive;
-  text-shadow: 2px 2px #000000, -1px -1px #000000, 0 0 5px #ffff00;
+  font-family: "Comic Sans MS", cursive;
+  text-shadow:
+    2px 2px #000000,
+    -1px -1px #000000,
+    0 0 5px #ffff00;
   font-weight: bold;
 }
 
@@ -999,7 +1144,7 @@
 }
 
 .countdown-content-cell::before {
-  content: '⭐';
+  content: "⭐";
   position: absolute;
   top: 10px;
   left: 10px;
@@ -1013,7 +1158,7 @@
 }
 
 .countdown-content-cell::after {
-  content: '⭐';
+  content: "⭐";
   position: absolute;
   top: 10px;
   right: 10px;
@@ -1036,21 +1181,29 @@
 }
 
 .countdown-digit-cell::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    transparent 50%
+  );
   pointer-events: none;
 }
 
 .countdown-digit-value {
   font-size: 48px;
   color: #ff0000;
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  text-shadow: 4px 4px #000000, -2px -2px #ffff00, 0 0 10px #ff0000, 0 0 20px #ff0000;
+  font-family: "Impact", "Arial Black", sans-serif;
+  text-shadow:
+    4px 4px #000000,
+    -2px -2px #ffff00,
+    0 0 10px #ff0000,
+    0 0 20px #ff0000;
   line-height: 1;
   margin-bottom: 8px;
   animation: sparkle-shine 2s ease-in-out infinite;
@@ -1063,11 +1216,14 @@
 .countdown-digit-label {
   font-size: 16px;
   color: #ff0000;
-  font-family: 'Arial Black', 'Impact', sans-serif;
+  font-family: "Arial Black", "Impact", sans-serif;
   font-weight: bold;
   text-transform: uppercase;
   margin-top: 8px;
-  text-shadow: 2px 2px #000000, -1px -1px #ffff00, 0 0 5px #ff0000;
+  text-shadow:
+    2px 2px #000000,
+    -1px -1px #ffff00,
+    0 0 5px #ff0000;
 }
 
 .countdown-separator-cell {
@@ -1082,7 +1238,14 @@
 }
 
 .countdown-footer-cell {
-  background: linear-gradient(90deg, #ff0000 0%, #ff00ff 25%, #ff0000 50%, #ff00ff 75%, #ff0000 100%);
+  background: linear-gradient(
+    90deg,
+    #ff0000 0%,
+    #ff00ff 25%,
+    #ff0000 50%,
+    #ff00ff 75%,
+    #ff0000 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 3s linear infinite;
   padding: 15px;
@@ -1092,8 +1255,10 @@
 .countdown-footer {
   font-size: 16px;
   color: #ffff00;
-  font-family: 'Comic Sans MS', cursive;
-  text-shadow: 2px 2px #000000, 0 0 5px #ffff00;
+  font-family: "Comic Sans MS", cursive;
+  text-shadow:
+    2px 2px #000000,
+    0 0 5px #ffff00;
   text-align: center;
   font-weight: bold;
 }
@@ -1101,7 +1266,7 @@
 /* ===== PRCARD COMPONENT ===== */
 .pr-card {
   margin-bottom: 10px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 @keyframes blink-border {
@@ -1175,7 +1340,7 @@
 .pr-card-number-text-leading {
   font-size: 20px;
   color: #ff0000;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .pr-card-number-text-leading {
@@ -1185,7 +1350,7 @@
 .pr-card-number-text-normal {
   font-size: 20px;
   color: #0000ff;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .pr-card-number-text-normal {
@@ -1227,7 +1392,7 @@
 
 .pr-card-title {
   font-size: 16px;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
   color: #000000;
 }
 
@@ -1292,7 +1457,7 @@
 .pr-card-votes-count-leading {
   font-size: 20px;
   color: #ff0000;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .pr-card-votes-count-leading {
@@ -1302,7 +1467,7 @@
 .pr-card-votes-count-normal {
   font-size: 20px;
   color: #006600;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .pr-card-votes-count-normal {
@@ -1318,7 +1483,7 @@
   background-color: #ffcccc;
   border-color: #ff0000;
   max-width: 600px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 .hall-error-cell {
@@ -1330,7 +1495,7 @@
   background-color: #ffffcc;
   border-color: #ffcc00;
   max-width: 600px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 .hall-empty-cell {
@@ -1340,7 +1505,7 @@
 
 .hall-card {
   margin-bottom: 10px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   background-color: #ccffcc;
   border-color: #009900;
 }
@@ -1354,7 +1519,7 @@
 .hall-card-number-text {
   font-size: 20px;
   color: #006600;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 .hall-card-merged-badge {
@@ -1377,7 +1542,7 @@
 
 .hall-card-title {
   font-size: 16px;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
   color: #000000;
 }
 
@@ -1426,7 +1591,7 @@
 .hall-card-winner-text {
   font-size: 12px;
   color: #cc6600;
-  font-family: 'Comic Sans MS';
+  font-family: "Comic Sans MS";
 }
 
 [data-theme="dark"] .hall-error-table {
@@ -1503,7 +1668,7 @@
   color: #ff0000;
   border: 3px solid #0000ff;
   padding: 8px 16px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -1554,7 +1719,7 @@
 .guestbook-modal-header-text {
   font-size: 28px;
   color: #ffff00;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 .guestbook-modal-subheader {
@@ -1608,14 +1773,14 @@
 .guestbook-entry-name {
   font-size: 16px;
   color: #0000ff;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   display: inline-block;
 }
 
 .guestbook-entry-date {
   font-size: 12px;
   color: #666666;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   float: right;
 }
 
@@ -1639,7 +1804,7 @@
   color: #ffff00;
   border: 3px solid #000000;
   padding: 10px 20px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 16px;
   cursor: pointer;
 }
@@ -1685,7 +1850,7 @@
   color: #ffff00;
   border: 3px solid #000000;
   padding: 8px 16px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 14px;
   cursor: default;
   font-weight: bold;
@@ -1729,8 +1894,10 @@
 .midi-player-header-text {
   font-size: 18px;
   color: #ffff00;
-  font-family: 'Comic Sans MS', cursive;
-  text-shadow: 2px 2px #000000, -1px -1px #000000;
+  font-family: "Comic Sans MS", cursive;
+  text-shadow:
+    2px 2px #000000,
+    -1px -1px #000000;
   font-weight: bold;
 }
 
@@ -1744,7 +1911,7 @@
 .midi-player-display-text {
   font-size: 14px;
   color: #ff0000;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   margin-bottom: 8px;
   font-weight: bold;
   text-shadow: 1px 1px #ffff00;
@@ -1753,7 +1920,7 @@
 .midi-player-filename {
   font-size: 12px;
   color: #0000ff;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-weight: bold;
 }
 
@@ -1769,7 +1936,7 @@
   color: #0000ff;
   border: 3px outset #00ff00;
   padding: 6px 12px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 12px;
   cursor: pointer;
   margin: 0 3px;
@@ -1792,7 +1959,7 @@
   color: #ffff00;
   border: 3px outset #ff0000;
   padding: 6px 12px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 12px;
   cursor: pointer;
   margin: 0 3px;
@@ -1816,7 +1983,7 @@
   color: #ff0000;
   border: 3px solid #ffff00;
   padding: 8px 16px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -1825,7 +1992,6 @@
 }
 
 @keyframes pulse {
-
   0%,
   100% {
     transform: scale(1);
@@ -1880,7 +2046,7 @@
 .tree-game-header-text {
   font-size: 28px;
   color: #ffffff;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   text-shadow: 3px 3px #000000;
 }
 
@@ -1893,7 +2059,7 @@
 .tree-game-instructions-text {
   font-size: 16px;
   color: #ff0000;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
 }
 
 .tree-game-image-container {
@@ -1923,7 +2089,7 @@
   color: #ffff00;
   border: 3px solid #000000;
   padding: 10px 20px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 16px;
   cursor: pointer;
 }
@@ -1954,7 +2120,7 @@
 .webcounter-header-text {
   font-size: 14px;
   color: #ff0000;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-weight: bold;
 }
 
@@ -1968,7 +2134,7 @@
 .webcounter-digit-text {
   font-size: 28px;
   color: #00ff00;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: bold;
   text-shadow: 2px 2px #000000;
 }
@@ -1980,11 +2146,20 @@
   left: 0;
   right: 0;
   height: 22px;
-  background: linear-gradient(to bottom, #d4d0c8 0%, #d4d0c8 1px, #ffffff 1px, #ffffff 2px, #d4d0c8 2px);
+  background: linear-gradient(
+    to bottom,
+    #d4d0c8 0%,
+    #d4d0c8 1px,
+    #ffffff 1px,
+    #ffffff 2px,
+    #d4d0c8 2px
+  );
   border-top: 1px solid #ffffff;
-  box-shadow: inset 0 1px 0 #ffffff, 0 -1px 0 #808080;
+  box-shadow:
+    inset 0 1px 0 #ffffff,
+    0 -1px 0 #808080;
   z-index: 9999;
-  font-family: 'Tahoma', 'Arial', sans-serif;
+  font-family: "Tahoma", "Arial", sans-serif;
   font-size: 11px;
 }
 
@@ -2009,7 +2184,10 @@
   padding: 0 6px;
   border-left: none;
   border-right: 1px solid #808080;
-  box-shadow: inset -1px 0 0 #ffffff, inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset -1px 0 0 #ffffff,
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
   overflow: hidden;
 }
 
@@ -2025,7 +2203,9 @@
   padding: 0 8px;
   min-width: 80px;
   gap: 4px;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
 .status-bar-icon {
@@ -2043,7 +2223,9 @@
   min-width: 40px;
   justify-content: center;
   border-right: none;
-  box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
+  box-shadow:
+    inset 1px 1px 0 #808080,
+    inset -1px -1px 0 #ffffff;
 }
 
 /* ===== DISCORD BUTTON STYLES ===== */
@@ -2055,7 +2237,7 @@
   color: #ffffff;
   border: 3px solid #23272a;
   padding: 8px 16px;
-  font-family: 'Comic Sans MS', cursive;
+  font-family: "Comic Sans MS", cursive;
   font-size: 14px;
   cursor: pointer;
   text-decoration: none;
@@ -2071,11 +2253,17 @@
 }
 
 @keyframes discord-pulse {
-  0%, 100% {
-    box-shadow: 2px 2px 0px #000000, 0 0 5px #5865f2;
+  0%,
+  100% {
+    box-shadow:
+      2px 2px 0px #000000,
+      0 0 5px #5865f2;
   }
   50% {
-    box-shadow: 2px 2px 0px #000000, 0 0 15px #5865f2, 0 0 25px #7289da;
+    box-shadow:
+      2px 2px 0px #000000,
+      0 0 15px #5865f2,
+      0 0 25px #7289da;
   }
 }
 
@@ -2092,7 +2280,8 @@
 }
 
 @keyframes button-88x31-glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 2px #5865f2);
   }
   50% {
@@ -2101,11 +2290,21 @@
 }
 
 @keyframes button-88x31-rainbow {
-  0% { filter: hue-rotate(0deg) drop-shadow(0 0 5px #ff00ff); }
-  25% { filter: hue-rotate(90deg) drop-shadow(0 0 5px #00ffff); }
-  50% { filter: hue-rotate(180deg) drop-shadow(0 0 5px #ffff00); }
-  75% { filter: hue-rotate(270deg) drop-shadow(0 0 5px #00ff00); }
-  100% { filter: hue-rotate(360deg) drop-shadow(0 0 5px #ff00ff); }
+  0% {
+    filter: hue-rotate(0deg) drop-shadow(0 0 5px #ff00ff);
+  }
+  25% {
+    filter: hue-rotate(90deg) drop-shadow(0 0 5px #00ffff);
+  }
+  50% {
+    filter: hue-rotate(180deg) drop-shadow(0 0 5px #ffff00);
+  }
+  75% {
+    filter: hue-rotate(270deg) drop-shadow(0 0 5px #00ff00);
+  }
+  100% {
+    filter: hue-rotate(360deg) drop-shadow(0 0 5px #ff00ff);
+  }
 }
 
 /* Discord item in Favorites panel - make it stand out */
@@ -2127,7 +2326,8 @@
 }
 
 @keyframes discord-favorite-blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
