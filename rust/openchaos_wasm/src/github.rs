@@ -6,10 +6,86 @@ use crate::utils::{log, log_error};
 
 const GITHUB_REPO: &str = "skridlevsky/openchaos";
 const GITHUB_API: &str = "https://api.github.com";
+const GITHUB_GRAPHQL: &str = "https://api.github.com/graphql";
 
 // Get localStorage for caching
 fn get_local_storage() -> Option<Storage> {
     web_sys::window()?.local_storage().ok()?
+}
+
+// REST API fallback (when no token) - only fetches reactions for top 20 PRs to save API calls
+async fn fetch_open_prs_rest(owner: &str, repo: &str, token: Option<String>) -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
+    log("Using REST API - fetching reactions for top 20 PRs only to avoid rate limit");
+
+    // Fetch PR list (1 API call)
+    let url = format!(
+        "{}/repos/{}/{}/pulls?state=open&per_page=100&sort=created&direction=desc",
+        GITHUB_API, owner, repo
+    );
+
+    let prs: Vec<GitHubPR> = fetch_json(&url, token.as_deref()).await?;
+    log(&format!("Found {} open PRs", prs.len()));
+
+    let mut prs_with_votes = vec![];
+
+    // Only fetch reactions for first 20 PRs to avoid rate limit (20 API calls max)
+    let limit = 20.min(prs.len());
+
+    for pr in prs.iter().take(limit) {
+        let votes = fetch_pr_reactions_rest(owner, repo, pr.number, token.as_deref()).await?;
+        prs_with_votes.push(PullRequest {
+            number: pr.number,
+            title: pr.title.clone(),
+            author: pr.user.login.clone(),
+            url: pr.html_url.clone(),
+            votes,
+            created_at: pr.created_at.clone(),
+        });
+    }
+
+    // Add remaining PRs with 0 votes (no API calls)
+    for pr in prs.iter().skip(limit) {
+        prs_with_votes.push(PullRequest {
+            number: pr.number,
+            title: pr.title.clone(),
+            author: pr.user.login.clone(),
+            url: pr.html_url.clone(),
+            votes: 0,
+            created_at: pr.created_at.clone(),
+        });
+    }
+
+    // Sort by votes DESC, then created_at DESC
+    prs_with_votes.sort_by(|a, b| {
+        b.votes
+            .cmp(&a.votes)
+            .then_with(|| b.created_at.cmp(&a.created_at))
+    });
+
+    log(&format!("Sorted {} PRs (reactions fetched for top {})", prs_with_votes.len(), limit));
+
+    Ok(prs_with_votes)
+}
+
+// Fetch reactions for a single PR (REST API)
+async fn fetch_pr_reactions_rest(
+    owner: &str,
+    repo: &str,
+    pr_number: u32,
+    token: Option<&str>,
+) -> Result<i32, Box<dyn std::error::Error>> {
+    // Only fetch first page (100 reactions) to minimize API calls
+    let url = format!(
+        "{}/repos/{}/{}/issues/{}/reactions?per_page=100&page=1",
+        GITHUB_API, owner, repo, pr_number
+    );
+
+    let reactions: Vec<GitHubReaction> = fetch_json(&url, token).await?;
+
+    let upvotes = reactions.iter().filter(|r| r.content == "+1").count() as i32;
+    let downvotes = reactions.iter().filter(|r| r.content == "-1").count() as i32;
+
+    Ok(upvotes - downvotes)
 }
 
 // Get cached ETag for a URL
@@ -45,60 +121,91 @@ fn store_cached_data(url: &str, data: &str) {
 pub async fn fetch_open_prs_with_votes(token: Option<String>) -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
     let (owner, repo) = GITHUB_REPO.split_once('/').ok_or("Invalid repo format")?;
 
-    log(&format!("Fetching open PRs for {}/{}", owner, repo));
+    // GraphQL requires authentication, fall back to REST if no token
+    if token.is_none() || token.as_ref().map(|t| t.is_empty()).unwrap_or(true) {
+        log("No token provided, using REST API (slower but works without auth)");
+        return fetch_open_prs_rest(owner, repo, token).await;
+    }
 
-    // Fetch PRs (paginated)
-    let mut all_prs = vec![];
-    let mut page = 1;
+    log(&format!("Fetching open PRs for {}/{} via GraphQL", owner, repo));
 
-    loop {
-        let url = format!(
-            "{}/repos/{}/{}/pulls?state=open&per_page=100&page={}",
-            GITHUB_API, owner, repo, page
-        );
-
-        let prs: Vec<GitHubPR> = fetch_json(&url, token.as_deref()).await?;
-        let prs_count = prs.len();
-
-        if prs_count == 0 {
-            break;
+    // Use GraphQL to fetch PRs and reactions in one query
+    let query = r#"
+    query($owner: String!, $repo: String!, $cursor: String) {
+      repository(owner: $owner, name: $repo) {
+        pullRequests(first: 100, states: OPEN, after: $cursor, orderBy: {field: CREATED_AT, direction: DESC}) {
+          nodes {
+            number
+            title
+            url
+            createdAt
+            author {
+              login
+            }
+            reactions(first: 100, content: [THUMBS_UP, THUMBS_DOWN]) {
+              nodes {
+                content
+              }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+            }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
         }
+      }
+    }
+    "#;
+
+    let mut all_prs = vec![];
+    let mut cursor: Option<String> = None;
+
+    // Paginate through PRs (100 at a time)
+    loop {
+        let variables = if let Some(ref c) = cursor {
+            format!(r#"{{"owner": "{}", "repo": "{}", "cursor": "{}"}}"#, owner, repo, c)
+        } else {
+            format!(r#"{{"owner": "{}", "repo": "{}"}}"#, owner, repo)
+        };
+
+        let response = fetch_graphql(query, &variables, token.as_deref()).await?;
+
+        let prs = parse_graphql_prs(&response)?;
+        let has_next_page = response["data"]["repository"]["pullRequests"]["pageInfo"]["hasNextPage"]
+            .as_bool()
+            .unwrap_or(false);
 
         all_prs.extend(prs);
 
-        if prs_count < 100 {
+        if !has_next_page {
             break;
         }
 
-        page += 1;
+        cursor = response["data"]["repository"]["pullRequests"]["pageInfo"]["endCursor"]
+            .as_str()
+            .map(|s| s.to_string());
+
+        if cursor.is_none() {
+            break;
+        }
     }
 
-    log(&format!("Found {} open PRs", all_prs.len()));
-
-    // Fetch votes for each PR
-    let mut prs_with_votes = vec![];
-    for pr in all_prs {
-        let votes = fetch_pr_votes(owner, repo, pr.number, token.as_deref()).await?;
-        prs_with_votes.push(PullRequest {
-            number: pr.number,
-            title: pr.title,
-            author: pr.user.login,
-            url: pr.html_url,
-            votes,
-            created_at: pr.created_at,
-        });
-    }
+    log(&format!("Found {} open PRs via GraphQL", all_prs.len()));
 
     // Sort by votes DESC, then created_at DESC
-    prs_with_votes.sort_by(|a, b| {
+    all_prs.sort_by(|a, b| {
         b.votes
             .cmp(&a.votes)
             .then_with(|| b.created_at.cmp(&a.created_at))
     });
 
-    log(&format!("Sorted {} PRs by votes", prs_with_votes.len()));
+    log(&format!("Sorted {} PRs by votes", all_prs.len()));
 
-    Ok(prs_with_votes)
+    Ok(all_prs)
 }
 
 pub async fn fetch_merged_prs(limit: u32, token: Option<String>) -> Result<Vec<MergedPullRequest>, Box<dyn std::error::Error>> {
@@ -165,41 +272,122 @@ pub async fn fetch_merged_prs(limit: u32, token: Option<String>) -> Result<Vec<M
     Ok(all_merged_prs)
 }
 
-async fn fetch_pr_votes(
-    owner: &str,
-    repo: &str,
-    pr_number: u32,
+
+// Fetch GraphQL query
+async fn fetch_graphql(
+    query: &str,
+    variables: &str,
     token: Option<&str>,
-) -> Result<i32, Box<dyn std::error::Error>> {
-    let mut all_reactions = vec![];
-    let mut page = 1;
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    let window = web_sys::window().ok_or("No window object")?;
 
-    loop {
-        let url = format!(
-            "{}/repos/{}/{}/issues/{}/reactions?per_page=100&page={}",
-            GITHUB_API, owner, repo, pr_number, page
-        );
+    let body = format!(
+        r#"{{"query": {}, "variables": {}}}"#,
+        serde_json::to_string(query)?,
+        variables
+    );
 
-        let reactions: Vec<GitHubReaction> = fetch_json(&url, token).await?;
-        let reactions_count = reactions.len();
+    let opts = RequestInit::new();
+    opts.set_method("POST");
+    opts.set_mode(RequestMode::Cors);
+    opts.set_body(&wasm_bindgen::JsValue::from_str(&body));
 
-        if reactions_count == 0 {
-            break;
+    let request = Request::new_with_str_and_init(GITHUB_GRAPHQL, &opts)
+        .map_err(|e| format!("Request creation failed: {:?}", e))?;
+
+    request
+        .headers()
+        .set("Content-Type", "application/json")
+        .map_err(|e| format!("Header set failed: {:?}", e))?;
+
+    request
+        .headers()
+        .set("Accept", "application/vnd.github.v4+json")
+        .map_err(|e| format!("Header set failed: {:?}", e))?;
+
+    // GraphQL requires authentication for most queries
+    if let Some(token) = token {
+        if !token.is_empty() {
+            request
+                .headers()
+                .set("Authorization", &format!("Bearer {}", token))
+                .map_err(|e| format!("Auth header set failed: {:?}", e))?;
         }
-
-        all_reactions.extend(reactions);
-
-        if reactions_count < 100 {
-            break;
-        }
-
-        page += 1;
     }
 
-    let upvotes = all_reactions.iter().filter(|r| r.content == "+1").count() as i32;
-    let downvotes = all_reactions.iter().filter(|r| r.content == "-1").count() as i32;
+    let resp_value = JsFuture::from(window.fetch_with_request(&request))
+        .await
+        .map_err(|e| format!("Fetch failed: {:?}", e))?;
 
-    Ok(upvotes - downvotes)
+    let resp: Response = resp_value
+        .dyn_into()
+        .map_err(|_| "Response type error")?;
+
+    if !resp.ok() {
+        let status = resp.status();
+        log_error(&format!("GraphQL HTTP error: {}", status));
+        return Err(format!("HTTP error: {}", status).into());
+    }
+
+    let json = JsFuture::from(
+        resp.json()
+            .map_err(|e| format!("JSON extraction failed: {:?}", e))?,
+    )
+    .await
+    .map_err(|e| format!("JSON parse failed: {:?}", e))?;
+
+    let value: serde_json::Value = serde_wasm_bindgen::from_value(json)
+        .map_err(|e| format!("Deserialization failed: {:?}", e))?;
+
+    Ok(value)
+}
+
+// Parse GraphQL response into PullRequest objects
+fn parse_graphql_prs(response: &serde_json::Value) -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
+    let nodes = response["data"]["repository"]["pullRequests"]["nodes"]
+        .as_array()
+        .ok_or("Invalid GraphQL response: missing nodes")?;
+
+    let mut prs = vec![];
+
+    for node in nodes {
+        let number = node["number"].as_u64().ok_or("Missing PR number")? as u32;
+        let title = node["title"].as_str().ok_or("Missing PR title")?.to_string();
+        let url = node["url"].as_str().ok_or("Missing PR url")?.to_string();
+        let created_at = node["createdAt"].as_str().ok_or("Missing createdAt")?.to_string();
+        let author = node["author"]["login"]
+            .as_str()
+            .unwrap_or("ghost")
+            .to_string();
+
+        // Count reactions
+        let empty_vec = vec![];
+        let reactions = node["reactions"]["nodes"].as_array().unwrap_or(&empty_vec);
+        let upvotes = reactions
+            .iter()
+            .filter(|r| r["content"].as_str() == Some("THUMBS_UP"))
+            .count() as i32;
+        let downvotes = reactions
+            .iter()
+            .filter(|r| r["content"].as_str() == Some("THUMBS_DOWN"))
+            .count() as i32;
+
+        let votes = upvotes - downvotes;
+
+        // TODO: Handle paginated reactions if hasNextPage is true
+        // For now, we only get first 100 reactions per PR
+
+        prs.push(PullRequest {
+            number,
+            title,
+            author,
+            url,
+            votes,
+            created_at,
+        });
+    }
+
+    Ok(prs)
 }
 
 async fn fetch_json<T: serde::de::DeserializeOwned>(
