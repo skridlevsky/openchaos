@@ -9,7 +9,7 @@
     "prebuild": "npm run wasm:build",
     "start": "next start",
     "lint": "eslint",
-    "wasm:build": "cd rust/openchaos_wasm && wasm-pack build --target web --out-dir ../../src/wasm/pkg",
+    "wasm:build": "cd rust/openchaos_wasm && wasm-pack build --target web --out-dir ../../src/wasm/pkg && mkdir -p ../../public/wasm/pkg && cp ../../src/wasm/pkg/* ../../public/wasm/pkg/",
     "wasm:build:release": "cd rust/openchaos_wasm && wasm-pack build --target web --release --out-dir ../../src/wasm/pkg",
     "wasm:dev": "cd rust/openchaos_wasm && cargo watch -s 'wasm-pack build --target web --out-dir ../../src/wasm/pkg'",
     "wasm:test": "cd rust/openchaos_wasm && cargo test"

@@ -1,14 +1,35 @@
-import { getOpenPRs } from "@/lib/github";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { getOpenPRs, type PullRequest } from "@/lib/github";
 import { PRCard } from "./PRCard";
 
-export async function PRList() {
-  let prs;
-  let error = null;
+export function PRList() {
+  const [prs, setPrs] = useState<PullRequest[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  try {
-    prs = await getOpenPRs();
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch PRs";
+  useEffect(() => {
+    async function fetchPRs() {
+      try {
+        const data = await getOpenPRs();
+        setPrs(data);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to fetch PRs");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPRs();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="w-full max-w-xl text-center py-8">
+        <p className="text-zinc-500">Loading PRs...</p>
+      </div>
+    );
   }
 
   if (error) {

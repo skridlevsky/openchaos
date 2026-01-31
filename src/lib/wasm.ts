@@ -20,7 +20,11 @@ export async function loadWasm() {
   }
 
   initPromise = import('@/wasm/pkg/openchaos_wasm')
-    .then(module => {
+    .then(async (module) => {
+      // Initialize WASM
+      // Fetch the WASM file from the public directory
+      const wasmUrl = '/wasm/pkg/openchaos_wasm_bg.wasm';
+      await module.default(wasmUrl);
       wasmModule = module;
       return module;
     })
