@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cat } from "@/components/Cat";
 import "./globals.css";
+import { Clippy } from "@/components/Clippy";
 
 export const metadata: Metadata = {
   title: "OpenChaos.dev",
@@ -18,6 +19,7 @@ export default function RootLayout({
         <div className="container">
           {children}
           <Cat />
+          <Clippy />
         </div>
       </body>
     </html>
