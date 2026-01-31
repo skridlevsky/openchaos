@@ -35,7 +35,7 @@ async fn fetch_prs_graphql(owner: &str, repo: &str, token: &str) -> Result<Vec<P
             author {
               login
             }
-            reactions(first: 100, content: [THUMBS_UP, THUMBS_DOWN]) {
+            reactions(first: 100) {
               nodes {
                 content
               }
