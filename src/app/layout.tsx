@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Cat } from "@/components/Cat";
 import "./globals.css";
 import "./retro.css";
 import { BSOD } from "../components/BSOD";
@@ -20,7 +18,6 @@ export default function RootLayout({
       <body>
         <BSOD />
         {children}
-        <Cat />
       </body>
     </html>
   );

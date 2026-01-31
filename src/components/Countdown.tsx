@@ -18,24 +18,24 @@ function getNextMergeTime(): Date {
 }
 
 function getTimeRemaining(target: Date): {
-  days: number;
   hours: number;
   minutes: number;
   seconds: number;
+  milliseconds: number;
 } {
   const now = new Date();
   const diff = Math.max(0, target.getTime() - now.getTime());
 
+  const milliseconds = diff % 1000;
   const seconds = Math.floor((diff / 1000) % 60);
   const minutes = Math.floor((diff / 1000 / 60) % 60);
   const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
-  const days = Math.floor(diff / 1000 / 60 / 60 / 24);
 
-  return { days, hours, minutes, seconds };
+  return { hours, minutes, seconds, milliseconds };
 }
 
-function pad(n: number): string {
-  return n.toString().padStart(2, "0");
+function pad(n: number, count: number = 2): string {
+  return n.toString().padStart(count, "0");
 }
 
 export function Countdown() {
@@ -55,7 +55,7 @@ export function Countdown() {
       } else {
         setTime(getTimeRemaining(target));
       }
-    }, 1000);
+    }, 53); // just a prime number
 
     return () => clearInterval(interval);
   }, [target]);
@@ -159,17 +159,6 @@ export function Countdown() {
                 <tr>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">
-                      <b>{time.days}</b>
-                    </div>
-                    <div className="countdown-digit-label">
-                      <b>DAYS</b>
-                    </div>
-                  </td>
-                  <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
-                  </td>
-                  <td className="countdown-digit-cell">
-                    <div className="countdown-digit-value blink-countdown">
                       <b>{pad(time.hours)}</b>
                     </div>
                     <div className="countdown-digit-label">
@@ -177,7 +166,7 @@ export function Countdown() {
                     </div>
                   </td>
                   <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
+                    <span className="countdown-separator sparkle-pulse">⭐</span>
                   </td>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">
@@ -188,7 +177,7 @@ export function Countdown() {
                     </div>
                   </td>
                   <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
                   </td>
                   <td className="countdown-digit-cell">
                     <div className="countdown-digit-value blink-countdown">
@@ -196,6 +185,17 @@ export function Countdown() {
                     </div>
                     <div className="countdown-digit-label">
                       <b>SECS</b>
+                    </div>
+                  </td>
+                  <td className="countdown-separator-cell">
+                    <span className="countdown-separator sparkle-pulse">⭐</span>
+                  </td>
+                  <td className="countdown-digit-cell">
+                    <div className="countdown-digit-value blink-countdown">
+                      <b>{pad(time.milliseconds, 3)}</b>
+                    </div>
+                    <div className="countdown-digit-label">
+                      <b>MILLISECONDS</b>
                     </div>
                   </td>
                 </tr>

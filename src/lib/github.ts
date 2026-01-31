@@ -164,9 +164,7 @@ async function getPRMergeStatus(
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-      },
+      headers: getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
     }
   );
@@ -187,9 +185,7 @@ async function getCommitStatus(
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/status`,
     {
-      headers: {
-        Accept: "application/vnd.github.v3+json",
-      },
+      headers: getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
     }
   );
