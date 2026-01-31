@@ -41,7 +41,7 @@ yarn-error.log*
 next-env.d.ts
 
 # wasm
-src/wasm/pkg/
+# src/wasm/pkg/ - COMMITTED (needed for CI without Rust)
 public/wasm/pkg/
 rust/openchaos_wasm/target/
 rust/openchaos_wasm/pkg/

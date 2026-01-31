@@ -1,0 +1,17 @@
+{
+  "name": "openchaos_wasm",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "openchaos_wasm_bg.wasm",
+    "openchaos_wasm.js",
+    "openchaos_wasm_bg.js",
+    "openchaos_wasm.d.ts"
+  ],
+  "main": "openchaos_wasm.js",
+  "types": "openchaos_wasm.d.ts",
+  "sideEffects": [
+    "./openchaos_wasm.js",
+    "./snippets/*"
+  ]
+}
