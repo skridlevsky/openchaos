@@ -18,24 +18,24 @@ function getNextMergeTime(): Date {
 }
 
 function getTimeRemaining(target: Date): {
-  days: number;
   hours: number;
   minutes: number;
   seconds: number;
+  milliseconds: number;
 } {
   const now = new Date();
   const diff = Math.max(0, target.getTime() - now.getTime());
 
+  const milliseconds = diff % 1000;
   const seconds = Math.floor((diff / 1000) % 60);
   const minutes = Math.floor((diff / 1000 / 60) % 60);
   const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
-  const days = Math.floor(diff / 1000 / 60 / 60 / 24);
 
-  return { days, hours, minutes, seconds };
+  return { hours, minutes, seconds, milliseconds };
 }
 
-function pad(n: number): string {
-  return n.toString().padStart(2, "0");
+function pad(n: number, count: number = 2): string {
+  return n.toString().padStart(count, "0");
 }
 
 export function Countdown() {
@@ -55,7 +55,7 @@ export function Countdown() {
       } else {
         setTime(getTimeRemaining(target));
       }
-    }, 1000);
+    }, 53); // just a prime number
 
     return () => clearInterval(interval);
   }, [target]);
@@ -76,7 +76,7 @@ export function Countdown() {
     <div>
       <div>NEXT MERGE COUNTDOWN</div>
       <div>
-        {time.days} DAYS : {pad(time.hours)} HOURS : {pad(time.minutes)} MINS : {pad(time.seconds)} SECS
+        {pad(time.hours)} HOURS : {pad(time.minutes)} MINS : {pad(time.seconds)} SECS : {pad(time.milliseconds, 3)} MS
       </div>
       <div>&nbsp;</div>
     </div>
