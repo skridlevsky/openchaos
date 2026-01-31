@@ -50,3 +50,27 @@ center {
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
 }
+
+@keyframes sixseven-shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.sixseven-shake {
+  animation: sixseven-shake 0.7s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}
