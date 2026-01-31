@@ -62,6 +62,12 @@ npm install  # Automatically builds WASM via preinstall
 npm run dev
 ```
 
+**Note:** No GitHub token required! The app works without authentication, but may hit rate limits (60 requests/hour). For development with higher limits, you can optionally add a token to `.env.local`:
+
+```bash
+GITHUB_TOKEN=your_token_here  # Optional, not committed
+```
+
 ### WASM Development
 
 The project uses Rust compiled to WebAssembly for performance-critical operations (GitHub API fetching, vote counting, sorting).

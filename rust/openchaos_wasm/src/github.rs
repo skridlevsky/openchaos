@@ -7,7 +7,7 @@ use crate::utils::{log, log_error};
 const GITHUB_REPO: &str = "skridlevsky/openchaos";
 const GITHUB_API: &str = "https://api.github.com";
 
-pub async fn fetch_open_prs_with_votes() -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
+pub async fn fetch_open_prs_with_votes(token: Option<String>) -> Result<Vec<PullRequest>, Box<dyn std::error::Error>> {
     let (owner, repo) = GITHUB_REPO.split_once('/').ok_or("Invalid repo format")?;
 
     log(&format!("Fetching open PRs for {}/{}", owner, repo));
@@ -22,7 +22,7 @@ pub async fn fetch_open_prs_with_votes() -> Result<Vec<PullRequest>, Box<dyn std
             GITHUB_API, owner, repo, page
         );
 
-        let prs: Vec<GitHubPR> = fetch_json(&url).await?;
+        let prs: Vec<GitHubPR> = fetch_json(&url, token.as_deref()).await?;
         let prs_count = prs.len();
 
         if prs_count == 0 {
@@ -43,7 +43,7 @@ pub async fn fetch_open_prs_with_votes() -> Result<Vec<PullRequest>, Box<dyn std
     // Fetch votes for each PR
     let mut prs_with_votes = vec![];
     for pr in all_prs {
-        let votes = fetch_pr_votes(owner, repo, pr.number).await?;
+        let votes = fetch_pr_votes(owner, repo, pr.number, token.as_deref()).await?;
         prs_with_votes.push(PullRequest {
             number: pr.number,
             title: pr.title,
@@ -66,7 +66,7 @@ pub async fn fetch_open_prs_with_votes() -> Result<Vec<PullRequest>, Box<dyn std
     Ok(prs_with_votes)
 }
 
-pub async fn fetch_merged_prs(limit: u32) -> Result<Vec<MergedPullRequest>, Box<dyn std::error::Error>> {
+pub async fn fetch_merged_prs(limit: u32, token: Option<String>) -> Result<Vec<MergedPullRequest>, Box<dyn std::error::Error>> {
     let (owner, repo) = GITHUB_REPO.split_once('/').ok_or("Invalid repo format")?;
 
     log(&format!("Fetching merged PRs for {}/{}", owner, repo));
@@ -81,7 +81,7 @@ pub async fn fetch_merged_prs(limit: u32) -> Result<Vec<MergedPullRequest>, Box<
             GITHUB_API, owner, repo, page
         );
 
-        let prs: Vec<GitHubPR> = fetch_json(&url).await?;
+        let prs: Vec<GitHubPR> = fetch_json(&url, token.as_deref()).await?;
         let prs_count = prs.len();
 
         if prs_count == 0 {
@@ -134,6 +134,7 @@ async fn fetch_pr_votes(
     owner: &str,
     repo: &str,
     pr_number: u32,
+    token: Option<&str>,
 ) -> Result<i32, Box<dyn std::error::Error>> {
     let mut all_reactions = vec![];
     let mut page = 1;
@@ -144,7 +145,7 @@ async fn fetch_pr_votes(
             GITHUB_API, owner, repo, pr_number, page
         );
 
-        let reactions: Vec<GitHubReaction> = fetch_json(&url).await?;
+        let reactions: Vec<GitHubReaction> = fetch_json(&url, token).await?;
         let reactions_count = reactions.len();
 
         if reactions_count == 0 {
@@ -168,6 +169,7 @@ async fn fetch_pr_votes(
 
 async fn fetch_json<T: serde::de::DeserializeOwned>(
     url: &str,
+    token: Option<&str>,
 ) -> Result<T, Box<dyn std::error::Error>> {
     let window = web_sys::window().ok_or("No window object")?;
 
@@ -182,6 +184,16 @@ async fn fetch_json<T: serde::de::DeserializeOwned>(
         .headers()
         .set("Accept", "application/vnd.github.v3+json")
         .map_err(|e| format!("Header set failed: {:?}", e))?;
+
+    // Add authorization header if token provided
+    if let Some(token) = token {
+        if !token.is_empty() {
+            request
+                .headers()
+                .set("Authorization", &format!("Bearer {}", token))
+                .map_err(|e| format!("Auth header set failed: {:?}", e))?;
+        }
+    }
 
     let resp_value = JsFuture::from(window.fetch_with_request(&request))
         .await

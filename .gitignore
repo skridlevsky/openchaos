@@ -45,3 +45,4 @@ src/wasm/pkg/
 public/wasm/pkg/
 rust/openchaos_wasm/target/
 rust/openchaos_wasm/pkg/
+.env.local

@@ -6,10 +6,10 @@ mod types;
 mod utils;
 
 #[wasm_bindgen]
-pub async fn get_open_prs() -> Result<JsValue, JsValue> {
+pub async fn get_open_prs(token: Option<String>) -> Result<JsValue, JsValue> {
     utils::log("WASM: get_open_prs() called");
 
-    let prs = github::fetch_open_prs_with_votes()
+    let prs = github::fetch_open_prs_with_votes(token)
         .await
         .map_err(|e| {
             let err_msg = format!("Failed to fetch open PRs: {}", e);
@@ -27,10 +27,10 @@ pub async fn get_open_prs() -> Result<JsValue, JsValue> {
 }
 
 #[wasm_bindgen]
-pub async fn get_merged_prs(limit: u32) -> Result<JsValue, JsValue> {
+pub async fn get_merged_prs(limit: u32, token: Option<String>) -> Result<JsValue, JsValue> {
     utils::log(&format!("WASM: get_merged_prs({}) called", limit));
 
-    let prs = github::fetch_merged_prs(limit)
+    let prs = github::fetch_merged_prs(limit, token)
         .await
         .map_err(|e| {
             let err_msg = format!("Failed to fetch merged PRs: {}", e);
