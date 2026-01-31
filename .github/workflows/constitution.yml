@@ -1,0 +1,16 @@
+name: Constitution Protection
+
+on:
+  pull_request:
+    paths:
+      - 'RULES.md'
+      - '.github/workflows/constitution.yml'
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block Constitution Changes
+        run: |
+          echo "::error::RULES.md cannot be modified. See RULES.md#Immutability"
+          exit 1

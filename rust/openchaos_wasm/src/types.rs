@@ -10,6 +10,8 @@ pub struct PullRequest {
     pub url: String,
     pub votes: i32,
     pub created_at: String,
+    pub is_mergeable: bool,
+    pub checks_passed: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

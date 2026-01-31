@@ -35,6 +35,8 @@ async fn fetch_prs_graphql(owner: &str, repo: &str, token: &str) -> Result<Vec<P
             author {
               login
             }
+            mergeable
+            headRefOid
             reactions(first: 100) {
               nodes {
                 content
@@ -103,6 +105,13 @@ async fn fetch_prs_graphql(owner: &str, repo: &str, token: &str) -> Result<Vec<P
             let created_at = node["createdAt"].as_str().ok_or("Missing createdAt")?.to_string();
             let author = node["author"]["login"].as_str().unwrap_or("ghost").to_string();
 
+            // Get mergeable status and commit SHA
+            let is_mergeable = node["mergeable"].as_str() == Some("MERGEABLE");
+            let head_sha = node["headRefOid"].as_str().unwrap_or("");
+
+            // Fetch commit status
+            let checks_passed = fetch_commit_status(owner, repo, head_sha, token).await.unwrap_or(false);
+
             // Count reactions
             let empty_vec = vec![];
             let reactions = node["reactions"]["nodes"].as_array().unwrap_or(&empty_vec);
@@ -120,6 +129,8 @@ async fn fetch_prs_graphql(owner: &str, repo: &str, token: &str) -> Result<Vec<P
                 url,
                 votes: upvotes - downvotes,
                 created_at,
+                is_mergeable,
+                checks_passed,
             });
         }
 
@@ -195,6 +206,8 @@ async fn fetch_prs_rest(owner: &str, repo: &str) -> Result<Vec<PullRequest>, Box
             url: pr.html_url.clone(),
             votes,
             created_at: pr.created_at.clone(),
+            is_mergeable: false, // Can't determine without token
+            checks_passed: false, // Can't determine without token
         });
     }
 
@@ -207,6 +220,8 @@ async fn fetch_prs_rest(owner: &str, repo: &str) -> Result<Vec<PullRequest>, Box
             url: pr.html_url.clone(),
             votes: 0,
             created_at: pr.created_at.clone(),
+            is_mergeable: false, // Can't determine without token
+            checks_passed: false, // Can't determine without token
         });
     }
 
@@ -286,6 +301,38 @@ pub async fn fetch_merged_prs(limit: u32, token: Option<String>) -> Result<Vec<M
     log(&format!("Fetched {} merged PRs", all_merged_prs.len()));
 
     Ok(all_merged_prs)
+}
+
+// Fetch commit status (checks if CI passed)
+async fn fetch_commit_status(
+    owner: &str,
+    repo: &str,
+    sha: &str,
+    token: &str,
+) -> Result<bool, Box<dyn std::error::Error>> {
+    if sha.is_empty() {
+        return Ok(false);
+    }
+
+    let client = reqwest::Client::new();
+    let url = format!("{}/repos/{}/{}/commits/{}/status", GITHUB_API, owner, repo, sha);
+
+    let response = client
+        .get(&url)
+        .header("Authorization", format!("Bearer {}", token))
+        .header("Accept", "application/vnd.github.v3+json")
+        .header("User-Agent", "openchaos-wasm")
+        .send()
+        .await?;
+
+    if !response.status().is_success() {
+        return Ok(false);
+    }
+
+    let data: serde_json::Value = response.json().await?;
+    let state = data["state"].as_str().unwrap_or("");
+
+    Ok(state == "success")
 }
 
 // Simple logging for Node.js

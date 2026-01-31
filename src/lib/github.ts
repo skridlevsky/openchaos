@@ -5,6 +5,8 @@ export interface PullRequest {
   url: string;
   votes: number;
   createdAt: string;
+  isMergeable: boolean;
+  checksPassed: boolean;
 }
 
 export interface MergedPullRequest {
