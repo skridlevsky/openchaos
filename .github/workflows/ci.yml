@@ -1,14 +1,34 @@
 name: CI
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
 
 jobs:
-  build:
+  # never gonna run around and desert you
+  protect-constitution:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch PR head
+        run: git fetch origin ${{ github.event.pull_request.head.sha }}
+      - name: Check for protected file changes
+        run: |
+          CHANGED=$(git diff --name-only origin/main...${{ github.event.pull_request.head.sha }} || echo "")
+          if echo "$CHANGED" | grep -E '^(RULES\.md|\.github/workflows/(constitution|ci)\.yml)$'; then
+            echo "::error::Protected files cannot be modified. See RULES.md#Immutability"
+            exit 1
+          fi
+
+  build:
+    needs: protect-constitution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
