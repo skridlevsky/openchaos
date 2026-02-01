@@ -6,10 +6,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { IE6Layout } from "@/components/IE6Layout";
 import { WebCounter } from "@/components/WebCounter";
 import { HallOfChaos } from "@/components/HallOfChaos";
+import OtherPage from "./other-page";
 
 export default function Home() {
   if (Math.random() <= 0.01337) {
-    return null;
+    return <OtherPage />;
   }
 
   return (
