@@ -55,7 +55,7 @@ export default function Home() {
                       </table>
                     }
                   >
-                    <div className="page-pr-container">
+                    <div id="pr-list" className="page-pr-container">
                       <PRList />
                     </div>
                   </Suspense>
@@ -65,7 +65,7 @@ export default function Home() {
           </tbody>
         </table>
 
-        <table width="100%" border={2} cellPadding={15} cellSpacing={0} className="page-main-table" style={{ marginTop: '20px' }}>
+        <table id="hall-of-chaos" width="100%" border={2} cellPadding={15} cellSpacing={0} className="page-main-table" style={{ marginTop: '20px' }}>
           <tbody>
             <tr>
               <td className="page-header-cell">
