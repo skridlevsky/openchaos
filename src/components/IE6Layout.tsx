@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Guestbook } from "./Guestbook";
 import { CursorTrail } from "./CursorTrail";
 import { MidiPlayer } from "./MidiPlayer";
@@ -16,6 +16,16 @@ interface IE6LayoutProps {
 
 export function IE6Layout({ children }: IE6LayoutProps) {
   const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
+  const [cursed, setCursed] = useState(false);
+
+  useEffect(() => {
+    if (Math.random() <= 0.01337) {
+      setCursed(true);
+    }
+  }, []);
+
+  if (cursed) return null;
+
   return (
     <>
       <CursorTrail />
