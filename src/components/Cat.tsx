@@ -3,16 +3,22 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
-export function Cat() {
-  // starts in the corner
+interface CatProps {
+  isMidiPlayerOpen: boolean;
+}
+
+export function Cat({ isMidiPlayerOpen }: CatProps) {
+  // starts on the midi player
   // drag it around
   // drops back down
   // looks where it goes
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
-  // default true (facing left) because it starts on the right
-  const [isFlipped, setIsFlipped] = useState(true);
+  // default false (facing right) because it starts on the left now
+  const [isFlipped, setIsFlipped] = useState(false);
+  // Track if cat has been manually positioned (dragged)
+  const [hasBeenDragged, setHasBeenDragged] = useState(false);
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -59,12 +65,13 @@ export function Cat() {
 
       setIsSettling(true);
 
-      // drop to bottom, final position
+      // drop to bottom, final position (on top of status bar)
       const rect = catRef.current.getBoundingClientRect();
       const screenHeight = window.innerHeight;
       const catHeight = rect.height;
+      const statusBarHeight = 22;
 
-      const targetY = screenHeight - catHeight;
+      const targetY = screenHeight - catHeight - statusBarHeight;
 
       const targetX = rect.left; // current x
 
@@ -101,10 +108,46 @@ export function Cat() {
     };
   }, [isDragging]);
 
+  // When midi player closes (and cat hasn't been dragged), make the cat fall
+  useEffect(() => {
+    if (!isMidiPlayerOpen && !hasBeenDragged && catRef.current) {
+      const screenHeight = window.innerHeight;
+      const catHeight = catRef.current.getBoundingClientRect().height;
+      const statusBarHeight = 22;
+
+      // First rAF: set position to where the cat currently is (on top of player)
+      // This converts from bottom-based positioning to top-based transform
+      let innerFrameId: number;
+      const frameId = requestAnimationFrame(() => {
+        const startY = screenHeight - 200 - catHeight; // 200px is the bottom offset
+        setPosition({ x: 20, y: startY });
+
+        // Second rAF: animate to the bottom after the starting position is painted
+        innerFrameId = requestAnimationFrame(() => {
+          setIsSettling(true);
+          // Fall to sit on top of the status bar
+          const targetY = screenHeight - catHeight - statusBarHeight;
+          setPosition({ x: 20, y: targetY });
+        });
+      });
+
+      const timerId = setTimeout(() => {
+        setIsSettling(false);
+      }, 600);
+
+      return () => {
+        cancelAnimationFrame(frameId);
+        cancelAnimationFrame(innerFrameId);
+        clearTimeout(timerId);
+      };
+    }
+  }, [isMidiPlayerOpen, hasBeenDragged]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
 
     setIsSettling(false);
+    setHasBeenDragged(true);
 
     if (catRef.current) {
       const rect = catRef.current.getBoundingClientRect();
@@ -122,6 +165,7 @@ export function Cat() {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsSettling(false);
+    setHasBeenDragged(true);
 
     if (catRef.current) {
       const rect = catRef.current.getBoundingClientRect();
@@ -138,16 +182,28 @@ export function Cat() {
     setIsDragging(true);
   };
 
+  // Determine default position based on midi player state
+  const getDefaultPositionClass = () => {
+    if (position) return "top-0 left-0"; // being dragged or fallen
+    if (isMidiPlayerOpen) return ""; // will use style for precise positioning
+    return "bottom-0 left-5"; // player closed, sit at bottom-left
+  };
+
   return (
     <div
       ref={catRef}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      className={`fixed z-50 cursor-grab active:cursor-grabbing select-none touch-none
-        ${!position ? "bottom-0 right-0" : "top-0 left-0"}
+      className={`fixed z-[1001] cursor-grab active:cursor-grabbing select-none touch-none
+        ${getDefaultPositionClass()}
         ${isSettling ? "transition-transform duration-500 ease-out" : ""}
       `}
       style={{
+        // When not dragged and player is open, position on top of the player
+        ...(!position && isMidiPlayerOpen ? {
+          bottom: "200px", // above the midi player
+          left: "20px",
+        } : {}),
         transform: position
           ? `translate3d(${position.x}px, ${position.y}px, 0)`
           : undefined,
