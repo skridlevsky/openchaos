@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { StartMenu } from "./StartMenu";
 
 const STATUS_MESSAGES = [
   "Welcome to my homepage! Sign my guestbook!",
@@ -44,6 +45,7 @@ export function StatusBar() {
   return (
     <div className="status-bar">
       <div className="status-bar-content">
+        <StartMenu />
         <div className="status-bar-section status-bar-main">
           <div className="status-bar-text">{currentMessage}</div>
         </div>
