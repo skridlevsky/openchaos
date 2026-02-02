@@ -9,6 +9,10 @@ import { HallOfChaos } from "@/components/HallOfChaos";
 import { getRandomFeatureFlags } from "@/lib/chaos-router";
 
 export default function Home() {
+  if (Math.random() <= 0.01337) {
+    return null;
+  }
+
   const flags = getRandomFeatureFlags();
 
   return (
