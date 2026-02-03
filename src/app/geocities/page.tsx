@@ -21,6 +21,7 @@ export default function Home() {
       showTreeGame={flags.treeGame}
       showMidiPlayer={flags.midiPlayer}
       showClippy={flags.clippy}
+      showDoom={flags.doom}
     >
       <Countdown />
       <div className="absolute top-8 right-4">

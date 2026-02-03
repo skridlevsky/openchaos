@@ -40,8 +40,12 @@ interface GitHubPRDetail {
   mergeable: boolean | null;
 }
 
-interface GitHubCommitStatus {
-  state: "failure" | "pending" | "success" | "error";
+interface GitHubCheckRunsResponse {
+  total_count: number;
+  check_runs: {
+    status: string;
+    conclusion: string | null;
+  }[];
 }
 
 const GITHUB_REPO = "skridlevsky/openchaos";
@@ -113,11 +117,19 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     }),
   );
 
-  // Sort by votes descending
-  return prsWithVotes.sort((a, b) =>
-    (b.votes - a.votes) ||
-    (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-  );
+  // Sort: mergeable PRs first, then by votes descending, ties by newest
+  return prsWithVotes.sort((a, b) => {
+    // PRs with conflicts go to the bottom (they can't win anyway)
+    if (a.isMergeable !== b.isMergeable) {
+      return a.isMergeable ? -1 : 1;
+    }
+    // Within same mergeability, sort by votes
+    if (b.votes !== a.votes) {
+      return b.votes - a.votes;
+    }
+    // Ties broken by newest
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 }
 
 async function getPRVotes(owner: string, repo: string, prNumber: number): Promise<number> {
@@ -170,11 +182,17 @@ async function getPRMergeStatus(
   );
 
   if (!response.ok) {
-    return false;
+    // Rate limited or other error — assume mergeable rather than showing
+    // false conflicts. The next ISR cycle will get the real value.
+    return true;
   }
 
   const data: GitHubPRDetail = await response.json();
-  return data.mergeable ?? false;
+
+  // GitHub computes mergeability lazily — null means "not yet computed", not
+  // "has conflicts". Default to true and let the next ISR cycle pick up the
+  // real value.
+  return data.mergeable ?? true;
 }
 
 async function getCommitStatus(
@@ -183,7 +201,7 @@ async function getCommitStatus(
   sha: string
 ): Promise<boolean> {
   const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/status`,
+    `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/check-runs`,
     {
       headers: getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
@@ -191,11 +209,22 @@ async function getCommitStatus(
   );
 
   if (!response.ok) {
-    return false;
+    // Rate limited or other error — assume checks pass rather than showing
+    // false failures. The next ISR cycle will get the real value.
+    return true;
   }
 
-  const data: GitHubCommitStatus = await response.json();
-  return data.state === "success";
+  const data: GitHubCheckRunsResponse = await response.json();
+
+  // No check runs means nothing to fail
+  if (data.total_count === 0) {
+    return true;
+  }
+
+  // All check runs must be completed and successful
+  return data.check_runs.every(
+    (run) => run.status === "completed" && run.conclusion === "success"
+  );
 }
 
 interface GitHubMergedPR {

@@ -1152,6 +1152,53 @@
   border-color: #00ffff;
 }
 
+.pr-card-conflict {
+  background-color: #d0d0d0;
+  border-color: #808080;
+  opacity: 0.7;
+}
+
+[data-theme="dark"] .pr-card-conflict {
+  background-color: #404040;
+  border-color: #606060;
+}
+
+.pr-card-conflict .pr-card-title,
+.pr-card-conflict .pr-card-author-text,
+.pr-card-conflict .pr-card-link {
+  color: #666666;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-title,
+[data-theme="dark"] .pr-card-conflict .pr-card-author-text,
+[data-theme="dark"] .pr-card-conflict .pr-card-link {
+  color: #999999;
+}
+
+.pr-card-conflict .pr-card-number-cell-normal {
+  background-color: #b0b0b0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-number-cell-normal {
+  background-color: #333333;
+}
+
+.pr-card-conflict .pr-card-content-cell-normal {
+  background-color: #d0d0d0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-content-cell-normal {
+  background-color: #404040;
+}
+
+.pr-card-conflict .pr-card-votes-cell-normal {
+  background-color: #c0c0c0;
+}
+
+[data-theme="dark"] .pr-card-conflict .pr-card-votes-cell-normal {
+  background-color: #383838;
+}
+
 .pr-card-number-cell-leading {
   background-color: #ffcc00;
   text-align: center;
@@ -2046,6 +2093,177 @@
   box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #ffffff;
 }
 
+  /* 
+╰┭━╾┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅╼━┮╮
+╭╯ openchaos § freedoom → styling                          ╭╯╿
+╙╼━╾┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄━━╪*/
+
+.launch-freedoom-button{
+  background-color: #333333;
+  color: #ff5555;
+  border: 3px solid #ff0000;
+  padding: 8px 16px;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  margin: 5px;
+  animation: btn_float 5s infinite ease-in-out;
+}
+
+.freedoom-blur{
+    position: absolute;
+    top:0;
+    left:0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,.8);
+    z-index: 9999999999;
+}
+
+.freedoom-blur:hover{
+    cursor:pointer;
+}
+
+.freedoom-computer{
+    position: absolute;
+    z-index: 99999999999;
+    height: 510px;
+    width: 530px;
+    position: absolute;
+    overflow: hidden;
+    border: 5px solid black;
+    box-shadow: 10px 10px 70px 10px rgba(0,0,0,.9);
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background-color: #333333;
+}
+
+.freedoom-title{
+    font-size: 68pt;
+    animation: freedoom-letter-glow 5s alternate infinite;
+}
+.freedoom-dialog{
+    position: absolute;
+    left: 50%;
+    bottom:20px;
+    transform: translateX(-50%);
+    overflow: hidden;
+    border: 5px solid black;
+    background-color: #333333;
+    width: 490px;
+    height: 310px;
+}
+
+.freedoom-scanline{
+    position: absolute;
+    width:480px;
+    height: 300px;
+    background-color: rgba(255,255,255,.1);
+    box-shadow: 1px 5px 5px 5px rgba(255,255,255,.1);
+    animation: doom-scanline .5s infinite;
+}
+
+.freedoom-iframe{
+    position: absolute;
+    top: 2;
+    left:2;
+    width: 480px;
+    height: 300px;
+    animation: doom-float .5s ease-in-out infinite alternate,
+               doom-rotate .3s ease-in-out infinite alternate,
+               doom-breath .2s ease-in-out infinite alternate;
+}
+
+/* 
+╰┭━╾┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅┅╼━┮╮
+╭╯ openchaos § freedoom → animations                       ╭╯╿
+╙╼━╾┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄━━╪*/
+
+@keyframes btn_float{
+    0%{
+        transform: skew(2deg, -1deg) rotate(-2deg);
+        color: #ff5555;
+        border: 3px solid #ff0000;
+        font-size: 14px;
+    }
+    25%{
+        transform: skew(2deg, 1deg) rotate(0deg);
+        color: #ffffff;
+        border: 3px solid #ffaa00;
+    }
+    50%{
+        transform: skew(-1deg, 3deg) rotate(2deg);
+        color: #ff5555;
+        border: 3px solid #ff0000;
+        font-size: 16px;
+    }
+    75%{
+        transform: skew(-2deg, -2deg) rotate(0deg);
+        color: #ffffff;
+        border: 3px solid #ffaa00;
+    }
+    100%{
+        transform: skew(2deg, -1deg) rotate(-2deg);
+        color: #ff5555;
+        border: 3px solid #ff0000;
+        font-size: 14px;
+    }
+}
+
+@keyframes doom-float {
+  0% {
+    transform: translate(-1px, -1px);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+  100% {
+    transform: translate(1px, 1px);
+  }
+}
+
+@keyframes doom-rotate {
+  0% {
+    rotate: -.2deg;
+  }
+  50% {
+    rotate: .1deg;
+  }
+  100% {
+    rotate: -0deg;
+  }
+}
+
+@keyframes doom-breath {
+  0% {
+    scale: 1;
+  }
+  100% {
+    scale: 1.001;
+  }
+}
+
+@keyframes doom-scanline{
+    0%{
+        transform: translateY(-300px);
+    }
+
+    100%{
+        transform: translateY(480px);
+    }
+}
+
+@keyframes freedoom-letter-glow{
+    0%{
+        color: #FFFFFF;
+    } 
+    100%{
+        color: #FFFF00;
+    }
+}
+
 /* ===== DISCORD BUTTON STYLES ===== */
 
 /* "JOIN THE CHAOS" button - matches Guestbook button style */
@@ -2054,12 +2272,6 @@
   background: linear-gradient(to bottom, #7289da 0%, #5865f2 50%, #4752c4 100%);
   color: #ffffff;
   border: 3px solid #23272a;
-  padding: 8px 16px;
-  font-family: 'Comic Sans MS', cursive;
-  font-size: 14px;
-  cursor: pointer;
-  text-decoration: none;
-  margin: 5px;
   animation: discord-pulse 1.5s ease-in-out infinite;
   box-shadow: 2px 2px 0px #000000;
 }

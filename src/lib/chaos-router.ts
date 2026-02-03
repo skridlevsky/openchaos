@@ -9,10 +9,11 @@
 export const ROUTE_GROUPS = ['geocities', 'teletext'] as const;
 
 export const FEATURE_FLAGS = [
-  'clippy',      // Clippy assistant (doesn't exist yet - safe example)
+  'clippy',      // Clippy assistant
   'guestbook',   // Guestbook modal
   'treeGame',    // Tree game modal
   'midiPlayer',  // MIDI player
+  'doom',        // Doom game
 ] as const;
 
 export type RouteGroup = typeof ROUTE_GROUPS[number];
