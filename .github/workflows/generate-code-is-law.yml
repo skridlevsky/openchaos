@@ -1,0 +1,333 @@
+name: Generate CODE_IS_LAW.md
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "RULES.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+  OPENCODE_CONFIG_CONTENT: ${{ secrets.OPENCODE_CONFIG_CONTENT }}
+  OPENCODE_MODEL: ${{ secrets.OPENCODE_MODEL }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+  COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+  PPLX_API_KEY: ${{ secrets.PPLX_API_KEY }}
+  TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+  XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+  DEEPINFRA_API_KEY: ${{ secrets.DEEPINFRA_API_KEY }}
+  ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+  GIT_PAT: ${{ secrets.GIT_PAT }}
+
+jobs:
+  generate-code-is-law:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if CODE_IS_LAW.md was the only change
+        id: check-changes
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            if git rev-parse HEAD~1 >/dev/null 2>&1; then
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+              echo "Changed files: $CHANGED_FILES"
+              if [ "$CHANGED_FILES" == "CODE_IS_LAW.md" ]; then
+                echo "Only CODE_IS_LAW.md changed - skipping workflow to prevent infinite loop"
+                echo "should_run=false" >> $GITHUB_OUTPUT
+              else
+                echo "Files other than CODE_IS_LAW.md changed - proceeding"
+                echo "should_run=true" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "Initial commit - no previous history, proceeding"
+              echo "should_run=true" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "Manual dispatch - proceeding"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install OpenCode CLI
+        if: steps.check-changes.outputs.should_run == 'true'
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+
+      - name: Read RULES.md, workflows, and branch protection
+        if: steps.check-changes.outputs.should_run == 'true'
+        run: |
+          if [ -f RULES.md ]; then
+            cat RULES.md > /tmp/rules_content.txt
+          else
+            echo "No RULES.md found" > /tmp/rules_content.txt
+          fi
+
+          if [ -d .github/workflows ]; then
+            for workflow in .github/workflows/*.yml .github/workflows/*.yaml; do
+              if [ -f "$workflow" ]; then
+                echo "" >> /tmp/workflows_content.txt
+                echo "### File: $workflow" >> /tmp/workflows_content.txt
+                echo "" >> /tmp/workflows_content.txt
+                cat "$workflow" >> /tmp/workflows_content.txt
+              fi
+            done || true
+          else
+            echo "No workflows found" > /tmp/workflows_content.txt
+          fi
+
+          echo "### Branch Protection Rules (main branch)" > /tmp/branch_protection.txt
+          if BRANCH_PROTECTION=$(gh api repos/${{ github.repository }}/branches/main/protection 2>/dev/null); then
+            echo "$BRANCH_PROTECTION" | jq '.' >> /tmp/branch_protection.txt
+
+            echo "" >> /tmp/branch_protection.txt
+            echo "Human-readable summary:" >> /tmp/branch_protection.txt
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.required_pull_request_reviews != null' > /dev/null 2>&1; then
+              echo "- Pull request reviews are REQUIRED" >> /tmp/branch_protection.txt
+              REQUIRED_APPROVERS=$(echo "$BRANCH_PROTECTION" | jq -r '.required_pull_request_reviews.required_approving_review_count // 0')
+              echo "  - Required approving reviews: $REQUIRED_APPROVERS" >> /tmp/branch_protection.txt
+            fi
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.bypass_pull_request_allowances // null' > /dev/null 2>&1; then
+              echo "- Bypass permissions:" >> /tmp/branch_protection.txt
+              echo "$BRANCH_PROTECTION" | jq -r '.bypass_pull_request_allowances // {}' | jq -r 'to_entries[] | "  - \(.key): \(.value // \"all\")"' >> /tmp/branch_protection.txt || true
+            fi
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.required_status_checks != null' > /dev/null 2>&1; then
+              echo "- Status checks are REQUIRED before merge" >> /tmp/branch_protection.txt
+              CHECKS=$(echo "$BRANCH_PROTECTION" | jq -r '.required_status_checks.contexts[]' 2>/dev/null)
+              if [ -n "$CHECKS" ]; then
+                echo "  - Required checks: $CHECKS" >> /tmp/branch_protection.txt
+              fi
+            fi
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.restrictions // null' > /dev/null 2>&1; then
+              echo "- Push restrictions: Only specific people/teams can push" >> /tmp/branch_protection.txt
+              echo "$BRANCH_PROTECTION" | jq -r '.restrictions // {}' | jq -r 'to_entries[] | "  - \(.key): \(.value // \"all\")"' >> /tmp/branch_protection.txt || true
+            fi
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.enforce_admins == false' > /dev/null 2>&1; then
+              echo "- Admins CANNOT bypass these rules" >> /tmp/branch_protection.txt
+            else
+              echo "- Admins CAN bypass these rules" >> /tmp/branch_protection.txt
+            fi
+
+            if echo "$BRANCH_PROTECTION" | jq -e '.required_linear_history == true' > /dev/null 2>&1; then
+              echo "- Linear history is REQUIRED (no merge commits)" >> /tmp/branch_protection.txt
+            fi
+          else
+            echo "- No branch protection rules found" >> /tmp/branch_protection.txt
+            echo "- Anyone with push access can push directly to main" >> /tmp/branch_protection.txt
+          fi
+
+      - name: Run OpenCode to generate CODE_IS_LAW.md
+        id: opencode-run
+        if: steps.check-changes.outputs.should_run == 'true'
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+
+          RULES_CONTENT=$(cat /tmp/rules_content.txt)
+          WORKFLOWS_CONTENT=$(cat /tmp/workflows_content.txt)
+          BRANCH_PROTECTION=$(cat /tmp/branch_protection.txt)
+
+          echo "Running OpenCode..."
+          if [ -n "${OPENCODE_CONFIG_CONTENT:-}" ]; then
+            echo "Using OPENCODE_CONFIG_CONTENT override"
+          fi
+
+          if [ -n "${OPENCODE_MODEL:-}" ]; then
+            MODEL_FLAG="--model ${OPENCODE_MODEL}"
+            echo "Model: ${OPENCODE_MODEL}"
+          else
+            MODEL_FLAG=""
+            echo "Model: (default)"
+          fi
+
+          cat > /tmp/opencode_prompt.md << PROMPT_EOF
+          Generate the complete contents of CODE_IS_LAW.md for this repository.
+
+          Core rule (Code Is Law): ONLY describe behavior that is ACTUALLY ENFORCED by code and repository configuration.
+          - If a statement cannot be backed by a concrete enforcement mechanism, it MUST NOT appear as a requirement.
+          - RULES.md is human guidance only; use it ONLY for the comparison table.
+
+          What counts as "enforced":
+          - Branch protection rules (required PRs, reviews, status checks, who can push, who can bypass, admin enforcement)
+          - Workflows/status checks that fail and therefore block merges (if required by branch protection)
+          - Any code/scripts that reject changes automatically (linters, policy checks) when they are required gates
+
+          What does NOT count as "enforced":
+          - Aspirational text in RULES.md
+          - A workflow that merely runs or generates docs (it does not block changes unless it is a required status check)
+          - Timeouts, retries, or internal workflow behavior (mention as operational detail, not as a rule)
+
+          Output requirements:
+          - Output ONLY markdown for CODE_IS_LAW.md (no tool chatter, no explanations about writing files)
+          - If there is NO enforcement, explicitly say so; do not invent requirements
+          - Keep it newcomer-readable; avoid jargon
+
+          Style:
+          - "Legislative" tone (THOU SHALT / THOU SHALT NOT) combined with RFC 2119 keywords
+          - RFC 2119 keywords must be UPPERCASE: MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY, REQUIRED, RECOMMENDED, OPTIONAL
+
+          Sections to produce (in this order):
+          1. ELI5 (Explain Like I'm 5) - 2-4 sentences describing what changes are ALLOWED or BLOCKED
+          2. Executive Summary - brief description of what is actually enforced and by what mechanism
+          3. The Commandments - numbered list of ONLY enforced constraints on contributor actions (push/merge/review/checks)
+             - If there are none, write: "There are no enforced commandments." and stop the list
+          4. Rule vs Code Comparison - table: Rule from RULES.md | Implementation in Code | Status (Enforced / Not Enforced)
+          5. Workflow Analysis - for each workflow, describe what it blocks/allows (if nothing is blocked, say so)
+          6. Exceptions and Edge Cases - only when applicable
+
+          Inputs
+
+          RULES.md (for comparison ONLY):
+          ${RULES_CONTENT}
+
+          Workflows:
+          ${WORKFLOWS_CONTENT}
+
+          Branch protection (main):
+          ${BRANCH_PROTECTION}
+          PROMPT_EOF
+
+          MAX_RETRIES=3
+          RETRY_DELAY=10
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i of $MAX_RETRIES..."
+            OUT_FILE=$(mktemp)
+
+            if opencode run ${MODEL_FLAG} < /tmp/opencode_prompt.md > "$OUT_FILE"; then
+              if [ ! -s "$OUT_FILE" ]; then
+                echo -e "\e[31m✗ OpenCode returned success but produced empty output\e[0m"
+                rm -f "$OUT_FILE"
+                exit 1
+              fi
+
+              mv "$OUT_FILE" CODE_IS_LAW.md
+              echo "✓ OpenCode completed successfully"
+              echo "success=true" >> $GITHUB_OUTPUT
+              exit 0
+            else
+              EXIT_CODE=$?
+              echo -e "\e[31m✗ OpenCode failed with exit code $EXIT_CODE\e[0m"
+              rm -f "$OUT_FILE"
+              if [ $i -lt $MAX_RETRIES ]; then
+                echo "Retrying in ${RETRY_DELAY}s..."
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY * 2))
+              fi
+            fi
+          done
+
+          echo -e "\e[31m✗ All retries exhausted\e[0m"
+          echo "success=false" >> $GITHUB_OUTPUT
+          exit 1
+
+      - name: Validate generated markdown
+        if: steps.check-changes.outputs.should_run == 'true'
+        id: validate
+        run: |
+          set -euo pipefail
+
+          if [ ! -f CODE_IS_LAW.md ]; then
+            echo -e "\e[31m✗ CODE_IS_LAW.md not found\e[0m"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "reason=file_missing" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          if [ ! -s CODE_IS_LAW.md ]; then
+            echo -e "\e[31m✗ CODE_IS_LAW.md is empty\e[0m"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "reason=file_empty" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          FILE_SIZE=$(wc -c < CODE_IS_LAW.md)
+          if [ "$FILE_SIZE" -lt 500 ]; then
+            echo -e "\e[31m✗ CODE_IS_LAW.md too small ($FILE_SIZE bytes) - likely incomplete\e[0m"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "reason=file_too_small" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          if ! grep -qiE "(Executive Summary|Commandments|Rule vs Code|Workflow Analysis)" CODE_IS_LAW.md; then
+            echo -e "\e[31m✗ CODE_IS_LAW.md missing expected sections\e[0m"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "reason=missing_sections" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          echo -e "\e[32m✓ CODE_IS_LAW.md validated successfully ($FILE_SIZE bytes)\e[0m"
+          echo "valid=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push CODE_IS_LAW.md
+        if: steps.check-changes.outputs.should_run == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin main
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+            echo "Remote moved; re-syncing to origin/main..."
+            cp CODE_IS_LAW.md /tmp/CODE_IS_LAW.md
+            git reset --hard origin/main
+            mv /tmp/CODE_IS_LAW.md CODE_IS_LAW.md
+          fi
+
+          git add CODE_IS_LAW.md
+          if git diff --staged --quiet CODE_IS_LAW.md; then
+            echo "No changes to CODE_IS_LAW.md - skipping commit"
+            exit 0
+          fi
+
+          git commit -m "docs: update CODE_IS_LAW.md [skip ci]"
+
+          for i in 1 2 3; do
+            if [ -n "${GIT_PAT}" ]; then
+              echo "Using PAT for git authentication"
+              if git push https://x-access-token:${GIT_PAT}@github.com/${{ github.repository }}.git HEAD:main; then
+                echo -e "\e[32m✓ Committed and pushed CODE_IS_LAW.md\e[0m"
+                exit 0
+              fi
+            else
+              echo "Using GITHUB_TOKEN for git authentication (may fail if branch protection is enabled)"
+              if git push; then
+                echo -e "\e[32m✓ Committed and pushed CODE_IS_LAW.md\e[0m"
+                exit 0
+              fi
+            fi
+
+            echo -e "\e[31m✗ Push failed; retrying ($i/3)...\e[0m"
+            git fetch origin main
+            cp CODE_IS_LAW.md /tmp/CODE_IS_LAW.md
+            git reset --hard origin/main
+            mv /tmp/CODE_IS_LAW.md CODE_IS_LAW.md
+            git add CODE_IS_LAW.md
+            git commit -m "docs: update CODE_IS_LAW.md [skip ci]" || true
+          done
+
+          echo -e "\e[31m✗ Failed to push after retries\e[0m"
+          exit 1
