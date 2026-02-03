@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
 import { PRList } from "@/components/PRList";
+import { ChaosButton } from "@/components/ChaosButton";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { IE6Layout } from "@/components/IE6Layout";
@@ -19,6 +20,7 @@ export default function Home() {
         <ThemeToggle />
       </div>
       <div className="page-container">
+        <ChaosButton />
         <table width="100%" border={2} cellPadding={15} cellSpacing={0} className="page-main-table">
           <tbody>
             <tr>
