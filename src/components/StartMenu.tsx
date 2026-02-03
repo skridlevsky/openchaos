@@ -111,7 +111,7 @@ export function StartMenu() {
         scrollToElement(".ie6-header");
         break;
       case "mailto":
-        window.location.href = "mailto:skridlevsky@geocities.com";
+        window.open("mailto:skridlevsky@geocities.com", "_self");
         break;
       case "scroll-pr-list":
         scrollToElement("#pr-list");
