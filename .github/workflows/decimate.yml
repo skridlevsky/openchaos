@@ -1,0 +1,70 @@
+name: Decimate PRs
+
+on:
+  schedule:
+    - cron: "0 0 */10 * *"  # Every 10 days at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  decimate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Randomly close 10% of open PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Get all open PRs
+            const { data: prs } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            if (prs.length === 0) {
+              console.log("No open PRs to decimate.");
+              return;
+            }
+
+            console.log(`Found ${prs.length} open PRs`);
+
+            // Calculate 10% (at least 1 if there are PRs)
+            const decimateCount = Math.max(1, Math.floor(prs.length * 0.1));
+            console.log(`Will decimate ${decimateCount} PR(s)`);
+
+            // Shuffle and pick random PRs
+            const shuffled = prs.sort(() => Math.random() - 0.5);
+            const victims = shuffled.slice(0, decimateCount);
+
+            // Close the selected PRs
+            for (const pr of victims) {
+              console.log(`Decimating PR #${pr.number}: ${pr.title}`);
+
+              // Add comment
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: "💀 **DECIMATED** 💀\n\nThis PR was randomly selected for decimation. Better luck next time!"
+              });
+
+              // Close the PR
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: pr.number,
+                state: "closed"
+              });
+
+              console.log(`✓ Closed PR #${pr.number}`);
+            }
+
+            console.log(`Decimation complete. ${decimateCount} PR(s) closed.`);
