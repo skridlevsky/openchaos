@@ -74,7 +74,7 @@ function WinXPDialog({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 99999,
+        zIndex: 99998,
         fontFamily: "Tahoma, Arial, sans-serif",
       }}
       onClick={onClose}
