@@ -1,0 +1,175 @@
+name: Daily PR Review Bot
+
+on:
+  schedule:
+    - cron: "0 9 * * *"  # Run daily at 9am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review unreviewed PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Get all open PRs
+            const { data: prs } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            console.log(`Found ${prs.length} open PRs`);
+
+            for (const pr of prs) {
+              // Check if PR already has reactions from the bot
+              const { data: reactions } = await github.rest.reactions.listForIssue({
+                owner,
+                repo,
+                issue_number: pr.number,
+              });
+
+              // Check if bot already reacted
+              const botReacted = reactions.some(r => 
+                r.user.login === 'github-actions[bot]' && 
+                (r.content === '+1' || r.content === '-1')
+              );
+
+              if (botReacted) {
+                console.log(`PR #${pr.number}: Already reviewed, skipping`);
+                continue;
+              }
+
+              // Get PR details
+              const { data: prDetails } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pr.number
+              });
+
+              // Get PR files
+              const { data: files } = await github.rest.pulls.listFiles({
+                owner,
+                repo,
+                pull_number: pr.number
+              });
+
+              // Analyze the PR
+              const analysis = analyzePR(prDetails, files);
+              
+              console.log(`PR #${pr.number}: ${analysis.verdict} - ${analysis.reason}`);
+
+              // Add reaction
+              await github.rest.reactions.createForIssue({
+                owner,
+                repo,
+                issue_number: pr.number,
+                content: analysis.verdict === 'approve' ? '+1' : '-1'
+              });
+
+              // Add comment explaining the decision
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: `## 🤖 Automated Review\n\n**Decision:** ${analysis.verdict === 'approve' ? '👍 Approve' : '👎 Reject'}\n\n**Reason:** ${analysis.reason}\n\n---\n*This is an automated review. Community votes still determine merge priority.*`
+              });
+
+              // Rate limit: wait 2 seconds between PRs
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+            function analyzePR(pr, files) {
+              const reasons = [];
+              let score = 0;
+
+              // Check 1: Does it modify RULES.md?
+              const modifiesRules = files.some(f => f.filename === 'RULES.md');
+              if (modifiesRules) {
+                return {
+                  verdict: 'reject',
+                  reason: 'Attempts to modify RULES.md, which is immutable per repository rules.'
+                };
+              }
+
+              // Check 2: Is the description clear?
+              if (pr.body && pr.body.length > 100) {
+                score += 2;
+                reasons.push('Has a detailed description');
+              } else {
+                score -= 1;
+                reasons.push('Description could be more detailed');
+              }
+
+              // Check 3: Reasonable file changes
+              const fileCount = files.length;
+              if (fileCount > 0 && fileCount < 20) {
+                score += 1;
+                reasons.push(`Changes ${fileCount} file(s) - reasonable scope`);
+              } else if (fileCount >= 20) {
+                score -= 1;
+                reasons.push(`Changes ${fileCount} files - potentially too broad`);
+              }
+
+              // Check 4: Has tests or docs?
+              const hasTests = files.some(f => f.filename.includes('test') || f.filename.includes('spec'));
+              const hasDocs = files.some(f => f.filename.endsWith('.md'));
+              if (hasTests) {
+                score += 2;
+                reasons.push('Includes tests');
+              }
+              if (hasDocs && !modifiesRules) {
+                score += 1;
+                reasons.push('Includes documentation');
+              }
+
+              // Check 5: Reasonable title
+              if (pr.title && pr.title.length > 10 && pr.title.length < 100) {
+                score += 1;
+              }
+
+              // Check 6: Adds fun/chaos (based on keywords)
+              const chaosKeywords = ['chaos', 'random', 'fun', 'button', 'easter egg', 'surprise'];
+              const titleLower = pr.title.toLowerCase();
+              const bodyLower = (pr.body || '').toLowerCase();
+              const isChaotic = chaosKeywords.some(kw => 
+                titleLower.includes(kw) || bodyLower.includes(kw)
+              );
+              if (isChaotic) {
+                score += 2;
+                reasons.push('Embraces chaos - aligns with repository spirit!');
+              }
+
+              // Check 7: File additions vs deletions
+              const additions = files.reduce((sum, f) => sum + f.additions, 0);
+              const deletions = files.reduce((sum, f) => sum + f.deletions, 0);
+              if (additions > 0) {
+                score += 1;
+              }
+              if (deletions > additions * 3) {
+                reasons.push('Removes more than it adds - could be cleanup');
+                score += 1;
+              }
+
+              // Final decision
+              const verdict = score >= 3 ? 'approve' : 'reject';
+              const reasonText = reasons.length > 0 
+                ? reasons.join('; ') 
+                : 'Standard review completed';
+
+              return {
+                verdict,
+                reason: `${reasonText} (Score: ${score}/10)`
+              };
+            }
