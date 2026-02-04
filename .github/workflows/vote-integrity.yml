@@ -109,7 +109,32 @@ jobs:
               });
               console.log('Posted baseline hash comment.');
             } else if (previousHash !== diffHash) {
-              // Code changed — post warning
+              // Code changed — fetch existing voters to notify them
+              let allReactions = [];
+              let rPage = 1;
+              while (true) {
+                const resp = await github.rest.reactions.listForIssue({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  per_page: 100,
+                  page: rPage,
+                });
+                allReactions = allReactions.concat(resp.data);
+                if (resp.data.length < 100) break;
+                rPage++;
+              }
+
+              const voters = [...new Set(
+                allReactions
+                  .filter(r => r.content === '+1' || r.content === '-1')
+                  .map(r => r.user.login)
+              )];
+
+              const mentionLine = voters.length > 0
+                ? `\n**Previous voters:** ${voters.map(v => `@${v}`).join(' ')} — the code has changed since you voted. Please review and re-vote if you still approve.\n`
+                : '';
+
               await github.rest.issues.createComment({
                 owner,
                 repo,
@@ -119,15 +144,15 @@ jobs:
                   `**CODE CHANGED** - Vote Integrity Watchdog`,
                   '',
                   `The code in this PR has been substantively modified since votes were cast.`,
-                  '',
+                  mentionLine,
                   `Previous diff hash: \`${previousHash}\``,
                   `New diff hash: \`${diffHash}\``,
                   `Timestamp: ${now}`,
                   '',
-                  '_Votes cast before this change will not count toward the automerge tally. Please review the updated code and vote again if you still approve._',
+                  '_Votes cast before this change will not count toward the automerge tally. Please remove your old reaction and re-add it to cast a valid vote on the updated code._',
                 ].join('\n'),
               });
-              console.log('Posted CODE CHANGED warning.');
+              console.log(`Posted CODE CHANGED warning. Notified ${voters.length} previous voters.`);
             } else {
               // Same hash (rebase) — no action needed
               console.log('Diff hash unchanged (likely a rebase). No action needed.');
