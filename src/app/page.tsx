@@ -14,10 +14,6 @@ const title = `
 `;
 
 export default function Home() {
-  if (Math.random() <= 0.01337) {
-    return null;
-  }
-
   return (
     <>
     <pre >{title}</pre>
@@ -65,6 +61,7 @@ export default function Home() {
           </Suspense>
         </div>
       </div>
+      <a href="doom.html">DOOM</a>
     </>
   );
 }

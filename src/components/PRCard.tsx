@@ -7,7 +7,19 @@ interface PRCardProps {
   rank: number;
 }
 
+function chooseURL(url: string) {
+  // 10% chance to Rickroll
+  if (Math.random() <= 0.10) {
+    // Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)
+    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  } else {
+    return url;
+  }
+}
+
 export function PRCard({ pr, rank }: PRCardProps) {
+  const url = chooseURL(pr.url);
+
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   return (
     <div className={`${isSixtySeven ? "sixseven-shake" : ""}
@@ -16,7 +28,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
       <br />
       &nbsp;&nbsp;&nbsp;by @{pr.author} · <TimeAgo isoDate={pr.createdAt} />
       <br />
-      &nbsp;&nbsp;&nbsp;<a href={pr.url} target="_blank" rel="noopener noreferrer">
+      &nbsp;&nbsp;&nbsp;<a href={url} target="_blank" rel="noopener noreferrer">
         {pr.url}
       </a>
       <br />
@@ -34,8 +46,6 @@ export function PRCard({ pr, rank }: PRCardProps) {
       )}
       {pr.isMergeable && pr.checksPassed && (
         <>
-          <br />
-          [OK]
         </>
       )}
     </div>
