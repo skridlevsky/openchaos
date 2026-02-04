@@ -183,6 +183,14 @@ ${unmergeableNote}${fitnessNote}
 🕊️ May this PR rest in the git log.`
               });
 
+              // Add death label
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: death.pr.number,
+                labels: ['dead']
+              });
+
               // Close the PR
               await github.rest.pulls.update({
                 owner,
