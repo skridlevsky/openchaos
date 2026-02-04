@@ -358,6 +358,16 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
         </div>
       )}
 
+      {/* Code changed indicator */}
+      {pr.codeChanged && (
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;
+          [CODE CHANGED]
+          {pr.totalVotes !== pr.votes && (
+            <span> (total: {pr.totalVotes})</span>
+          )}
+        </div>
+      )}
+
       {/* Merge status */}
       <div>&nbsp;&nbsp;&nbsp;&nbsp;
         {hasMergeIssues && <span>{getMergeStatusText()} </span>}

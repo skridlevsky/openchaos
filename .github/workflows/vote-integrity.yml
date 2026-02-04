@@ -1,0 +1,134 @@
+name: Vote Integrity Watchdog
+
+on:
+  pull_request_target:
+    types: [synchronize]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  check-diff-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for code changes
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const crypto = require('crypto');
+
+            // Fetch PR files
+            let allFiles = [];
+            let page = 1;
+            while (true) {
+              const resp = await github.rest.pulls.listFiles({
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+                page,
+              });
+              allFiles = allFiles.concat(resp.data);
+              if (resp.data.length < 100) break;
+              page++;
+            }
+
+            // Build rebase-resilient diff string
+            // Sort files by filename for deterministic ordering
+            allFiles.sort((a, b) => a.filename.localeCompare(b.filename));
+
+            let diffContent = '';
+            for (const file of allFiles) {
+              diffContent += `${file.filename}:${file.status}\n`;
+              if (file.patch) {
+                // Extract only +/- lines (skip @@ headers and context lines)
+                const lines = file.patch.split('\n');
+                const changes = lines.filter(
+                  (line) => line.startsWith('+') || line.startsWith('-')
+                );
+                diffContent += changes.join('\n') + '\n';
+              } else if (file.sha) {
+                // Binary file or file without patch — use blob SHA
+                diffContent += `blob:${file.sha}\n`;
+              }
+            }
+
+            const diffHash = crypto
+              .createHash('sha256')
+              .update(diffContent)
+              .digest('hex');
+
+            console.log(`Computed diff hash: ${diffHash}`);
+
+            // Look for previous watchdog comments
+            const MARKER = '<!-- vote-integrity-watchdog -->';
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const watchdogComments = comments.data.filter(
+              (c) =>
+                c.user.login === 'github-actions[bot]' &&
+                c.body.includes(MARKER)
+            );
+
+            // Find the most recent hash from previous comments
+            let previousHash = null;
+            for (const comment of watchdogComments.reverse()) {
+              const match = comment.body.match(/Diff hash: `([a-f0-9]{64})`/);
+              if (match) {
+                previousHash = match[1];
+                break;
+              }
+            }
+
+            const now = new Date().toISOString();
+
+            if (previousHash === null) {
+              // First time — post baseline hash
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: [
+                  MARKER,
+                  `**Vote Integrity Watchdog** - Baseline established`,
+                  '',
+                  `Diff hash: \`${diffHash}\``,
+                  `Timestamp: ${now}`,
+                  '',
+                  '_This is the initial diff hash for this PR. Future code changes will be tracked against this baseline._',
+                ].join('\n'),
+              });
+              console.log('Posted baseline hash comment.');
+            } else if (previousHash !== diffHash) {
+              // Code changed — post warning
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: [
+                  MARKER,
+                  `**CODE CHANGED** - Vote Integrity Watchdog`,
+                  '',
+                  `The code in this PR has been substantively modified since votes were cast.`,
+                  '',
+                  `Previous diff hash: \`${previousHash}\``,
+                  `New diff hash: \`${diffHash}\``,
+                  `Timestamp: ${now}`,
+                  '',
+                  '_Votes cast before this change will not count toward the automerge tally. Please review the updated code and vote again if you still approve._',
+                ].join('\n'),
+              });
+              console.log('Posted CODE CHANGED warning.');
+            } else {
+              // Same hash (rebase) — no action needed
+              console.log('Diff hash unchanged (likely a rebase). No action needed.');
+            }

@@ -7,6 +7,7 @@ export interface PullRequest {
   author: string;
   url: string;
   votes: number;
+  totalVotes: number;
   upvotes: number;
   downvotes: number;
   comments: number;
@@ -15,10 +16,13 @@ export interface PullRequest {
   checksPassed: boolean;
   hotScore: number;
   isTrending: boolean;
+  codeChanged: boolean;
 }
 
-interface PRVotes {
+interface PRVoteData {
   total: number;
+  votes: number;
+  totalVotes: number;
   upvotes: number;
   downvotes: number;
   recentPositive: number;
@@ -29,7 +33,7 @@ interface PRVotes {
  * Calculate a "hot score" based on net votes from the last 7 days.
  * Simple and transparent: the PR with the most recent voting activity wins.
  */
-function calculateHotScore(votes: PRVotes): number {
+function calculateHotScore(votes: PRVoteData): number {
   return votes.recentPositive - votes.recentNegative;
 }
 
@@ -124,10 +128,16 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   const prs = allPRs;
 
-  // Fetch reactions, status, and calculate hot score for each PR
+  // Fetch reactions, status, code change info, and calculate hot score for each PR
   let prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
-      const votes = await getPRReactions(owner, repo, pr.number);
+      const codeStatus = await getCodeChangeStatus(owner, repo, pr.number);
+      const voteData = await getPRVoteData(
+        owner,
+        repo,
+        pr.number,
+        codeStatus.cutoffTimestamp
+      );
       const detail = await getPRDetail(owner, repo, pr.number);
       const isMergeable = detail.isMergeable && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
@@ -138,15 +148,17 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
-        votes: votes.total,
-        upvotes: votes.upvotes,
-        downvotes: votes.downvotes,
+        votes: voteData.votes,
+        totalVotes: voteData.totalVotes,
+        upvotes: voteData.upvotes,
+        downvotes: voteData.downvotes,
         comments: detail.comments,
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
-        hotScore: calculateHotScore(votes),
+        hotScore: calculateHotScore(voteData),
         isTrending: false, // Set by getOrganizedPRs based on top 5 hot score
+        codeChanged: codeStatus.codeChanged,
       };
     }),
   );
@@ -250,7 +262,67 @@ export async function getOrganizedPRs(): Promise<OrganizedPRs> {
   return { topByVotes, rising, newest, discussed, controversial };
 }
 
-async function getPRReactions(owner: string, repo: string, prNumber: number): Promise<PRVotes> {
+interface CodeChangeStatus {
+  codeChanged: boolean;
+  cutoffTimestamp: string | null;
+}
+
+interface GitHubComment {
+  user: {
+    login: string;
+  };
+  body: string;
+}
+
+async function getCodeChangeStatus(
+  owner: string,
+  repo: string,
+  prNumber: number
+): Promise<CodeChangeStatus> {
+  const MARKER = "<!-- vote-integrity-watchdog -->";
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/comments?per_page=100`,
+    {
+      headers: getHeaders("application/vnd.github.v3+json"),
+      next: { revalidate: 300 },
+    }
+  );
+
+  if (!response.ok) {
+    return { codeChanged: false, cutoffTimestamp: null };
+  }
+
+  const comments: GitHubComment[] = await response.json();
+
+  const codeChangedComments = comments.filter(
+    (c) =>
+      c.user.login === "github-actions[bot]" &&
+      c.body.includes(MARKER) &&
+      c.body.includes("**CODE CHANGED**")
+  );
+
+  if (codeChangedComments.length === 0) {
+    return { codeChanged: false, cutoffTimestamp: null };
+  }
+
+  const latest = codeChangedComments[codeChangedComments.length - 1];
+  const match = latest.body.match(
+    /Timestamp: (\d{4}-\d{2}-\d{2}T[\d:.]+Z)/
+  );
+
+  return {
+    codeChanged: true,
+    cutoffTimestamp: match ? match[1] : null,
+  };
+}
+
+async function getPRVoteData(
+  owner: string,
+  repo: string,
+  prNumber: number,
+  cutoffTimestamp: string | null
+): Promise<PRVoteData> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -264,13 +336,6 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     );
 
     if (!response.ok) {
-      // Do not throw: this is called inside Promise.all for every PR.
-      // Throwing here would fail the entire page for a single PR's reactions.
-      // Instead, return partial data and let the ISR cycle retry.
-      console.error(
-        `getPRReactions: HTTP ${response.status} for PR #${prNumber}, page ${page}. ` +
-        `Proceeding with ${allReactions.length} reactions collected.`
-      );
       break;
     }
 
@@ -291,14 +356,31 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
 
   const upvotes = allReactions.filter((r) => r.content === "+1").length;
   const downvotes = allReactions.filter((r) => r.content === "-1").length;
+  const totalVotes = upvotes - downvotes;
 
+  // If code changed, only count votes after the cutoff
+  let validReactions = allReactions;
+  if (cutoffTimestamp) {
+    const cutoffTime = new Date(cutoffTimestamp).getTime();
+    validReactions = allReactions.filter(
+      (r) => new Date(r.created_at).getTime() > cutoffTime
+    );
+  }
+
+  const votes =
+    validReactions.filter((r) => r.content === "+1").length -
+    validReactions.filter((r) => r.content === "-1").length;
+
+  // Hot score: based on recent (7-day) valid votes
   const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
-  const recentReactions = allReactions.filter(
+  const recentReactions = validReactions.filter(
     (r) => new Date(r.created_at).getTime() >= sevenDaysAgo,
   );
 
   return {
-    total: upvotes - downvotes,
+    total: totalVotes,
+    votes,
+    totalVotes,
     upvotes,
     downvotes,
     recentPositive: recentReactions.filter((r) => r.content === "+1").length,

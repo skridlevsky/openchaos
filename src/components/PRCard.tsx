@@ -225,6 +225,15 @@ export function PRCard({ pr, rank }: PRCardProps) {
             </a>
             {" · "}
             <TimeAgo isoDate={pr.createdAt} />
+            {pr.codeChanged && (
+              <>
+                {" · "}
+                <span title="Code changed after votes were cast — only recent votes count">
+                  CODE CHANGED
+                  {pr.totalVotes !== pr.votes && ` (total: ${pr.totalVotes})`}
+                </span>
+              </>
+            )}
           </div>
           <a
             href={url}
