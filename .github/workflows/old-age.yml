@@ -177,6 +177,8 @@ ${unmergeableNote}${fitnessNote}
 
 **Senectus ipsa est morbus.** (Old age itself is a disease.)
 
+🔒 **This PR has been locked. No resurrection is possible.**
+
 ---
 🕊️ May this PR rest in the git log.`
               });
@@ -189,7 +191,15 @@ ${unmergeableNote}${fitnessNote}
                 state: "closed"
               });
 
-              console.log(`✓ Closed PR #${death.pr.number}`);
+              // Lock the PR - no resurrection allowed
+              await github.rest.issues.lock({
+                owner,
+                repo,
+                issue_number: death.pr.number,
+                lock_reason: 'resolved'
+              });
+
+              console.log(`✓ Closed and locked PR #${death.pr.number}`);
             }
 
             console.log(`\n💀 Old age claimed ${deaths.length} PR(s) today.`);
