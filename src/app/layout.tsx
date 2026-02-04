@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./retro.css";
+import { pageCounter } from "@/lib/count/pageCounter";
 
 export const metadata: Metadata = {
   title: "OpenChaos.dev",
@@ -12,6 +13,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  pageCounter.increment();
   return (
     <html lang="en">
       <body>

@@ -1,26 +1,37 @@
-"use client";
+import { getCurrentCount } from "@/lib/count/getCount";
 
-export function WebCounter() {
-  const count = 1337;
+export async function WebCounter() {
+  let count = -1;
+  try {
+    count = await getCurrentCount();
+  } catch (e) {
+    console.error(e)
+    console.error('Unable to fetch current pageview count.');
+  }
 
   // Format leading zeros
-  const formattedCount = count.toString().padStart(6, "0");
-  
+
+  let formattedCount = count.toString().padStart(8, "0");
+
+  if (count === -1) {
+    formattedCount = 'xerrorx'
+  }
+
   // Split for each "cell"
   const digits = formattedCount.split("");
 
   return (
     <div className="webcounter-container">
-      <table 
-        border={2} 
-        cellPadding={5} 
-        cellSpacing={0} 
+      <table
+        border={2}
+        cellPadding={5}
+        cellSpacing={0}
         className="webcounter-table"
       >
         <tbody>
           <tr>
-            <td 
-              colSpan={6} 
+            <td
+              colSpan={6}
               className="webcounter-header-cell"
             >
               <span className="webcounter-header-text">
@@ -30,7 +41,7 @@ export function WebCounter() {
           </tr>
           <tr>
             {digits.map((digit, index) => (
-              <td 
+              <td
                 key={index}
                 className="webcounter-digit-cell"
               >
