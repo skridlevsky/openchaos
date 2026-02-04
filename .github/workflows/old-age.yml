@@ -79,32 +79,36 @@ jobs:
               const now = new Date();
               const ageDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
 
-              // Count interactions
-              const { data: comments } = await github.rest.issues.listComments({
-                owner,
-                repo,
-                issue_number: pr.number,
-                per_page: 100
-              });
-
-              const { data: reactions } = await github.rest.reactions.listForIssue({
-                owner,
-                repo,
-                issue_number: pr.number,
-                per_page: 100
-              });
-
-              const { data: reviews } = await github.rest.pulls.listReviews({
-                owner,
-                repo,
-                pull_number: pr.number,
-                per_page: 100
-              });
+              // Count interactions - fetch all in parallel for speed
+              const [comments, reactions, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  per_page: 100
+                }),
+                github.paginate(github.rest.reactions.listForIssue, {
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  per_page: 100
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  per_page: 100
+                })
+              ]);
 
               const interactions = comments.length + reactions.length + reviews.length;
 
-              // Check if unmergeable
-              const isUnmergeable = pr.mergeable === false || pr.mergeable_state === 'dirty';
+              // Check if unmergeable (conflicts, behind, or can't merge)
+              // Note: mergeable can be null while GitHub calculates it
+              const isUnmergeable =
+                pr.mergeable_state === 'dirty' ||
+                pr.mergeable_state === 'conflicting' ||
+                pr.mergeable === false;
 
               // Calculate death probability
               const deathProb = calculateDeathProbability(ageDays, interactions, isUnmergeable);
