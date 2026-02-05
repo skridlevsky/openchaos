@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
-:root {
-  --background: #c0c0c0;
-  --foreground: #000000;
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root,
+[data-theme="light"] {
+  --background: #fafafa;
+  --foreground: #0a0a0a;
+}
+
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -41,4 +49,29 @@ center {
 @keyframes rotate-hue {
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
+}
+
+
+@keyframes sixseven-shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.sixseven-shake {
+  animation: sixseven-shake 0.7s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
 }
