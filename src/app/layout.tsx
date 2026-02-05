@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./retro.css";
 import { BSOD } from "../components/BSOD";
+import { Fartscroll } from "@/components/Fartscroll";
 
 export const metadata: Metadata = {
   title: "OpenChaos.dev",
@@ -18,6 +19,7 @@ export default function RootLayout({
       <body>
         <BSOD />
         {children}
+        <Fartscroll />
       </body>
     </html>
   );
