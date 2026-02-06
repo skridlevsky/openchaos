@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cat } from "@/components/Cat";
 import "./globals.css";
 import { Clippy } from "@/components/Clippy";
+import { Fartscroll } from "@/components/Fartscroll";
 
 export const metadata: Metadata = {
   title: "OpenChaos.dev",
@@ -20,6 +21,7 @@ export default function RootLayout({
           {children}
           <Cat />
           <Clippy />
+          <Fartscroll />
         </div>
       </body>
     </html>
