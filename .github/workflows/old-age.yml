@@ -158,29 +158,34 @@ jobs:
                 ? "\n\n💚 **High Engagement:** Despite significant community love, time caught up."
                 : "";
 
+              const deathMessage = [
+                "⏳ **SUCCUMBED TO OLD AGE** ⏳",
+                "",
+                `This PR has died from natural causes after ${death.ageDays} days.`,
+                "",
+                "**Mortality Report:**",
+                `- Age: ${death.ageDays} days`,
+                `- Fitness (interactions): ${death.interactions}`,
+                `- Death probability: ${death.deathProb.toFixed(2)}%`,
+                `- Fatal roll: ${death.roll.toFixed(2)}`,
+                unmergeableNote,
+                fitnessNote,
+                "",
+                "*In the chaos world, PRs must move fast or perish. Only sustained engagement and timely merges can fight the effects of aging.*",
+                "",
+                "**Senectus ipsa est morbus.** (Old age itself is a disease.)",
+                "",
+                "🔒 **This PR has been locked. No resurrection is possible.**",
+                "",
+                "---",
+                "🕊️ May this PR rest in the git log."
+              ].join("\n");
+
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number: death.pr.number,
-                body: `⏳ **SUCCUMBED TO OLD AGE** ⏳
-
-This PR has died from natural causes after ${death.ageDays} days.
-
-**Mortality Report:**
-- Age: ${death.ageDays} days
-- Fitness (interactions): ${death.interactions}
-- Death probability: ${death.deathProb.toFixed(2)}%
-- Fatal roll: ${death.roll.toFixed(2)}
-${unmergeableNote}${fitnessNote}
-
-*In the chaos world, PRs must move fast or perish. Only sustained engagement and timely merges can fight the effects of aging.*
-
-**Senectus ipsa est morbus.** (Old age itself is a disease.)
-
-🔒 **This PR has been locked. No resurrection is possible.**
-
----
-🕊️ May this PR rest in the git log.`
+                body: deathMessage
               });
 
               // Add death label
