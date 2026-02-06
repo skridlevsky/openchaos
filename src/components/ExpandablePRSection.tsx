@@ -12,7 +12,7 @@ interface ExpandablePRSectionProps {
 
 export function ExpandablePRSection({ title, prs, showRank = false }: ExpandablePRSectionProps) {
   const [expanded, setExpanded] = useState(false);
-  const initialCount = 5;
+  const initialCount = 10;
   const hasMore = prs.length > initialCount;
   const displayedPRs = expanded ? prs : prs.slice(0, initialCount);
 

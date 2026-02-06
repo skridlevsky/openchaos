@@ -210,7 +210,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
             {pr.isTrending && (
               <div className="pr-card-trending-badge">
                 <span className="pr-card-trending-badge-text">
-                  <b>🔥 TRENDING</b>
+                  <b>🔥</b>
                 </span>
               </div>
             )}
