@@ -23,6 +23,7 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const lastX = useRef(0);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const handleWindowMouseMove = (e: MouseEvent) => {
@@ -141,6 +142,63 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
         clearTimeout(timerId);
       };
     }
+  }, [isMidiPlayerOpen, hasBeenDragged]);
+
+  // When midi player opens (and cat hasn't been dragged), place the cat on top of the radio
+  // and animate it running across the top surface.
+  useEffect(() => {
+    if (!isMidiPlayerOpen || hasBeenDragged || !catRef.current) return;
+
+    const radio = document.querySelector('.gta-radio-container') as HTMLElement | null;
+    const catEl = catRef.current;
+
+    if (!radio) {
+      // fallback to previous behaviour
+      const screenHeight = window.innerHeight;
+      const catHeight = catEl.getBoundingClientRect().height;
+      setPosition({ x: 20, y: screenHeight - 200 - catHeight });
+      return;
+    }
+
+    const radioRect = radio.getBoundingClientRect();
+    const catRect = catEl.getBoundingClientRect();
+
+    const topY = Math.max(0, radioRect.top - catRect.height);
+    let x = radioRect.left;
+    const minX = radioRect.left;
+    const maxX = Math.max(minX, radioRect.left + radioRect.width - catRect.width);
+
+    setPosition({ x, y: topY });
+
+    let dir = 1; // 1 = right, -1 = left
+    setIsFlipped(false);
+    let last = performance.now();
+
+    const speed = 120; // px per second
+
+    const step = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      x += dir * speed * dt;
+      if (x <= minX) {
+        x = minX;
+        dir = 1;
+        setIsFlipped(false);
+      } else if (x >= maxX) {
+        x = maxX;
+        dir = -1;
+        setIsFlipped(true);
+      }
+      setPosition({ x, y: topY });
+      rafRef.current = requestAnimationFrame(step);
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
   }, [isMidiPlayerOpen, hasBeenDragged]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
