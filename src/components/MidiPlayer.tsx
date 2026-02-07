@@ -45,7 +45,7 @@ export function MidiPlayer({ isOpen: isOpenProp, onClose }: MidiPlayerProps = {}
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStationIndex, setCurrentStationIndex] = useState(0);
-  const [alignment, setAlignment] = useState<"left" | "right">("right");
+  const [alignment, setAlignment] = useState<"left" | "right">("left");
   const audioRef = useRef<HTMLAudioElement>(null);
   const shouldAutoPlayRef = useRef(false);
 
