@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-
+import { useRef, useEffect, useState } from "react";
 interface RadioStation {
   id: string;
   name: string;
@@ -33,8 +32,15 @@ const STATIONS: RadioStation[] = [
   { id: "lazlow", name: "Integrity 2.0", logo: "/build/games/assets/lazlow-CVZww43x.png" },
 ];
 
-export function MidiPlayer() {
-  const [isOpen, setIsOpen] = useState(true);
+interface MidiPlayerProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function MidiPlayer({ isOpen: isOpenProp, onClose }: MidiPlayerProps = {}) {
+  // support either prop-driven open state or an internal one
+  const [internalIsOpen, setInternalIsOpen] = useState(true);
+  const isOpen = typeof isOpenProp === "boolean" ? isOpenProp : internalIsOpen;
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -149,7 +155,7 @@ export function MidiPlayer() {
       <div className="gta-radio-overlay">
         <div className="gta-radio-header">
           <span className="gta-radio-title">RADIO</span>
-          <div className="gta-radio-header-buttons">
+            <div className="gta-radio-header-buttons">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="gta-radio-header-btn"
@@ -167,7 +173,8 @@ export function MidiPlayer() {
             <button
               onClick={() => {
                 stopMusic();
-                setIsOpen(false);
+                if (onClose) onClose();
+                else setInternalIsOpen(false);
               }}
               className="gta-radio-close-btn"
               title="Close"
