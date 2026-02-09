@@ -325,27 +325,44 @@ interface GitHubMergedPR {
 export async function getMergedPRs(): Promise<MergedPullRequest[]> {
   const [owner, repo] = GITHUB_REPO.split("/");
 
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=20`,
-    {
-      headers: getHeaders("application/vnd.github.v3+json"),
-      next: { revalidate: 300 },
-    }
-  );
+  let allPRs: GitHubMergedPR[] = [];
+  let page = 1;
 
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("Rate limited by GitHub API");
+  while (true) {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
+      {
+        headers: getHeaders("application/vnd.github.v3+json"),
+        next: { revalidate: 300 },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error("Rate limited by GitHub API");
+      }
+      throw new Error(`GitHub API error: ${response.status}`);
     }
-    throw new Error(`GitHub API error: ${response.status}`);
+
+    const prs: GitHubMergedPR[] = await response.json();
+
+    if (prs.length === 0) {
+      break;
+    }
+
+    allPRs = allPRs.concat(prs);
+
+    if (prs.length < 100) {
+      break;
+    }
+
+    page++;
   }
-
-  const prs: GitHubMergedPR[] = await response.json();
 
   // Filter to only merged PRs (not just closed), exclude repo owner's maintenance PRs
   // Sort by merge time (newest first) since sort=updated may not reflect merge order
   const REPO_OWNER = owner;
-  return prs
+  return allPRs
     .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
     .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
     .map((pr) => ({
