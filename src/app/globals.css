@@ -75,3 +75,89 @@ center {
   transform-origin: center;
   will-change: transform;
 }
+
+.auth-button {
+  padding: 8px 16px;
+  border: 3px outset #808080;
+  background: linear-gradient(to bottom, #c0c0c0, #808080);
+  color: #000000;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.auth-button:hover {
+  background: linear-gradient(to bottom, #d0d0d0, #909090);
+}
+
+.auth-button:active {
+  border-style: inset;
+  background: linear-gradient(to bottom, #808080, #c0c0c0);
+}
+
+.auth-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-button-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-avatar {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #000000;
+  border-radius: 3px;
+}
+
+.auth-username {
+  color: #0000ff;
+}
+
+.auth-button-logout {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vote-button {
+  padding: 6px 16px;
+  border: 2px outset #808080;
+  background: linear-gradient(to bottom, #c0c0c0, #808080);
+  color: #000000;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.vote-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #d0d0d0, #909090);
+}
+
+.vote-button:active:not(:disabled) {
+  border-style: inset;
+  background: linear-gradient(to bottom, #808080, #c0c0c0);
+}
+
+.vote-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-button-up {
+  border-color: #00ff00;
+}
+
+.vote-button-down {
+  border-color: #ff0000;
+}
