@@ -1,4 +1,4 @@
-import { Console } from "console";
+import { cookies } from "next/headers";
 
 export interface PullRequest {
   number: number;
@@ -50,8 +50,20 @@ interface GitHubCheckRunsResponse {
 
 const GITHUB_REPO = "skridlevsky/openchaos";
 
-function getHeaders(accept: string): Record<string, string> {
+async function getHeaders(accept: string): Promise<Record<string, string>> {
   const headers: Record<string, string> = { Accept: accept };
+  // Prefer the logged-in user's OAuth token to preserve the shared
+  // GITHUB_TOKEN budget for unauthenticated visitors.
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("github_token")?.value;
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+      return headers;
+    }
+  } catch {
+    // cookies() not available (e.g. during build) — fall through
+  }
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
@@ -68,7 +80,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.v3+json"),
+        headers: await getHeaders("application/vnd.github.v3+json"),
         next: { revalidate: 300 }, // Cache for 5 minutes
       }
     );
@@ -140,7 +152,7 @@ async function getPRVotes(owner: string, repo: string, prNumber: number): Promis
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions?per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.squirrel-girl-preview+json"),
+        headers: await getHeaders("application/vnd.github.squirrel-girl-preview+json"),
         next: { revalidate: 300 },
       },
     );
@@ -176,7 +188,7 @@ async function getPRMergeStatus(
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: await getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
     }
   );
@@ -203,7 +215,7 @@ async function getCommitStatus(
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/check-runs`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: await getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
     }
   );
@@ -243,7 +255,7 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=20`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: await getHeaders("application/vnd.github.v3+json"),
       next: { revalidate: 300 },
     }
   );
