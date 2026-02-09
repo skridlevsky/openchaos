@@ -69,25 +69,7 @@ pre {
   will-change: transform;
 }
 
-.auth-button {
-  padding: 8px 16px;
-  border: 3px outset #808080;
-  background: linear-gradient(to bottom, #c0c0c0, #808080);
-  color: #000000;
-  font-family: 'Comic Sans MS', cursive;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-block;
-}
 
-.auth-button:hover {
-  background: linear-gradient(to bottom, #d0d0d0, #909090);
-}
-
-.auth-button:active {
-  border-style: inset;
-  background: linear-gradient(to bottom, #808080, #c0c0c0);
-}
 
 .auth-button-disabled {
   opacity: 0.5;
