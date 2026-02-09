@@ -216,26 +216,34 @@ export async function getOrganizedPRs(): Promise<OrganizedPRs> {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  // Rising: sorted by hot score (recent voting activity)
+  // Rising: sorted by hot score, conflicts at bottom
   const rising = [...prsWithTrending]
-    .sort((a, b) => b.hotScore - a.hotScore)
-    .slice(0, 10);
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return b.hotScore - a.hotScore;
+    });
 
-  // Newest: sorted by creation date, limited to 10
+  // Newest: sorted by creation date, conflicts at bottom
   const newest = [...prsWithTrending]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10);
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
-  // Discussed: sorted by comment count, limited to 10
+  // Discussed: sorted by comment count, conflicts at bottom
   const discussed = [...prsWithTrending]
-    .sort((a, b) => b.comments - a.comments)
-    .slice(0, 10);
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return b.comments - a.comments;
+    });
 
-  // Controversial: PRs with both upvotes and downvotes, sorted by min(up, down)
+  // Controversial: PRs with both upvotes and downvotes, conflicts at bottom
   const controversial = [...prsWithTrending]
     .filter((pr) => pr.upvotes > 0 && pr.downvotes > 0)
-    .sort((a, b) => Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes))
-    .slice(0, 10);
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes);
+    });
 
   return { topByVotes, rising, newest, discussed, controversial };
 }
