@@ -478,9 +478,8 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
 
   let allPRs: GitHubMergedPR[] = [];
   let page = 1;
-  const MAX_PAGES = 10; // 1000 PRs max, matches GitHub API limit
 
-  while (page <= MAX_PAGES) {
+  while (true) {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
       {
