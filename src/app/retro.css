@@ -544,6 +544,24 @@
   }
 }
 
+/* Toolbar avatar/globe spinning animation */
+@keyframes toolbarSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.toolbar-avatar-spin {
+  animation: toolbarSpin 20s linear infinite;
+}
+
+.toolbar-globe-spin {
+  animation: toolbarSpin 8s linear infinite;
+}
+
 @keyframes spin-horizontal {
   from {
     transform: rotateY(0deg);
@@ -1099,6 +1117,239 @@
 }
 
 /* ===== PRCARD COMPONENT ===== */
+
+/* Vote feedback animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes voteButtonHover {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Milestone celebration animation */
+@keyframes celebrate {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  50% {
+    transform: scale(1.3) rotate(5deg);
+  }
+  75% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Shake animation for 67 votes */
+@keyframes shake67 {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px) rotate(2deg);
+  }
+}
+
+/* Confetti particle animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Star burst animation */
+@keyframes star-burst {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+.celebrate-animation {
+  animation: celebrate 0.6s ease-in-out;
+}
+
+.shake-67-animation {
+  animation: shake67 0.5s ease-in-out;
+}
+
+.confetti-particle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  animation: confetti-fall 2s ease-out forwards;
+  pointer-events: none;
+}
+
+.star-burst {
+  position: absolute;
+  font-size: 24px;
+  animation: star-burst 0.8s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Reddit/Digg-style vote arrows */
+.vote-arrow {
+  width: 32px;
+  height: 28px;
+  border: 2px solid;
+  border-color: #ffffff #000000 #000000 #ffffff;
+  background: #c0c0c0;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: inset 1px 1px 0 #dfdfdf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+}
+
+.vote-arrow:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: inset 1px 1px 0 #dfdfdf, 0 0 8px rgba(0,0,0,0.3);
+}
+
+.vote-arrow:active:not(:disabled) {
+  border-color: #000000 #ffffff #ffffff #000000;
+  box-shadow: inset 2px 2px 2px #808080;
+  transform: scale(0.95);
+}
+
+.vote-arrow:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* Upvote arrow - orange like Reddit/Digg */
+.vote-arrow-up {
+  background: linear-gradient(to bottom, #ff8b60 0%, #ff6639 100%);
+  color: #ffffff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.vote-arrow-up:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #ffa080 0%, #ff7d4d 100%);
+  color: #ffffff;
+}
+
+.vote-arrow-up:active:not(:disabled) {
+  background: linear-gradient(to bottom, #ff6639 0%, #ff4500 100%);
+}
+
+/* Downvote arrow - blue/purple like Reddit */
+.vote-arrow-down {
+  background: linear-gradient(to bottom, #9494ff 0%, #7c7cff 100%);
+  color: #ffffff;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+}
+
+.vote-arrow-down:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #ababff 0%, #9494ff 100%);
+  color: #ffffff;
+}
+
+.vote-arrow-down:active:not(:disabled) {
+  background: linear-gradient(to bottom, #7c7cff 0%, #5858ff 100%);
+}
+
+/* Vote count styling */
+.vote-count {
+  user-select: none;
+}
+
+.vote-count-leading {
+  color: #ff0000;
+}
+
+.vote-count-normal {
+  color: #0000ff;
+}
+
+/* Legacy button styles (keeping for backwards compatibility) */
+.vote-buttons {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vote-button {
+  transition: all 0.2s ease;
+  border: 2px solid;
+  border-color: #ffffff #000000 #000000 #ffffff;
+  background: #c0c0c0;
+  padding: 4px 8px;
+  font-family: 'Arial', sans-serif;
+  font-size: 11px;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 0 #dfdfdf;
+}
+
+.vote-button:hover:not(:disabled) {
+  animation: voteButtonHover 0.6s ease infinite;
+  background: #d0d0d0;
+}
+
+.vote-button:active:not(:disabled) {
+  border-color: #000000 #ffffff #ffffff #000000;
+  box-shadow: inset 1px 1px 0 #808080;
+}
+
+.vote-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.vote-button-up {
+  background: linear-gradient(to bottom, #90EE90 0%, #7CD97C 100%);
+}
+
+.vote-button-up:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #A0FEA0 0%, #8CE98C 100%);
+}
+
+.vote-button-down {
+  background: linear-gradient(to bottom, #FFB6C1 0%, #FFa0b0 100%);
+}
+
+.vote-button-down:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #FFC6D1 0%, #FFb0c0 100%);
+}
+
 .pr-card {
   margin-bottom: 10px;
   font-family: 'Comic Sans MS', cursive;

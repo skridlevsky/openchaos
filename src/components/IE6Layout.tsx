@@ -18,9 +18,11 @@ interface IE6LayoutProps {
 
 export function IE6Layout({ children }: IE6LayoutProps) {
   const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
+  const [dateStr, setDateStr] = useState('');
   const [hide, setHide] = useState(false);
   const shouldHide = Math.random() <= 0.01337;
   useEffect(()=>{
+    setDateStr(new Date().toLocaleDateString());
     if(shouldHide){
       setHide(true);
     }
@@ -116,7 +118,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                         <span className="ie6-visitor-text">
                           {/* @ts-expect-error marquee is deprecated but used for retro styling */}
                           <marquee scrollamount="3">
-                            👾 Last updated: {new Date().toLocaleDateString()} 👾 Webmaster: skridlevsky@geocities.com 👾
+                            👾 Last updated: {dateStr} 👾 Webmaster: skridlevsky@geocities.com 👾
                           {/* @ts-expect-error marquee is deprecated but used for retro styling */}
                           </marquee>
                         </span>

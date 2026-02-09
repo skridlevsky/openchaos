@@ -24,6 +24,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
+- Any time the maintainer pushes code to main without following the community voting process indicated above, he must post to his X account "I'm a naughty boy" with a link to the Github commit page. 
 
 ## What Can Be Changed
 
