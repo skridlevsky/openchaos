@@ -1,7 +1,9 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth, GitHubUser } from "@/hooks/useAuth";
+import { soundPlayer } from "@/utils/sounds";
 
 interface IE6BrowserChromeProps {
   children: ReactNode;
@@ -9,8 +11,26 @@ interface IE6BrowserChromeProps {
 
 export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [showSearchPanel, setShowSearchPanel] = useState(false);
   const [showFavoritesPanel, setShowFavoritesPanel] = useState(false);
+  const [titleText, setTitleText] = useState("OpenChaos - Microsoft Internet Explorer");
+  const [hasPlayedStartup, setHasPlayedStartup] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setTitleText(`OpenChaos - logged in as ${user.login} - Microsoft Internet Explorer`);
+
+      // Play Windows XP startup sound on successful login (once per session)
+      if (!hasPlayedStartup) {
+        soundPlayer.playStartup();
+        setHasPlayedStartup(true);
+      }
+    } else {
+      setTitleText("OpenChaos - Microsoft Internet Explorer");
+      setHasPlayedStartup(false);
+    }
+  }, [user, hasPlayedStartup]);
 
   const handleBack = () => {
     window.history.back();
@@ -44,11 +64,11 @@ export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
       <div className="ie6-titlebar">
         <div className="ie6-titlebar-left">
           <img 
-            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM3.5 8a4.5 4.5 0 0 1 8.59-1.91l-2.24.75A2 2 0 1 0 8 10a2 2 0 0 0 1.85-1.23l2.24-.75A4.5 4.5 0 0 1 3.5 8z'/%3E%3C/svg%3E" 
+            src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23fff' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM3.5 8a4.5 4.5 0 0 1 8.59-1.91L-2.24.75A2 2 0 1 0 8 10a2 2 0 0 0 1.85-1.23l2.24-.75A4.5 4.5 0 0 1 3.5 8z'/%3E%3C/svg%3E" 
             alt="Internet Explorer icon" 
             className="ie6-titlebar-icon"
           />
-          <span className="ie6-titlebar-text">Microsoft Internet Explorer</span>
+          <span className="ie6-titlebar-text">{titleText}</span>
         </div>
         <div className="ie6-titlebar-buttons">
           <button className="ie6-titlebar-button ie6-minimize">
@@ -99,22 +119,98 @@ export function IE6BrowserChrome({ children }: IE6BrowserChromeProps) {
         </div>
         <div className="ie6-separator"></div>
         <div className="ie6-toolbar-buttons">
-          <button 
+          <button
             className={`ie6-toolbar-button ${showSearchPanel ? 'active' : ''}`}
-            title="Search" 
+            title="Search"
             onClick={handleSearch}
           >
             <span className="ie6-button-icon">🔍</span>
             <span className="ie6-button-label">Search</span>
           </button>
-          <button 
+          <button
             className={`ie6-toolbar-button ${showFavoritesPanel ? 'active' : ''}`}
-            title="Favorites" 
+            title="Favorites"
             onClick={handleFavorites}
           >
             <span className="ie6-button-icon">⭐</span>
             <span className="ie6-button-label">Favorites</span>
           </button>
+          <button
+            className="ie6-toolbar-button"
+            title={user ? `Logout (${user.login})` : "Login with GitHub"}
+            onClick={() => {
+              if (user) {
+                // Logout - play Windows XP shutdown sound!
+                soundPlayer.playShutdown();
+                // Wait for sound to play before reloading
+                setTimeout(() => {
+                  fetch('/api/auth/logout', { method: 'POST' })
+                    .then(() => window.location.reload());
+                }, 2500); // Sound duration
+              } else {
+                // Login - play Windows XP startup sound, redirect when done
+                localStorage.setItem('oauth_login_pending', '1');
+                const audio = soundPlayer.playStartup();
+                const redirect = () => { window.location.href = '/api/auth/login'; };
+                if (audio) {
+                  audio.addEventListener('ended', redirect);
+                  setTimeout(redirect, 5000); // fallback
+                } else {
+                  redirect();
+                }
+              }
+            }}
+          >
+            <span className="ie6-button-icon">{user ? '🚪' : '🔐'}</span>
+            <span className="ie6-button-label">{user ? 'Logout' : 'Login'}</span>
+          </button>
+        </div>
+        <div className="ie6-separator"></div>
+        <div style={{ 
+          marginLeft: 'auto',
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          {user ? (
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              title={user.login}
+              className="toolbar-avatar-spin"
+              style={{
+                width: '32px',
+                height: '32px',
+                border: '1px solid #808080',
+                display: 'inline-block',
+                borderRadius: '50%'
+              }}
+            />
+          ) : (
+            <img
+              src="/globe.svg"
+              alt="Login with GitHub"
+              onClick={() => {
+                localStorage.setItem('oauth_login_pending', '1');
+                const audio = soundPlayer.playStartup();
+                const redirect = () => { window.location.href = '/api/auth/login'; };
+                if (audio) {
+                  audio.addEventListener('ended', redirect);
+                  setTimeout(redirect, 5000); // fallback
+                } else {
+                  redirect();
+                }
+              }}
+              style={{
+                width: '32px',
+                height: '32px',
+                border: '1px solid #808080',
+                backgroundColor: '#000000',
+                display: 'inline-block',
+                cursor: 'pointer'
+              }}
+              title="Login with GitHub"
+            />
+          )}
         </div>
       </div>
 
