@@ -21,8 +21,6 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
       <a href={pr.url} target="_blank" rel="noopener noreferrer">
         {pr.url}
       </a>
-      <br />
-      WINNER
     </div>
   );
 }

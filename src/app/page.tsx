@@ -30,11 +30,6 @@ export default function Home() {
             8===D (‿|‿)
           </pre>
           <br />
-          OPEN PRS - VOTE TO MERGE
-          <br />
-          ------------------------
-          <br />
-          <br />
           <Suspense
             fallback={
               <div>
