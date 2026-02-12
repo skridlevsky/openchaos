@@ -26,7 +26,7 @@ type VoteStatus = 'idle' | 'voting' | 'success' | 'error';
 
 export function PRCard({ pr, rank }: PRCardProps) {
   const { user, isAuthenticated, login } = useAuth();
-  const url = chooseURL(pr.url);
+  const linkHref = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   const containsRhymes = hasRhymingWords(pr.title);
   const hasConflict = !pr.isMergeable || !containsRhymes;
@@ -226,7 +226,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          &nbsp;&nbsp;&nbsp;&nbsp;Votes:&nbsp;
+          &nbsp;&nbsp;&nbsp;&nbsp;Score:&nbsp;
           {voteStatus === "voting" ? "..." : optimisticVotes}
           {showTooltip && (
             <span
@@ -285,14 +285,14 @@ export function PRCard({ pr, rank }: PRCardProps) {
       </div>
 
       {/* Line 3: link */}
-      <div style={{ marginBottom: "4px" }}>
+      <div>
       &nbsp;&nbsp;&nbsp;&nbsp;<a
-          href={url}
+          href={linkHref}
           target="_blank"
           rel="noopener noreferrer"
           className="pr-card-link"
         >
-          {url}
+          {pr.url}
         </a>
       </div>
 
