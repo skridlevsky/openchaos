@@ -36,7 +36,7 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
           <PRCard
             key={pr.number}
             pr={showRank ? pr : { ...pr, isTrending: false }}
-            rank={showRank ? index + 1 : 0}
+            rank={index + 1}
           />
         ))}
       </div>
