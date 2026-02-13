@@ -2,6 +2,45 @@
 
 import { useState, useEffect } from "react";
 
+const CLIPPY_ASCII_FRAMES = [
+  `  __
+  /  \\
+  |  |
+  @  @
+  |  |
+  || |
+  || |
+  |\\_|
+  \\__\\`,
+  `  __
+  /  \\
+  |  |
+  -  -
+  |  |
+  || |
+  || |
+  |\\_|
+  \\__\\`,
+  `  __
+  /  \\
+  |  |
+  @  @
+  |  |
+  || |
+  || |
+  |\\_|
+  \\__\\`,
+  `  __
+  /  \\
+  |  |
+  @  @
+  |  |
+  || |
+  || |
+  |\\_|
+  \\__\\`,
+];
+
 const CLIPPY_TIPS = [
   "It looks like you're trying to vote on a PR! Would you like help with that?",
   "Did you know? The top-voted PR gets merged every day at 09:00 UTC!",
@@ -31,6 +70,48 @@ function getRandomTip(currentIndex: number): number {
   return newIndex;
 }
 
+function wrapText(text: string, maxWidth: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    if (currentLine.length + word.length + 1 <= maxWidth) {
+      currentLine += (currentLine ? " " : "") + word;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+
+  return lines;
+}
+
+function createSpeechBubble(text: string, maxWidth: number = 40): string {
+  const lines = wrapText(text, maxWidth);
+  const maxLineLength = Math.max(...lines.map((line) => line.length), 10);
+  const width = maxLineLength + 4; // padding on each side
+
+  let bubble = `┌${"─".repeat(width)}┐\n`;
+  
+  for (const line of lines) {
+    const paddedLine = line.padEnd(maxLineLength+2, " ");
+    bubble += `│ ${paddedLine} │\n`;
+  }
+  
+  // Add button row with proper spacing - ensure enough padding on the right
+  const buttonText = `  [OK]  [Don't show tips]  `;
+  const buttonRowPadded = buttonText.padEnd(maxLineLength+2, " ");
+  bubble += `│ ${buttonRowPadded} │\n`;
+  bubble += `└${"─".repeat(width)}┘\n`;
+  // Arrow on the right side - align to right edge of bubble
+  const arrowOffset = width - 2; // Position arrow near right edge
+  bubble += `${" ".repeat(arrowOffset)}\\/\n`; // pointer pointing down on the right
+
+  return bubble;
+}
+
 export function Clippy() {
   const [isVisible, setIsVisible] = useState(false);
   const [currentTip, setCurrentTip] = useState(() =>
@@ -38,6 +119,7 @@ export function Clippy() {
   );
   const [isDismissed, setIsDismissed] = useState(false);
   const [showClippy, setShowClippy] = useState(true);
+  const [currentFrame, setCurrentFrame] = useState(0);
 
   useEffect(() => {
     // Show Clippy after a delay
@@ -46,6 +128,15 @@ export function Clippy() {
     }, 3000);
 
     return () => clearTimeout(showTimer);
+  }, []);
+
+  useEffect(() => {
+    // Animate ASCII frames
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % CLIPPY_ASCII_FRAMES.length);
+    }, 500); // Change frame every 500ms
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -93,7 +184,7 @@ export function Clippy() {
         bottom: "80px",
         right: "20px",
         zIndex: 9998,
-        fontFamily: "Tahoma, Arial, sans-serif",
+        fontFamily: "Courier New, monospace",
       }}
     >
       {/* Speech Bubble */}
@@ -103,91 +194,51 @@ export function Clippy() {
             position: "absolute",
             bottom: "140px",
             right: "0",
-            width: "220px",
-            backgroundColor: "#ffffcc",
-            border: "2px solid #000",
-            borderRadius: "10px",
-            padding: "12px",
-            boxShadow: "3px 3px 0 #888",
+            fontFamily: "Courier New, monospace",
+            fontSize: "12px",
+            lineHeight: "1.2",
+            color: "var(--foreground)",
+            whiteSpace: "pre",
             animation: "clippy-bounce 0.3s ease-out",
           }}
         >
-          {/* Speech bubble pointer */}
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-20px",
-              right: "30px",
-              width: 0,
-              height: 0,
-              borderLeft: "10px solid transparent",
-              borderRight: "10px solid transparent",
-              borderTop: "20px solid #000",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "-16px",
-              right: "32px",
-              width: 0,
-              height: 0,
-              borderLeft: "8px solid transparent",
-              borderRight: "8px solid transparent",
-              borderTop: "16px solid #ffffcc",
-            }}
-          />
-
-          <p
-            style={{
-              margin: "0 0 10px 0",
-              fontSize: "12px",
-              lineHeight: "1.4",
-              color: "#000",
-            }}
-          >
-            {CLIPPY_TIPS[currentTip]}
-          </p>
-
-          <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
-            <button
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <pre
+              className="font-mono text-xs leading-tight whitespace-pre"
+              style={{
+                margin: 0,
+                color: "var(--foreground)",
+              }}
+            >
+              {createSpeechBubble(CLIPPY_TIPS[currentTip])}
+            </pre>
+            {/* Clickable button areas over ASCII art */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: "1.2em",
+                left: "0.5ch",
+                width: "4ch",
+                height: "1.2em",
+                cursor: "pointer",
+                zIndex: 1,
+              }}
               onClick={handleDismiss}
+              title="OK"
+            />
+            <div
               style={{
-                padding: "3px 12px",
-                fontSize: "11px",
-                backgroundColor: "#c0c0c0",
-                border: "2px outset #fff",
+                position: "absolute",
+                bottom: "1.2em",
+                left: "7ch",
+                width: "14ch",
+                height: "1.2em",
                 cursor: "pointer",
-                fontFamily: "Tahoma, Arial, sans-serif",
+                zIndex: 1,
               }}
-              onMouseDown={(e) => {
-                (e.target as HTMLButtonElement).style.border = "2px inset #888";
-              }}
-              onMouseUp={(e) => {
-                (e.target as HTMLButtonElement).style.border = "2px outset #fff";
-              }}
-            >
-              OK
-            </button>
-            <button
               onClick={handleHideClippy}
-              style={{
-                padding: "3px 8px",
-                fontSize: "11px",
-                backgroundColor: "#c0c0c0",
-                border: "2px outset #fff",
-                cursor: "pointer",
-                fontFamily: "Tahoma, Arial, sans-serif",
-              }}
-              onMouseDown={(e) => {
-                (e.target as HTMLButtonElement).style.border = "2px inset #888";
-              }}
-              onMouseUp={(e) => {
-                (e.target as HTMLButtonElement).style.border = "2px outset #fff";
-              }}
-            >
-              Don&apos;t show tips
-            </button>
+              title="Don't show tips"
+            />
           </div>
         </div>
       )}
@@ -205,16 +256,18 @@ export function Clippy() {
         }}
         title="Click me for help!"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/clippy.png"
-          alt="Clippy the Office Assistant"
+        <pre
+          className="font-mono text-xs leading-tight whitespace-pre text-center"
           style={{
-            width: "100px",
-            height: "auto",
-            filter: "drop-shadow(2px 2px 2px rgba(0,0,0,0.3))",
+            margin: 0,
+            color: "var(--foreground)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
-        />
+        >
+          {CLIPPY_ASCII_FRAMES[currentFrame]}
+        </pre>
       </div>
 
       <style jsx>{`

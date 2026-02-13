@@ -23,7 +23,7 @@ export function AuthButton() {
 
   return (
     <button onClick={login} className="auth-button">
-      <b>🔐 Login with GitHub</b>
+      [Login with GitHub]
     </button>
   );
 }
