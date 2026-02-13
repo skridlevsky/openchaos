@@ -8,10 +8,6 @@ import { WebCounter } from "@/components/WebCounter";
 import { HallOfChaos } from "@/components/HallOfChaos";
 
 export default function Home() {
-  if (Math.random() <= 0.01337) {
-    return null;
-  }
-
   return (
     <IE6Layout>
       <Countdown />

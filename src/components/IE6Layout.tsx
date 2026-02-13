@@ -1,12 +1,14 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Guestbook } from "./Guestbook";
 import { CursorTrail } from "./CursorTrail";
 import { MidiPlayer } from "./MidiPlayer";
 import { TreeGame } from "./TreeGame";
 import { StatusBar } from "./StatusBar";
 import { IE6BrowserChrome } from "./IE6BrowserChrome";
+
+import {Doom} from "./Doom";
 import { Clippy } from "./Clippy";
 import { Cat } from "./Cat";
 
@@ -16,7 +18,14 @@ interface IE6LayoutProps {
 
 export function IE6Layout({ children }: IE6LayoutProps) {
   const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
-  return (
+  const [hide, setHide] = useState(false);
+  const shouldHide = Math.random() <= 0.01337;
+  useEffect(()=>{
+    if(shouldHide){
+      setHide(true);
+    }
+  }, []);
+  return hide ? <></> : (
     <>
       <CursorTrail />
       <IE6BrowserChrome>
@@ -98,6 +107,7 @@ export function IE6Layout({ children }: IE6LayoutProps) {
                             <b>💬 JOIN THE CHAOS! 💬</b>
                           </a>
                           <TreeGame />
+                          <Doom />
                         </div>
                       </td>
                     </tr>
