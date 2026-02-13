@@ -26,7 +26,7 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
         <tbody>
           <tr>
             <td className="pr-list-section-header-cell">
-              <b>{title}</b>
+              {title}<br/>{"-".repeat(title.length)}<br/>
             </td>
           </tr>
         </tbody>
@@ -36,24 +36,26 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
           <PRCard
             key={pr.number}
             pr={showRank ? pr : { ...pr, isTrending: false }}
-            rank={showRank ? index + 1 : 0}
+            rank={index + 1}
           />
         ))}
       </div>
       {hasMore && (
-        <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '16px' }}>
+        <div style={{ textAlign: 'left', marginTop: '8px', marginBottom: '16px' }}>
           <button
             onClick={() => setExpanded(!expanded)}
             style={{
-              fontFamily: 'Arial, sans-serif',
-              fontSize: '12px',
-              padding: '4px 12px',
+              background: 'none',
+              border: 'none',
               cursor: 'pointer',
-              border: '2px outset #ffffff',
-              backgroundColor: '#c0c0c0',
+              padding: '0',
+              fontSize: 'inherit',
+              fontFamily: 'inherit',
+              color: 'inherit',
+              textDecoration: 'underline',
             }}
           >
-            <b>{expanded ? "Show Less" : `Show All (${prs.length})`}</b>
+            {expanded ? "Show Less" : `Show All (${prs.length}) >`}
           </button>
         </div>
       )}

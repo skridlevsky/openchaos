@@ -1,3 +1,4 @@
+import { hasRhymingWords } from "./rhymes";
 export interface PullRequest {
   number: number;
   title: string;
@@ -117,7 +118,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRReactions(owner, repo, pr.number);
-      const isMergeable = await getPRMergeStatus(owner, repo, pr.number);
+      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
 
       return {

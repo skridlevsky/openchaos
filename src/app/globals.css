@@ -4,51 +4,38 @@
 
 :root,
 [data-theme="light"] {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
+  --background: #000000;
+  --foreground: #00ff00;
 }
 
 [data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
+  --background: #000000;
+  --foreground: #00ff00;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Comic Sans MS', cursive;
-  --font-mono: 'Courier New', monospace;
-}
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Comic Sans MS', cursive;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+pre {
+  white-space: pre;
 }
 
-/* Classic IE6 styles */
-marquee {
-  display: inline-block;
+* {
+  color: var(--foreground);
 }
 
-/* Restore classic HTML elements styling */
-table {
-  border-collapse: separate;
+.container {
+  max-width: 80ch;
+  margin: 0 auto;
+  padding: 20px;
 }
-
-font {
-  display: inline;
-}
-
-center {
-  display: block;
-  text-align: center;
-}
-
-/* Add some retro animations */
-@keyframes rotate-hue {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+.container a {
+  text-decoration: underline;
 }
 
 
@@ -76,26 +63,10 @@ center {
   will-change: transform;
 }
 
+
 .auth-button {
-  padding: 8px 16px;
-  border: 3px outset #808080;
-  background: linear-gradient(to bottom, #c0c0c0, #808080);
-  color: #000000;
-  font-family: 'Comic Sans MS', cursive;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-block;
+  text-decoration: underline;
 }
-
-.auth-button:hover {
-  background: linear-gradient(to bottom, #d0d0d0, #909090);
-}
-
-.auth-button:active {
-  border-style: inset;
-  background: linear-gradient(to bottom, #808080, #c0c0c0);
-}
-
 .auth-button-disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -134,7 +105,6 @@ center {
   border: 2px outset #808080;
   background: linear-gradient(to bottom, #c0c0c0, #808080);
   color: #000000;
-  font-family: 'Comic Sans MS', cursive;
   font-size: 16px;
   cursor: pointer;
   display: inline-block;
