@@ -39,8 +39,8 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
   };
 
   const navItems = [
-    { id: "top" as Section, label: "TOP BY VOTES", icon: "*" },
-    { id: "rising" as Section, label: "HOT THIS WEEK", icon: "^" },
+    { id: "top" as Section, label: "TOP VOTES", icon: "*" },
+    { id: "rising" as Section, label: "HOT", icon: "^" },
     { id: "controversial" as Section, label: "CONTROVERSIAL", icon: "!" },
     { id: "discussed" as Section, label: "DISCUSSED", icon: "#" },
     { id: "new" as Section, label: "NEWEST", icon: "+" },
@@ -50,27 +50,26 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
     <div>
       {/* ASCII Navigation Bar */}
       <div style={{ marginBottom: "1.5em" }}>
-        <div>
-          {navItems.map((item, i) => (
-            <span key={item.id}>
-              {i > 0 && " | "}
-              <button
-                onClick={() => handleNavClick(item.id)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "0",
-                  fontSize: "inherit",
-                  fontFamily: "inherit",
-                  color: "inherit",
-                  fontWeight: activeSection === item.id ? "bold" : "normal",
-                  textDecoration: activeSection === item.id ? "none" : "underline",
-                }}
-              >
-                [{item.icon}] {item.label}
-              </button>
-            </span>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.25em 1em" }}>
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: "0",
+                fontSize: "inherit",
+                fontFamily: "inherit",
+                color: "inherit",
+                fontWeight: activeSection === item.id ? "bold" : "normal",
+                textDecoration: activeSection === item.id ? "none" : "underline",
+                whiteSpace: "nowrap",
+              }}
+            >
+              [{item.icon}] {item.label}
+            </button>
           ))}
         </div>
         <div>{"-".repeat(72)}</div>
@@ -79,14 +78,14 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
       {/* Active Section Content */}
       {activeSection === "top" && (
         <ExpandablePRSection
-          title="[*] TOP BY VOTES"
+          title="[*] TOP VOTES"
           prs={topByVotes}
           showRank
         />
       )}
       {activeSection === "rising" && (
         <ExpandablePRSection
-          title="[^] HOT THIS WEEK"
+          title="[^] HOT"
           prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))}
         />
       )}
