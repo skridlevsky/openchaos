@@ -3,6 +3,7 @@ import { Cat } from "@/components/Cat";
 import "./globals.css";
 import { Clippy } from "@/components/Clippy";
 import { Fartscroll } from "@/components/Fartscroll";
+import { KonamiCode } from "@/components/KonamiCode";
 
 const chaoticEmojis = [
   "🎯", "🎲", "⚡", "🔥", "💥", "🎪", "🎭", "🎨", "🚀", "⭐", "💫", "🌪️", 
@@ -38,6 +39,7 @@ export default function RootLayout({
           <Cat />
           <Clippy />
           <Fartscroll />
+          <KonamiCode />
         </div>
       </body>
     </html>
