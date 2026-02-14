@@ -1,43 +1,54 @@
-import { getOpenPRs } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { getOrganizedPRs } from "@/lib/github";
+import { ExpandablePRSection } from "./ExpandablePRSection";
 
 export async function PRList() {
-  let prs;
+  let data;
   let error = null;
 
   try {
-    prs = await getOpenPRs();
+    data = await getOrganizedPRs();
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
 
   if (error) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-500">{error}</p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Try refreshing the page in a minute.
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-error-table">
+        <tbody>
+          <tr>
+            <td className="page-error-cell">
+              <b>{error}</b>
+              <br />
+              <span>Try refreshing the page in a minute.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
-  if (!prs || prs.length === 0) {
+  const { topByVotes, trending } = data!;
+
+  if (topByVotes.length === 0 && trending.length === 0) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-400">No open PRs yet.</p>
-        <p className="mt-2 text-sm text-zinc-500">
-          Be the first to submit one!
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
+        <tbody>
+          <tr>
+            <td className="page-empty-cell">
+              <b>No open PRs yet.</b>
+              <br />
+              <span>Be the first to submit one!</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
   return (
-    <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
-      ))}
-    </div>
+    <>
+      <ExpandablePRSection title="TOP 10 BY VOTES" prs={topByVotes} showRank />
+      <ExpandablePRSection title="TRENDING THIS WEEK" prs={trending} />
+    </>
   );
 }
