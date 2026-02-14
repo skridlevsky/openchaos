@@ -360,11 +360,11 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
 
   const prs: GitHubMergedPR[] = await response.json();
 
-  // Filter to only merged PRs (not just closed), exclude repo owner's maintenance PRs
+  // Filter to only merged PRs (not just closed), exclude explicitly listed maintenance PRs
   // Sort by merge time (newest first) since sort=updated may not reflect merge order
-  const REPO_OWNER = owner;
+  const MAINT_PRS = [86]
   return prs
-    .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
+    .filter((pr) => pr.merged_at !== null && !MAINT_PRS.includes(pr.number))
     .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
     .map((pr) => ({
       number: pr.number,
