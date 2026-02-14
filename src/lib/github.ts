@@ -1,3 +1,4 @@
+import { hasRhymingWords } from "./rhymes";
 export interface PullRequest {
   number: number;
   title: string;
@@ -7,6 +8,22 @@ export interface PullRequest {
   createdAt: string;
   isMergeable: boolean;
   checksPassed: boolean;
+  hotScore: number;
+  isTrending: boolean;
+}
+
+interface PRVotes {
+  total: number;
+  recentPositive: number;
+  recentNegative: number;
+}
+
+/**
+ * Calculate a "hot score" based on net votes from the last 7 days.
+ * Simple and transparent: the PR with the most recent voting activity wins.
+ */
+function calculateHotScore(votes: PRVotes): number {
+  return votes.recentPositive - votes.recentNegative;
 }
 
 export interface MergedPullRequest {

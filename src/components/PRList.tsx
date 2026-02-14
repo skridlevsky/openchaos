@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getOpenPRs, type PullRequest } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { ExpandablePRSection } from "./ExpandablePRSection";
 
 export function PRList() {
   const [prs, setPrs] = useState<PullRequest[] | null>(null);
@@ -34,31 +34,59 @@ export function PRList() {
 
   if (error) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-500">{error}</p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Try refreshing the page in a minute.
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-error-table">
+        <tbody>
+          <tr>
+            <td className="page-error-cell">
+              <b>{error}</b>
+              <br />
+              <span>Try refreshing the page in a minute.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
 
-  if (!prs || prs.length === 0) {
+  const allPRs = prs ?? [];
+
+  if (allPRs.length === 0) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-400">No open PRs yet.</p>
-        <p className="mt-2 text-sm text-zinc-500">
-          Be the first to submit one!
-        </p>
-      </div>
+      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
+        <tbody>
+          <tr>
+            <td className="page-empty-cell">
+              <b>No open PRs yet.</b>
+              <br />
+              <span>Be the first to submit one!</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     );
   }
+
+  // Split into top by votes and trending (same logic as getOrganizedPRs)
+  const topByVotes = [...allPRs].sort((a, b) => {
+    if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+    if (b.votes !== a.votes) return b.votes - a.votes;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const top10Numbers = new Set(topByVotes.slice(0, 10).map(pr => pr.number));
+
+  const trending = [...allPRs]
+    .filter(pr => !top10Numbers.has(pr.number))
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      if (b.hotScore !== a.hotScore) return b.hotScore - a.hotScore;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
-    <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
-      ))}
-    </div>
+    <>
+      <ExpandablePRSection title="TOP 10 BY VOTES" prs={topByVotes} showRank />
+      <ExpandablePRSection title="TRENDING THIS WEEK" prs={trending} />
+    </>
   );
 }
