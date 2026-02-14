@@ -1,4 +1,5 @@
 import { getDailyVoteEmojis } from "./chaos-emojis";
+import { hasRhymingWords } from "./rhymes";
 
 export interface PullRequest {
   number: number;
@@ -11,6 +12,24 @@ export interface PullRequest {
   createdAt: string;
   isMergeable: boolean;
   checksPassed: boolean;
+  hotScore: number;
+  isTrending: boolean;
+}
+
+interface PRVotes {
+  total: number;
+  upvotes: number;
+  downvotes: number;
+  recentPositive: number;
+  recentNegative: number;
+}
+
+/**
+ * Calculate a "hot score" based on net votes from the last 7 days.
+ * Simple and transparent: the PR with the most recent voting activity wins.
+ */
+function calculateHotScore(votes: PRVotes): number {
+  return votes.recentPositive - votes.recentNegative;
 }
 
 export interface MergedPullRequest {
@@ -36,6 +55,7 @@ interface GitHubPR {
 
 interface GitHubReaction {
   content: string;
+  created_at: string;
 }
 
 interface GitHubPRDetail {
@@ -50,6 +70,7 @@ interface GitHubCheckRunsResponse {
   }[];
 }
 
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const GITHUB_REPO = "skridlevsky/openchaos";
 
 function getHeaders(accept: string): Record<string, string> {
@@ -102,11 +123,11 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   // Get today's chaos emojis
   const { upvoteContent, downvoteContent } = getDailyVoteEmojis();
 
-  // Fetch reactions and status for each PR
+  // Fetch reactions, status, and calculate hot score for each PR
   const prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
-      const voteData = await getPRVotes(owner, repo, pr.number, upvoteContent, downvoteContent);
-      const isMergeable = await getPRMergeStatus(owner, repo, pr.number);
+      const votes = await getPRVotes(owner, repo, pr.number, upvoteContent, downvoteContent);
+      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
 
       return {
@@ -114,12 +135,14 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
-        votes: voteData.votes,
-        upvotes: voteData.upvotes,
-        downvotes: voteData.downvotes,
+        votes: votes.total,
+        upvotes: votes.upvotes,
+        downvotes: votes.downvotes,
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
+        hotScore: calculateHotScore(votes),
+        isTrending: false, // Set by getOrganizedPRs based on top 5 hot score
       };
     }),
   );
@@ -139,13 +162,70 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   });
 }
 
+/**
+ * Get PRs organized into two lists:
+ * 1. All PRs sorted by votes (merge candidates)
+ * 2. All PRs sorted by hot score (trending), excluding those in top 5 by votes
+ *
+ * The isTrending flag is set based on whether a PR is in the top 5 by hot score.
+ */
+export async function getOrganizedPRs(): Promise<{
+  topByVotes: PullRequest[];
+  trending: PullRequest[];
+}> {
+  const allPRs = await getOpenPRs();
+
+  // Determine which PRs are in top 5 by hot score (these are "trending")
+  const top5ByHotScore = [...allPRs]
+    .sort((a, b) => b.hotScore - a.hotScore)
+    .slice(0, 5);
+  const trendingNumbers = new Set(top5ByHotScore.map((pr) => pr.number));
+
+  // Update isTrending flag based on actual top 5 hot score
+  const prsWithTrending = allPRs.map((pr) => ({
+    ...pr,
+    isTrending: trendingNumbers.has(pr.number),
+  }));
+
+  // All PRs sorted by votes (these compete for merge)
+  // PRs with conflicts go to the bottom
+  const topByVotes = [...prsWithTrending]
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) {
+        return a.isMergeable ? -1 : 1;
+      }
+      if (b.votes !== a.votes) {
+        return b.votes - a.votes;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  const top10ByVotesNumbers = new Set(topByVotes.slice(0, 10).map((pr) => pr.number));
+
+  // Trending section: sorted by hot score (7-day votes), excluding those in top 5 by votes
+  // PRs with conflicts go to the bottom
+  const trending = [...prsWithTrending]
+    .filter((pr) => !top10ByVotesNumbers.has(pr.number))
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) {
+        return a.isMergeable ? -1 : 1;
+      }
+      if (b.hotScore !== a.hotScore) {
+        return b.hotScore - a.hotScore;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+  return { topByVotes, trending };
+}
+
 async function getPRVotes(
   owner: string,
   repo: string,
   prNumber: number,
   upvoteContent: string,
   downvoteContent: string
-): Promise<{ votes: number; upvotes: number; downvotes: number }> {
+): Promise<PRVotes> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -159,7 +239,6 @@ async function getPRVotes(
     );
 
     if (!response.ok) {
-      // console.error(`Failed to fetch reactions for PR #${prNumber}: ${response.status} with message ${await response.text()}`);
       break;
     }
 
@@ -181,10 +260,17 @@ async function getPRVotes(
   const upvotes = allReactions.filter((r) => r.content === upvoteContent).length;
   const downvotes = allReactions.filter((r) => r.content === downvoteContent).length;
 
+  const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
+  const recentReactions = allReactions.filter(
+    (r) => new Date(r.created_at).getTime() >= sevenDaysAgo,
+  );
+
   return {
-    votes: upvotes - downvotes,
+    total: upvotes - downvotes,
     upvotes,
-    downvotes
+    downvotes,
+    recentPositive: recentReactions.filter((r) => r.content === upvoteContent).length,
+    recentNegative: recentReactions.filter((r) => r.content === downvoteContent).length,
   };
 }
 
