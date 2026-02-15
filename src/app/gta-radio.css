@@ -1,10 +1,10 @@
 /* GTA Radio Selector Styles */
 .gta-radio-container {
   position: fixed;
-  bottom: 20px;
-  font-family: 'Arial', sans-serif;
+  bottom: 16px;
+  font-family: 'Courier New', 'Courier', monospace;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .gta-radio-container.gta-radio-right {
@@ -28,14 +28,14 @@
 }
 
 .gta-radio-overlay {
-  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-  border: 3px solid #FFD700;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 215, 0, 0.3);
-  padding: 12px;
-  min-width: 420px;
-  max-width: 480px;
-  color: #FFD700;
+  background: #000;
+  border: 1px solid #00ff00;
+  border-radius: 0;
+  box-shadow: 0 0 0 1px #003300;
+  padding: 10px;
+  min-width: 360px;
+  max-width: 420px;
+  color: #00ff00;
 }
 
 .gta-radio-header {
@@ -43,15 +43,14 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
-  border-bottom: 2px solid #FFD700;
+  border-bottom: 1px dashed #00ff00;
   margin-bottom: 8px;
 }
 
 .gta-radio-title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  letter-spacing: 1px;
 }
 
 .gta-radio-header-buttons {
@@ -60,54 +59,53 @@
 }
 
 .gta-radio-header-btn {
-  background: #FFD700;
-  color: #000;
-  border: 1px solid #B8860B;
+  background: #001800;
+  color: #00ff00;
+  border: 1px solid #00ff00;
   padding: 2px 6px;
   cursor: pointer;
-  font-weight: bold;
-  border-radius: 3px;
+  font-weight: normal;
+  border-radius: 0;
   transition: all 0.2s;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .gta-radio-header-btn:hover {
-  background: #FFA500;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  background: #003300;
 }
 
 .gta-radio-close-btn {
-  background: #FFD700;
-  color: #000;
-  border: 1px solid #B8860B;
+  background: #001800;
+  color: #00ff00;
+  border: 1px solid #00ff00;
   padding: 2px 6px;
   cursor: pointer;
-  font-weight: bold;
-  border-radius: 3px;
+  font-weight: normal;
+  border-radius: 0;
   transition: all 0.2s;
 }
 
 .gta-radio-close-btn:hover {
-  background: #FF4444;
-  border-color: #FF0000;
-  box-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
+  background: #330000;
+  border-color: #ff4444;
+  color: #ff6666;
 }
 
 .gta-radio-display {
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
-  background: rgba(0, 0, 0, 0.5);
+  background: #001200;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .gta-radio-logo-container {
   width: 60px;
   height: 60px;
   background: #000;
-  border: 2px solid #FFD700;
-  border-radius: 3px;
+  border: 1px solid #00ff00;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -133,7 +131,6 @@
   font-size: 12px;
   font-weight: bold;
   line-height: 1.2;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   word-break: break-word;
 }
 
@@ -156,12 +153,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #FFD700;
+  color: #00ff00;
   animation: pulse 1s infinite;
 }
 
 .gta-radio-stopped {
-  color: #FF6B6B;
+  color: #ff6666;
 }
 
 .gta-radio-equalizer {
@@ -204,27 +201,24 @@
 }
 
 .gta-radio-control-btn {
-  background: linear-gradient(180deg, #333 0%, #1a1a1a 100%);
-  color: #FFD700;
-  border: 2px solid #FFD700;
+  background: #001800;
+  color: #00ff00;
+  border: 1px solid #00ff00;
   padding: 6px 4px;
   font-size: 10px;
-  font-weight: bold;
+  font-weight: normal;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 0;
   transition: all 0.2s;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.5px;
 }
 
 .gta-radio-control-btn:hover {
-  background: linear-gradient(180deg, #444 0%, #222 100%);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  transform: scale(1.05);
+  background: #003300;
 }
 
 .gta-radio-control-btn:active {
-  transform: scale(0.95);
+  background: #004000;
 }
 
 .gta-radio-play-btn {
@@ -236,9 +230,9 @@
 }
 
 .gta-radio-station-list {
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid #FFD700;
-  border-radius: 4px;
+  background: #000;
+  border: 1px dashed #00ff00;
+  border-radius: 0;
   padding: 4px;
   max-height: 150px;
   overflow-y: auto;
@@ -247,9 +241,9 @@
 .gta-radio-list-label {
   font-size: 10px;
   font-weight: bold;
-  color: #FFD700;
+  color: #00ff00;
   padding: 4px;
-  border-bottom: 1px solid #FFD700;
+  border-bottom: 1px dashed #00ff00;
   margin-bottom: 4px;
   text-align: center;
   letter-spacing: 1px;
@@ -262,13 +256,13 @@
 }
 
 .gta-radio-list-item {
-  background: rgba(255, 215, 0, 0.1);
-  color: #FFD700;
-  border: 1px solid #FFD700;
+  background: #001000;
+  color: #00ff00;
+  border: 1px solid #006600;
   padding: 4px 6px;
   font-size: 9px;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 0;
   text-align: left;
   transition: all 0.2s;
   white-space: nowrap;
@@ -277,15 +271,15 @@
 }
 
 .gta-radio-list-item:hover {
-  background: rgba(255, 215, 0, 0.3);
-  box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.2);
+  background: #003300;
+  border-color: #00ff00;
 }
 
 .gta-radio-list-item.active {
-  background: linear-gradient(90deg, #FFD700 0%, rgba(255, 215, 0, 0.5) 100%);
-  color: #000;
+  background: #00ff00;
+  color: #000000;
   font-weight: bold;
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  border-color: #00ff00;
 }
 
 /* Scrollbar styling */
@@ -299,10 +293,10 @@
 }
 
 .gta-radio-station-list::-webkit-scrollbar-thumb {
-  background: #FFD700;
+  background: #00aa00;
   border-radius: 4px;
 }
 
 .gta-radio-station-list::-webkit-scrollbar-thumb:hover {
-  background: #FFA500;
+  background: #00ff00;
 }

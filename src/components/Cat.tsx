@@ -1,13 +1,41 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 
-interface CatProps {
-  isMidiPlayerOpen: boolean;
+const ASCII_FRAMES = [
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n / /    \\ \\",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  \\ \\  / /",
+  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
+];
+
+// Function to flip ASCII art horizontally
+function flipAscii(ascii: string): string {
+  const lines = ascii.split("\n");
+  const maxWidth = Math.max(...lines.map((line) => line.length));
+  
+  return lines
+    .map((line) => {
+      const padded = line.padEnd(maxWidth, " ");
+      return padded
+        .split("")
+        .reverse()
+        .map((char) => {
+          // Swap mirror characters
+          if (char === "/") return "\\";
+          if (char === "\\") return "/";
+          if (char === "(") return ")";
+          if (char === ")") return "(";
+          return char;
+        })
+        .join("")
+        .trimEnd();
+    })
+    .join("\n");
 }
 
-export function Cat({ isMidiPlayerOpen }: CatProps) {
+
+export function Cat() {
   // starts on the midi player
   // drag it around
   // drops back down
@@ -15,15 +43,45 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
+  const [currentFrame, setCurrentFrame] = useState(0);
   // default false (facing right) because it starts on the left now
   const [isFlipped, setIsFlipped] = useState(false);
   // Track if cat has been manually positioned (dragged)
   const [hasBeenDragged, setHasBeenDragged] = useState(false);
+  const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const lastX = useRef(0);
   const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const checkRadioOpen = () => {
+      setIsMidiPlayerOpen(Boolean(document.querySelector(".gta-radio-container")));
+    };
+
+    checkRadioOpen();
+
+    const observer = new MutationObserver(() => {
+      checkRadioOpen();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Animate ASCII frames
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFrame((prev) => (prev + 1) % ASCII_FRAMES.length);
+    }, 200); // Change frame every 200ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const handleWindowMouseMove = (e: MouseEvent) => {
@@ -111,7 +169,7 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
 
   // When midi player closes (and cat hasn't been dragged), make the cat fall
   useEffect(() => {
-    if (!isMidiPlayerOpen && !hasBeenDragged && catRef.current) {
+    if (!hasBeenDragged && catRef.current) {
       const screenHeight = window.innerHeight;
       const catHeight = catRef.current.getBoundingClientRect().height;
       const statusBarHeight = 22;
@@ -142,7 +200,7 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
         clearTimeout(timerId);
       };
     }
-  }, [isMidiPlayerOpen, hasBeenDragged]);
+  }, [hasBeenDragged]);
 
   // When midi player opens (and cat hasn't been dragged), place the cat on top of the radio
   // and animate it running across the top surface.
@@ -243,7 +301,7 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
   // Determine default position based on midi player state
   const getDefaultPositionClass = () => {
     if (position) return "top-0 left-0"; // being dragged or fallen
-    if (isMidiPlayerOpen) return ""; // will use style for precise positioning
+    if (isMidiPlayerOpen) return ""; // player open, use style positioning
     return "bottom-0 left-5"; // player closed, sit at bottom-left
   };
 
@@ -267,15 +325,18 @@ export function Cat({ isMidiPlayerOpen }: CatProps) {
           : undefined,
       }}
     >
-      <Image
-        src="/cat.gif" // 16KB
-        alt="Chaos Cat"
-        width={128}
-        height={128}
-        className={`h-auto w-32 ${isFlipped ? "-scale-x-100" : "scale-x-100"}`}
-        unoptimized
+      <pre
+        className="font-mono text-xs leading-tight whitespace-pre text-center"
+        style={{ 
+          width: "128px", 
+          height: "128px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center",
+          margin: 0,
+        }}
         draggable={false}
-      />
+      >{isFlipped ? flipAscii(ASCII_FRAMES[currentFrame]) : ASCII_FRAMES[currentFrame]}</pre>
     </div>
   );
 }
