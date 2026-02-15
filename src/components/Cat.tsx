@@ -169,64 +169,81 @@ export function Cat() {
 
   // When midi player closes (and cat hasn't been dragged), make the cat fall
   useEffect(() => {
-    if (!hasBeenDragged && catRef.current) {
-      const screenHeight = window.innerHeight;
-      const catHeight = catRef.current.getBoundingClientRect().height;
-      const statusBarHeight = 22;
+    if (isMidiPlayerOpen || hasBeenDragged || !catRef.current) return;
 
-      // First rAF: set position to where the cat currently is (on top of player)
-      // This converts from bottom-based positioning to top-based transform
-      let innerFrameId: number;
-      const frameId = requestAnimationFrame(() => {
-        const startY = screenHeight - 200 - catHeight; // 200px is the bottom offset
-        setPosition({ x: 20, y: startY });
+    const screenHeight = window.innerHeight;
+    const catHeight = catRef.current.getBoundingClientRect().height;
+    const statusBarHeight = 22;
 
-        // Second rAF: animate to the bottom after the starting position is painted
-        innerFrameId = requestAnimationFrame(() => {
-          setIsSettling(true);
-          // Fall to sit on top of the status bar
-          const targetY = screenHeight - catHeight - statusBarHeight;
-          setPosition({ x: 20, y: targetY });
-        });
+    // First rAF: set position to where the cat currently is (on top of player)
+    // This converts from bottom-based positioning to top-based transform
+    let innerFrameId: number;
+    const frameId = requestAnimationFrame(() => {
+      const startY = screenHeight - 200 - catHeight; // 200px is the bottom offset
+      setPosition({ x: 20, y: startY });
+
+      // Second rAF: animate to the bottom after the starting position is painted
+      innerFrameId = requestAnimationFrame(() => {
+        setIsSettling(true);
+        // Fall to sit on top of the status bar
+        const targetY = screenHeight - catHeight - statusBarHeight;
+        setPosition({ x: 20, y: targetY });
       });
+    });
 
-      const timerId = setTimeout(() => {
-        setIsSettling(false);
-      }, 600);
+    const timerId = setTimeout(() => {
+      setIsSettling(false);
+    }, 600);
 
-      return () => {
-        cancelAnimationFrame(frameId);
-        cancelAnimationFrame(innerFrameId);
-        clearTimeout(timerId);
-      };
-    }
-  }, [hasBeenDragged]);
+    return () => {
+      cancelAnimationFrame(frameId);
+      cancelAnimationFrame(innerFrameId);
+      clearTimeout(timerId);
+    };
+  }, [isMidiPlayerOpen, hasBeenDragged]);
 
   // When midi player opens (and cat hasn't been dragged), place the cat on top of the radio
   // and animate it running across the top surface.
   useEffect(() => {
     if (!isMidiPlayerOpen || hasBeenDragged || !catRef.current) return;
-
-    const radio = document.querySelector('.gta-radio-container') as HTMLElement | null;
     const catEl = catRef.current;
 
-    if (!radio) {
-      // fallback to previous behaviour
+    const getAnchorRect = (): DOMRect | null => {
+      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
+      const clippy = document.querySelector(".clippy-container") as HTMLElement | null;
+
+      if (!radio && !clippy) return null;
+      if (!radio) return clippy?.getBoundingClientRect() ?? null;
+
+      const radioSide = radio.dataset.chaosSide;
+      const radioCollapsed = radio.classList.contains("gta-radio-collapsed");
+
+      const clippyOnSameSide =
+        !!clippy &&
+        (clippy.dataset.chaosSide === radioSide || !clippy.dataset.chaosSide);
+
+      // When collapsed, perch above Clippy if available on the same side.
+      if (radioCollapsed && clippyOnSameSide && clippy) {
+        return clippy.getBoundingClientRect();
+      }
+
+      // Expanded radio is the main perch target.
+      return radio.getBoundingClientRect();
+    };
+
+    const initialAnchor = getAnchorRect();
+    if (!initialAnchor) {
       const screenHeight = window.innerHeight;
       const catHeight = catEl.getBoundingClientRect().height;
       setPosition({ x: 20, y: screenHeight - 200 - catHeight });
       return;
     }
 
-    const radioRect = radio.getBoundingClientRect();
-    const catRect = catEl.getBoundingClientRect();
+    const initialCatRect = catEl.getBoundingClientRect();
+    const initialTopY = Math.max(0, initialAnchor.top - initialCatRect.height);
+    let x = initialAnchor.left;
 
-    const topY = Math.max(0, radioRect.top - catRect.height);
-    let x = radioRect.left;
-    const minX = radioRect.left;
-    const maxX = Math.max(minX, radioRect.left + radioRect.width - catRect.width);
-
-    setPosition({ x, y: topY });
+    setPosition({ x, y: initialTopY });
 
     let dir = 1; // 1 = right, -1 = left
     setIsFlipped(false);
@@ -237,6 +254,19 @@ export function Cat() {
     const step = (now: number) => {
       const dt = (now - last) / 1000;
       last = now;
+
+      const anchorRect = getAnchorRect();
+      const catRect = catEl.getBoundingClientRect();
+
+      if (!anchorRect) {
+        rafRef.current = requestAnimationFrame(step);
+        return;
+      }
+
+      const topY = Math.max(0, anchorRect.top - catRect.height);
+      const minX = anchorRect.left;
+      const maxX = Math.max(minX, anchorRect.left + anchorRect.width - catRect.width);
+
       x += dir * speed * dt;
       if (x <= minX) {
         x = minX;

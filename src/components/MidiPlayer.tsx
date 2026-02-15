@@ -52,6 +52,18 @@ export function MidiPlayer({ isOpen: isOpenProp, onClose }: MidiPlayerProps = {}
   const currentStation = STATIONS[currentStationIndex];
   const audioUrl = `https://audio.gtaradio.net/4/${currentStation.id}`;
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("openchaos:radio-layout", {
+        detail: {
+          side: alignment,
+          isCollapsed,
+          isOpen,
+        },
+      })
+    );
+  }, [alignment, isCollapsed, isOpen]);
+
   const changeStation = (index: number) => {
     shouldAutoPlayRef.current = isPlaying;
     
@@ -151,7 +163,11 @@ export function MidiPlayer({ isOpen: isOpenProp, onClose }: MidiPlayerProps = {}
   }
 
   return (
-    <div className={`gta-radio-container gta-radio-${alignment} ${isCollapsed ? "gta-radio-collapsed" : ""}`}>
+    <div
+      className={`gta-radio-container gta-radio-${alignment} ${isCollapsed ? "gta-radio-collapsed" : ""}`}
+      data-chaos-side={alignment}
+      data-collapsed={isCollapsed ? "true" : "false"}
+    >
       <div className="gta-radio-overlay">
         <div className="gta-radio-header">
           <span className="gta-radio-title">RADIO</span>

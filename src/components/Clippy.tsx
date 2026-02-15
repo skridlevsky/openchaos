@@ -120,6 +120,31 @@ export function Clippy() {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showClippy, setShowClippy] = useState(true);
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [alignment, setAlignment] = useState<"left" | "right">("left");
+
+  useEffect(() => {
+    const opposite = (side: "left" | "right") => (side === "left" ? "right" : "left");
+
+    const syncFromRadioDom = () => {
+      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
+      const side = radio?.dataset.chaosSide;
+      if (side === "left" || side === "right") {
+        setAlignment(opposite(side));
+      }
+    };
+
+    syncFromRadioDom();
+
+    const handleRadioLayout = (event: Event) => {
+      const customEvent = event as CustomEvent<{ side?: "left" | "right" }>;
+      if (customEvent.detail?.side === "left" || customEvent.detail?.side === "right") {
+        setAlignment(opposite(customEvent.detail.side));
+      }
+    };
+
+    window.addEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
+    return () => window.removeEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
+  }, []);
 
   useEffect(() => {
     // Show Clippy after a delay
@@ -179,10 +204,13 @@ export function Clippy() {
 
   return (
     <div
+      className={`clippy-container clippy-${alignment}`}
+      data-chaos-side={alignment}
       style={{
         position: "fixed",
         bottom: "80px",
-        right: "20px",
+        right: alignment === "right" ? "20px" : undefined,
+        left: alignment === "left" ? "20px" : undefined,
         zIndex: 9998,
         fontFamily: "Courier New, monospace",
       }}
@@ -193,7 +221,8 @@ export function Clippy() {
           style={{
             position: "absolute",
             bottom: "140px",
-            right: "0",
+            right: alignment === "right" ? "0" : undefined,
+            left: alignment === "left" ? "0" : undefined,
             fontFamily: "Courier New, monospace",
             fontSize: "12px",
             lineHeight: "1.2",
