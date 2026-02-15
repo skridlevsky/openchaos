@@ -50,6 +50,7 @@ interface GitHubPR {
   };
   created_at: string;
   comments: number;
+  review_comments: number;
   head: {
     sha: string;
   };
@@ -139,7 +140,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         votes: votes.total,
         upvotes: votes.upvotes,
         downvotes: votes.downvotes,
-        comments: pr.comments ?? 0,
+        comments: (pr.comments ?? 0) + (pr.review_comments ?? 0),
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
@@ -262,6 +263,13 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     );
 
     if (!response.ok) {
+      // Do not throw: this is called inside Promise.all for every PR.
+      // Throwing here would fail the entire page for a single PR's reactions.
+      // Instead, return partial data and let the ISR cycle retry.
+      console.error(
+        `getPRReactions: HTTP ${response.status} for PR #${prNumber}, page ${page}. ` +
+        `Proceeding with ${allReactions.length} reactions collected.`
+      );
       break;
     }
 
@@ -379,8 +387,9 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
 
   let allPRs: GitHubMergedPR[] = [];
   let page = 1;
+  const MAX_PAGES = 10; // 1000 PRs max, matches GitHub API limit
 
-  while (true) {
+  while (page <= MAX_PAGES) {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
       {
