@@ -1,5 +1,7 @@
+import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
 import { hasRhymingWords } from "./rhymes";
 export interface PullRequest {
+  rank: number;
   number: number;
   title: string;
   author: string;
@@ -69,6 +71,7 @@ const GITHUB_REPO = "skridlevsky/openchaos";
 
 function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
+  fetchKey();
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
@@ -115,13 +118,14 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prs = allPRs;
 
   // Fetch reactions, status, and calculate hot score for each PR
-  const prsWithVotes = await Promise.all(
+  let prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRReactions(owner, repo, pr.number);
       const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
 
       return {
+        rank: 0,
         number: pr.number,
         title: pr.title,
         author: pr.user.login,
@@ -137,7 +141,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   );
 
   // Sort: mergeable PRs first, then by votes descending, ties by newest
-  return prsWithVotes.sort((a, b) => {
+  prsWithVotes = prsWithVotes.sort((a, b) => {
     // PRs with conflicts go to the bottom (they can't win anyway)
     if (a.isMergeable !== b.isMergeable) {
       return a.isMergeable ? -1 : 1;
@@ -149,6 +153,12 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     // Ties broken by newest
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  prsWithVotes.forEach((pr: PullRequest, index: number): void => {
+    pr.rank = index + 1;
+  });
+
+  return prsWithVotes;
 }
 
 /**
@@ -320,6 +330,14 @@ interface GitHubMergedPR {
     login: string;
   };
   merged_at: string | null;
+}
+
+function fetchKey(): Key {
+  try {
+    return validateKey(keypath);
+  } catch {
+    throw new Error("Failed to fetch key");
+  }
 }
 
 export async function getMergedPRs(): Promise<MergedPullRequest[]> {

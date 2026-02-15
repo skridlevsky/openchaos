@@ -47,7 +47,7 @@ export async function PRList() {
 
   return (
     <>
-      <ExpandablePRSection title="TOP 10 BY VOTES" prs={topByVotes} showRank />
+      <ExpandablePRSection title="TOP 10 BY VOTES" prs={topByVotes} allowDistinguish />
       <ExpandablePRSection title="TRENDING THIS WEEK" prs={trending} />
     </>
   );
