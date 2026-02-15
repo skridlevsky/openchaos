@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import type { PullRequest } from "@/lib/github";
 import { ExpandablePRSection } from "./ExpandablePRSection";
 
-type Section = "top" | "rising" | "new" | "discussed" | "controversial";
+type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
 
-const VALID_SECTIONS: Section[] = ["top", "rising", "new", "discussed", "controversial"];
+const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial"];
 
 const NAV_ITEMS: { id: Section; label: string; icon: string }[] = [
-  { id: "top", label: "TOP VOTES", icon: "*" },
+  { id: "votes", label: "TOP VOTES", icon: "*" },
   { id: "rising", label: "HOT", icon: "^" },
   { id: "controversial", label: "CONTROVERSIAL", icon: "!" },
   { id: "discussed", label: "DISCUSSED", icon: "#" },
@@ -25,7 +25,7 @@ interface FramesLayoutProps {
 }
 
 export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: FramesLayoutProps) {
-  const [activeSection, setActiveSection] = useState<Section>("top");
+  const [activeSection, setActiveSection] = useState<Section>("votes");
 
   // Sync with URL hash on mount and hash changes
   useEffect(() => {
@@ -67,7 +67,7 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
       </div>
 
       {/* Active Section Content */}
-      {activeSection === "top" && (
+      {activeSection === "votes" && (
         <ExpandablePRSection
           title="[*] TOP VOTES"
           prs={topByVotes}
