@@ -49,8 +49,6 @@ interface GitHubPR {
     login: string;
   };
   created_at: string;
-  comments: number;
-  review_comments: number;
   head: {
     sha: string;
   };
@@ -63,6 +61,8 @@ interface GitHubReaction {
 
 interface GitHubPRDetail {
   mergeable: boolean | null;
+  comments: number;
+  review_comments: number;
 }
 
 interface GitHubCheckRunsResponse {
@@ -128,7 +128,8 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   let prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRReactions(owner, repo, pr.number);
-      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
+      const detail = await getPRDetail(owner, repo, pr.number);
+      const isMergeable = detail.isMergeable && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
 
       return {
@@ -140,7 +141,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         votes: votes.total,
         upvotes: votes.upvotes,
         downvotes: votes.downvotes,
-        comments: (pr.comments ?? 0) + (pr.review_comments ?? 0),
+        comments: detail.comments,
         createdAt: pr.created_at,
         isMergeable,
         checksPassed,
@@ -305,11 +306,16 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
   };
 }
 
-async function getPRMergeStatus(
+interface PRDetailResult {
+  isMergeable: boolean;
+  comments: number;
+}
+
+async function getPRDetail(
   owner: string,
   repo: string,
   prNumber: number
-): Promise<boolean> {
+): Promise<PRDetailResult> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
@@ -321,7 +327,7 @@ async function getPRMergeStatus(
   if (!response.ok) {
     // Rate limited or other error — assume mergeable rather than showing
     // false conflicts. The next ISR cycle will get the real value.
-    return true;
+    return { isMergeable: true, comments: 0 };
   }
 
   const data: GitHubPRDetail = await response.json();
@@ -329,7 +335,10 @@ async function getPRMergeStatus(
   // GitHub computes mergeability lazily — null means "not yet computed", not
   // "has conflicts". Default to true and let the next ISR cycle pick up the
   // real value.
-  return data.mergeable ?? true;
+  return {
+    isMergeable: data.mergeable ?? true,
+    comments: (data.comments ?? 0) + (data.review_comments ?? 0),
+  };
 }
 
 async function getCommitStatus(
