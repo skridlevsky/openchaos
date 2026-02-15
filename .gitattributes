@@ -1,0 +1,11 @@
+# Most things are text
+* text eol=lf
+
+# But not everything
+*.data binary
+*.gif binary
+*.jgp binary
+*.mp3 binary
+*.ogg binary
+*.png binary
+*.wasm binary
