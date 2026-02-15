@@ -1,5 +1,7 @@
+import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
 import { hasRhymingWords } from "./rhymes";
 export interface PullRequest {
+  rank: number;
   number: number;
   title: string;
   author: string;
