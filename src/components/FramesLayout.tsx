@@ -80,7 +80,7 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
         <ExpandablePRSection
           title="[*] TOP VOTES"
           prs={topByVotes}
-          showRank
+          allowDistinguish
         />
       )}
       {activeSection === "rising" && (
