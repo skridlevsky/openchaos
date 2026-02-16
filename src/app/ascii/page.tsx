@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/ascii/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
 import { GuyFieri } from "@/components/GuyFieri";
+import { ChaosTerminal } from "@/components/ChaosTerminal";
 
 const title = `
   ___                 ___ _
@@ -40,6 +41,8 @@ export default function AsciiHome() {
             <PRList />
           </Suspense>
         </div>
+
+        <ChaosTerminal />
 
         <div>
           HALL OF CHAOS - PAST WINNERS
