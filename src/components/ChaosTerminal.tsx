@@ -177,6 +177,29 @@ export function ChaosTerminal() {
   const inputRef = useRef<HTMLInputElement>(null);
   const outputRef = useRef<HTMLDivElement>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const sessionRef = useRef(0);
+
+  const clearAllTimers = useCallback(() => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  }, []);
+
+  const closeTerminal = useCallback(() => {
+    clearAllTimers();
+    setIsOpen(false);
+    setIsAnimating(false);
+  }, [clearAllTimers]);
+
+  const openTerminal = useCallback(() => {
+    clearAllTimers();
+    sessionRef.current++;
+    setLines([]);
+    setInput("");
+    setIsBooting(true);
+    setIsAnimating(false);
+    setHistoryIndex(-1);
+    setIsOpen(true);
+  }, [clearAllTimers]);
 
   const addLines = useCallback((...newLines: string[]) => {
     setLines((prev) => [...prev, ...newLines]);
@@ -197,40 +220,40 @@ export function ChaosTerminal() {
     setMounted(true);
   }, []);
 
-  // Global keyboard shortcut: ~ to toggle, Escape to close
+  // Global keyboard shortcut: ~ or backtick to toggle, Escape to close
   useEffect(() => {
     if (!mounted) return;
 
     const handleGlobalKey = (e: KeyboardEvent) => {
-      // Ignore if user is typing in another input/textarea
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "TEXTAREA" || (tag === "INPUT" && (e.target as HTMLInputElement) !== inputRef.current)) {
+      const target = e.target as HTMLElement;
+      if (!target) return;
+
+      // Skip if user is in any editable context
+      if (
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        (target.tagName === "INPUT" && target !== inputRef.current) ||
+        target.isContentEditable
+      ) {
         return;
       }
 
       if (e.key === "~" || e.key === "`") {
-        // Don't toggle if the terminal input is focused (user is typing)
         if (document.activeElement === inputRef.current) return;
         e.preventDefault();
-        setIsOpen((prev) => {
-          if (!prev) {
-            // Fresh boot on each open
-            setLines([]);
-            setInput("");
-            setIsBooting(true);
-            setIsAnimating(false);
-            setHistoryIndex(-1);
-          }
-          return !prev;
-        });
+        if (isOpen) {
+          closeTerminal();
+        } else {
+          openTerminal();
+        }
       } else if (e.key === "Escape" && isOpen) {
-        setIsOpen(false);
+        closeTerminal();
       }
     };
 
     window.addEventListener("keydown", handleGlobalKey);
     return () => window.removeEventListener("keydown", handleGlobalKey);
-  }, [mounted, isOpen]);
+  }, [mounted, isOpen, closeTerminal, openTerminal]);
 
   // Boot sequence - runs when terminal opens
   useEffect(() => {
@@ -244,8 +267,8 @@ export function ChaosTerminal() {
       } else {
         clearInterval(bootTimer);
         setIsBooting(false);
-        // Focus input after boot
-        setTimeout(() => inputRef.current?.focus(), 50);
+        const focusTimer = setTimeout(() => inputRef.current?.focus(), 50);
+        timersRef.current.push(focusTimer);
       }
     }, 200);
 
@@ -256,11 +279,8 @@ export function ChaosTerminal() {
 
   // Cleanup all timers on unmount
   useEffect(() => {
-    const timers = timersRef.current;
-    return () => {
-      timers.forEach((t) => clearTimeout(t));
-    };
-  }, []);
+    return () => clearAllTimers();
+  }, [clearAllTimers]);
 
   const handleCommand = useCallback(
     (cmd: string) => {
@@ -322,6 +342,7 @@ export function ChaosTerminal() {
 
         case lower === "rm -rf /": {
           setIsAnimating(true);
+          const session = sessionRef.current;
           const rmSteps = [
             "rm: removing /usr/share/sanity...",
             "rm: removing /var/log/good-decisions...",
@@ -334,6 +355,7 @@ export function ChaosTerminal() {
           ];
           rmSteps.forEach((line, i) => {
             const t = setTimeout(() => {
+              if (sessionRef.current !== session) return;
               addLines(line);
               if (i === rmSteps.length - 1) setIsAnimating(false);
             }, (i + 1) * 400);
@@ -344,6 +366,7 @@ export function ChaosTerminal() {
 
         case lower === "ping chaos": {
           setIsAnimating(true);
+          const session = sessionRef.current;
           const pings = [
             "PING chaos (127.0.0.666): 56 data bytes",
             "64 bytes from chaos: time=42ms",
@@ -357,6 +380,7 @@ export function ChaosTerminal() {
           ];
           pings.forEach((line, i) => {
             const t = setTimeout(() => {
+              if (sessionRef.current !== session) return;
               addLines(line);
               if (i === pings.length - 1) setIsAnimating(false);
             }, (i + 1) * 500);
@@ -388,8 +412,12 @@ export function ChaosTerminal() {
         case lower === "exit": {
           const msg = EXIT_MESSAGES[Math.floor(Math.random() * EXIT_MESSAGES.length)];
           addLines(msg);
-          // Close after a beat so they can read the message
-          const t = setTimeout(() => setIsOpen(false), 1500);
+          const session = sessionRef.current;
+          // Close after 1.5s so the user can read the exit message
+          const t = setTimeout(() => {
+            if (sessionRef.current !== session) return;
+            closeTerminal();
+          }, 1500);
           timersRef.current.push(t);
           break;
         }
@@ -414,9 +442,14 @@ export function ChaosTerminal() {
 
         case lower === "matrix": {
           setIsAnimating(true);
+          const session = sessionRef.current;
           const chars = "abcdefghijklmnopqrstuvwxyz0123456789@#$%^&*";
           let count = 0;
           const matrixTimer = setInterval(() => {
+            if (sessionRef.current !== session) {
+              clearInterval(matrixTimer);
+              return;
+            }
             const line = Array.from({ length: 48 }, () =>
               chars[Math.floor(Math.random() * chars.length)]
             ).join("");
@@ -438,7 +471,7 @@ export function ChaosTerminal() {
           );
       }
     },
-    [addLines]
+    [addLines, closeTerminal]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -490,14 +523,7 @@ export function ChaosTerminal() {
           cursor: "pointer",
           textAlign: "center",
         }}
-        onClick={() => {
-          setLines([]);
-          setInput("");
-          setIsBooting(true);
-          setIsAnimating(false);
-          setHistoryIndex(-1);
-          setIsOpen(true);
-        }}
+        onClick={openTerminal}
         title="Press ~ to open terminal"
       >
         [~] terminal
@@ -532,7 +558,7 @@ export function ChaosTerminal() {
         <span
           onClick={(e) => {
             e.stopPropagation();
-            setIsOpen(false);
+            closeTerminal();
           }}
           style={{ cursor: "pointer", opacity: 0.7 }}
           title="Close terminal (Esc)"
