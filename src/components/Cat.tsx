@@ -49,6 +49,7 @@ export function Cat() {
   // Track if cat has been manually positioned (dragged)
   const [hasBeenDragged, setHasBeenDragged] = useState(false);
   const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
+  const [isPurring, setIsPurring] = useState(false);
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
@@ -81,6 +82,21 @@ export function Cat() {
     }, 200); // Change frame every 200ms
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Listen for pet-cat events from terminal
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    const handlePet = () => {
+      clearTimeout(timer);
+      setIsPurring(true);
+      timer = setTimeout(() => setIsPurring(false), 2000);
+    };
+    window.addEventListener("chaos:pet-cat", handlePet);
+    return () => {
+      window.removeEventListener("chaos:pet-cat", handlePet);
+      clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {
@@ -355,18 +371,57 @@ export function Cat() {
           : undefined,
       }}
     >
+      {isPurring && (
+        <div
+          style={{
+            position: "absolute",
+            top: "-20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            fontSize: "14px",
+            fontWeight: "bold",
+            pointerEvents: "none",
+            animation: "purr-float 2s ease-out forwards",
+            whiteSpace: "nowrap",
+          }}
+        >
+          *purr*
+        </div>
+      )}
       <pre
         className="font-mono text-xs leading-tight whitespace-pre text-center"
-        style={{ 
-          width: "128px", 
-          height: "128px", 
-          display: "flex", 
-          alignItems: "center", 
+        style={{
+          width: "128px",
+          height: "128px",
+          display: "flex",
+          alignItems: "center",
           justifyContent: "center",
           margin: 0,
+          animation: isPurring ? "cat-bounce 0.3s ease-in-out 3" : undefined,
         }}
         draggable={false}
       >{isFlipped ? flipAscii(ASCII_FRAMES[currentFrame]) : ASCII_FRAMES[currentFrame]}</pre>
+
+      <style jsx>{`
+        @keyframes purr-float {
+          0% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-30px);
+          }
+        }
+        @keyframes cat-bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

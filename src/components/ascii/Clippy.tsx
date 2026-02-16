@@ -60,6 +60,10 @@ const CLIPPY_TIPS = [
   // Clippy's conspiracy theories
   "Did you know the top PR always has exactly the votes needed to win? 🤔 Coincidence?",
   "I've been tracking the vote patterns. They follow the Fibonacci sequence. Wake up, sheeple!",
+  "I see you opened the terminal! Try 'hack' to breach the mainframe. I won't tell anyone.",
+  "The terminal knows things. Type 'clippy' if you miss me. Type 'kill clippy' if you don't.",
+  "Pro tip: Type 'play startup' in the terminal for a blast from the past.",
+  "Did you know you can 'pet cat' in the terminal? The cat loves it. Mostly.",
 ];
 
 function getRandomTip(currentIndex: number): number {
@@ -120,6 +124,7 @@ export function Clippy() {
   const [isDismissed, setIsDismissed] = useState(false);
   const [showClippy, setShowClippy] = useState(true);
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [forcedTip, setForcedTip] = useState<string | null>(null);
 
   useEffect(() => {
     // Show Clippy after a delay
@@ -162,8 +167,51 @@ export function Clippy() {
     }
   }, [isDismissed]);
 
+  // Listen for terminal events
+  useEffect(() => {
+    const handleTrigger = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setShowClippy(true);
+      setIsVisible(true);
+      setIsDismissed(false);
+      if (detail?.tip) {
+        setForcedTip(detail.tip);
+        const t = setTimeout(() => setForcedTip(null), 12000);
+        return () => clearTimeout(t);
+      }
+    };
+
+    const handleHide = () => {
+      setShowClippy(false);
+      const t = setTimeout(() => {
+        setShowClippy(true);
+        setIsDismissed(false);
+        setForcedTip(null);
+      }, 30000);
+      return () => clearTimeout(t);
+    };
+
+    const handleTerminalOpened = () => {
+      // Show a terminal-specific tip when terminal opens
+      const terminalTipStart = CLIPPY_TIPS.length - 4; // index of first terminal tip
+      setCurrentTip(terminalTipStart + Math.floor(Math.random() * 4));
+      setIsDismissed(false);
+      setIsVisible(true);
+    };
+
+    window.addEventListener("chaos:trigger-clippy", handleTrigger);
+    window.addEventListener("chaos:hide-clippy", handleHide);
+    window.addEventListener("chaos:terminal-opened", handleTerminalOpened);
+    return () => {
+      window.removeEventListener("chaos:trigger-clippy", handleTrigger);
+      window.removeEventListener("chaos:hide-clippy", handleHide);
+      window.removeEventListener("chaos:terminal-opened", handleTerminalOpened);
+    };
+  }, []);
+
   const handleDismiss = () => {
     setIsDismissed(true);
+    setForcedTip(null);
   };
 
   const handleHideClippy = () => {
@@ -210,7 +258,7 @@ export function Clippy() {
                 color: "var(--foreground)",
               }}
             >
-              {createSpeechBubble(CLIPPY_TIPS[currentTip])}
+              {createSpeechBubble(forcedTip ?? CLIPPY_TIPS[currentTip])}
             </pre>
             {/* Clickable button areas over ASCII art */}
             <div

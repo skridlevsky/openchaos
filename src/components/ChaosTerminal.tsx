@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { soundPlayer } from "@/utils/sounds";
 
 const BOOT_LINES = [
   "CHAOS BIOS v6.6.6 - Entropy Unlimited Inc.",
@@ -114,7 +115,16 @@ const HELP_TEXT = `Available commands:
   neofetch    Display system information
   date        Show current date and time
   echo        Echo text (with chaos)
-  matrix      Enter the matrix`;
+  matrix      Enter the matrix
+  doom        Launch DOOM
+  pet cat     Pet the cat
+  clippy      Summon Clippy
+  kill clippy Terminate Clippy
+  fart        You know what this does
+  play <snd>  Play a sound (startup/shutdown/dialup/
+              success/error/upvote/downvote/milestone)
+  hack        Hack the mainframe
+  barrel roll Do a barrel roll`;
 
 function cowsay(text: string): string {
   const maxWidth = 40;
@@ -186,8 +196,14 @@ export function ChaosTerminal() {
 
   const closeTerminal = useCallback(() => {
     clearAllTimers();
+    // Reset any DOM effects (hack invert, barrel roll, etc.)
+    const root = document.documentElement;
+    root.style.filter = "";
+    root.style.transform = "";
+    root.style.transition = "";
     setIsOpen(false);
     setIsAnimating(false);
+    window.dispatchEvent(new CustomEvent("chaos:terminal-closed"));
   }, [clearAllTimers]);
 
   const openTerminal = useCallback(() => {
@@ -199,6 +215,7 @@ export function ChaosTerminal() {
     setIsAnimating(false);
     setHistoryIndex(-1);
     setIsOpen(true);
+    window.dispatchEvent(new CustomEvent("chaos:terminal-opened"));
   }, [clearAllTimers]);
 
   const addLines = useCallback((...newLines: string[]) => {
@@ -462,6 +479,152 @@ export function ChaosTerminal() {
             }
           }, 200);
           timersRef.current.push(matrixTimer as unknown as ReturnType<typeof setTimeout>);
+          break;
+        }
+
+        case lower === "doom" || lower === "play doom": {
+          setIsAnimating(true);
+          const session = sessionRef.current;
+          const doomSteps = [
+            "Loading DOOM.WAD...",
+            "Initializing idTech 1 engine...",
+            "Spawning demons... [OK]",
+            "Loading BFG 9000... [OK]",
+            "Setting difficulty to NIGHTMARE...",
+            "",
+            "DOOM is ready. Opening portal...",
+          ];
+          doomSteps.forEach((line, i) => {
+            const t = setTimeout(() => {
+              if (sessionRef.current !== session) return;
+              addLines(line);
+              if (i === doomSteps.length - 1) {
+                setIsAnimating(false);
+                const w = window.open("/doom.html", "_blank");
+                if (!w) {
+                  addLines("ERROR: Popup blocked. Allow popups to slay demons.");
+                }
+              }
+            }, (i + 1) * 400);
+            timersRef.current.push(t);
+          });
+          break;
+        }
+
+        case lower === "pet cat" || lower === "pet": {
+          addLines("*purring intensifies*");
+          window.dispatchEvent(new CustomEvent("chaos:pet-cat"));
+          break;
+        }
+
+        case lower === "kick cat": {
+          addLines("You monster. The cat remembers this.");
+          break;
+        }
+
+        case lower === "clippy" || lower === "ask clippy": {
+          addLines("Summoning Clippy...");
+          window.dispatchEvent(
+            new CustomEvent("chaos:trigger-clippy", {
+              detail: {
+                tip: "It looks like you're using the terminal! Need help hacking the mainframe?",
+              },
+            })
+          );
+          break;
+        }
+
+        case lower === "kill clippy" || lower === "killall clippy": {
+          addLines(
+            "$ kill -9 $(pgrep clippy)",
+            "clippy.exe terminated.",
+            "(He'll be back. He always comes back.)"
+          );
+          window.dispatchEvent(new CustomEvent("chaos:hide-clippy"));
+          break;
+        }
+
+        case lower === "fart": {
+          addLines("*ppffrrrrtttt*");
+          try {
+            (window as unknown as Record<string, { play?: () => void }>).fartscroll?.play?.();
+          } catch {
+            // fartscroll not loaded
+          }
+          break;
+        }
+
+        case lower.startsWith("play "): {
+          const soundName = lower.slice(5).trim();
+          const sounds: Record<string, () => void> = {
+            startup: () => soundPlayer.playStartup(),
+            shutdown: () => soundPlayer.playShutdown(),
+            dialup: () => soundPlayer.playDialup(),
+            success: () => soundPlayer.playSuccess(),
+            error: () => soundPlayer.playError(),
+            upvote: () => soundPlayer.playUpvote(),
+            downvote: () => soundPlayer.playDownvote(),
+            milestone: () => soundPlayer.playMilestone(),
+          };
+          if (sounds[soundName]) {
+            sounds[soundName]();
+            addLines(`Now playing: ${soundName}`);
+          } else {
+            addLines(
+              `Unknown sound: ${soundName}`,
+              `Available: ${Object.keys(sounds).join(", ")}`
+            );
+          }
+          break;
+        }
+
+        case lower === "hack": {
+          setIsAnimating(true);
+          const session = sessionRef.current;
+          const hackSteps = [
+            "Initiating hack sequence...",
+            "Bypassing firewall... [OK]",
+            "Injecting SQL into mainframe...",
+            "Decrypting passwords... ********",
+            "Downloading classified PRs...",
+            "Uploading virus.exe to /dev/null...",
+            "",
+            "ACCESS GRANTED",
+            "",
+            "Just kidding. You hacked nothing.",
+          ];
+          hackSteps.forEach((line, i) => {
+            const t = setTimeout(() => {
+              if (sessionRef.current !== session) return;
+              addLines(line);
+              if (line === "ACCESS GRANTED") {
+                const root = document.documentElement;
+                root.style.transition = "filter 0.15s";
+                root.style.filter = "invert(1) hue-rotate(180deg)";
+                const revertT = setTimeout(() => {
+                  if (sessionRef.current !== session) return;
+                  root.style.filter = "";
+                  root.style.transition = "";
+                }, 300);
+                timersRef.current.push(revertT);
+              }
+              if (i === hackSteps.length - 1) setIsAnimating(false);
+            }, (i + 1) * 500);
+            timersRef.current.push(t);
+          });
+          break;
+        }
+
+        case lower === "barrel roll": {
+          addLines("Initiating barrel roll...");
+          const root = document.documentElement;
+          root.style.transition = "transform 1s ease-in-out";
+          root.style.transform = "rotate(360deg)";
+          const t = setTimeout(() => {
+            root.style.transform = "";
+            root.style.transition = "";
+          }, 1100);
+          timersRef.current.push(t);
           break;
         }
 
