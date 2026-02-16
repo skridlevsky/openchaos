@@ -22,6 +22,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 - **Highest Score Wins**: The winner is determined by (Total 👍) - (Total 👎)
 - **Ties favor the New**: If scores are equal, the **newest PR** (created most recently) wins
 - **Must have rhyming words**: Only PRs that contain **two rhyming words** in the title are eligible for merge (e.g., "botch" and "watch")
+- **Must include a picture**: PRs must contain at least one image uploaded directly to the PR description (GitHub attachment). No pic, no merge. What the picture is? That's your business.
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content

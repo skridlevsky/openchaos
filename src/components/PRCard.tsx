@@ -30,7 +30,7 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   const isLeading = pr.rank === 1 && distinguishLeading;
   const containsRhymes = hasRhymingWords(pr.title);
-  const hasConflict = !pr.isMergeable || !containsRhymes;
+  const hasConflict = !pr.isMergeable || !containsRhymes || !pr.hasPicture;
 
   const [voteStatus, setVoteStatus] = useState<VoteStatus>('idle');
   const [optimisticVotes, setOptimisticVotes] = useState(pr.votes);
@@ -345,18 +345,23 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
 
       {/* Merge status */}
       <div>&nbsp;&nbsp;&nbsp;&nbsp;
-        {(!pr.isMergeable || !pr.checksPassed) && (
+        {(hasConflict || !pr.checksPassed) && (
           <span>
-            {!pr.isMergeable && !pr.checksPassed
-              ? "Conflicts & Checks failed"
-              : !pr.isMergeable
-                ? containsRhymes
-                  ? "Merge conflicts"
-                  : "No rhyme or reason"
-                : "Checks failed"}
+            {(() => {
+              const issues = [];
+              if (!pr.isMergeable && !containsRhymes && !pr.hasPicture) issues.push("Merge conflicts", "No rhyme", "No pic");
+              else if (!pr.isMergeable && !containsRhymes) issues.push("Merge conflicts", "No rhyme");
+              else if (!pr.isMergeable && !pr.hasPicture) issues.push("Merge conflicts", "No pic");
+              else if (!containsRhymes && !pr.hasPicture) issues.push("No rhyme", "No pic");
+              else if (!pr.isMergeable) issues.push("Merge conflicts");
+              else if (!containsRhymes) issues.push("No rhyme or reason");
+              else if (!pr.hasPicture) issues.push("No pic attached");
+              if (!pr.checksPassed) issues.push("Checks failed");
+              return issues.join(" & ");
+            })()}
           </span>
         )}
-        {(!pr.isMergeable || !pr.checksPassed) && " "}
+        {(hasConflict || !pr.checksPassed) && " "}
       </div>
     </div>
   );

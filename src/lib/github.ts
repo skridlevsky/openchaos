@@ -1,5 +1,6 @@
 import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
 import { hasRhymingWords } from "./rhymes";
+import { hasPicture } from "./pictures";
 export interface PullRequest {
   rank: number;
   number: number;
@@ -9,6 +10,7 @@ export interface PullRequest {
   votes: number;
   createdAt: string;
   isMergeable: boolean;
+  hasPicture: boolean;
   checksPassed: boolean;
   hotScore: number;
   isTrending: boolean;
@@ -39,6 +41,7 @@ export interface MergedPullRequest {
 interface GitHubPR {
   number: number;
   title: string;
+  body: string | null;
   html_url: string;
   user: {
     login: string;
@@ -121,7 +124,8 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   let prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRReactions(owner, repo, pr.number);
-      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
+      const prHasPicture = hasPicture(pr.body);
+      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title) && prHasPicture;
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
 
       return {
@@ -133,6 +137,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
         votes: votes.total,
         createdAt: pr.created_at,
         isMergeable,
+        hasPicture: prHasPicture,
         checksPassed,
         hotScore: calculateHotScore(votes),
         isTrending: false, // Set by getOrganizedPRs based on top 5 hot score
