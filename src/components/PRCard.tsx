@@ -350,13 +350,9 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
           <span>
             {(() => {
               const issues = [];
-              if (!pr.isMergeable && !containsRhymes && !pr.hasPicture) issues.push("Merge conflicts", "No rhyme", "No pic");
-              else if (!pr.isMergeable && !containsRhymes) issues.push("Merge conflicts", "No rhyme");
-              else if (!pr.isMergeable && !pr.hasPicture) issues.push("Merge conflicts", "No pic");
-              else if (!containsRhymes && !pr.hasPicture) issues.push("No rhyme", "No pic");
-              else if (!pr.isMergeable) issues.push("Merge conflicts");
-              else if (!containsRhymes) issues.push("No rhyme or reason");
-              else if (!pr.hasPicture) issues.push("No pic attached");
+              if (!pr.isMergeable) issues.push("Merge conflicts");
+              if (!containsRhymes) issues.push("No rhyme");
+              if (!pr.hasPicture) issues.push("No pic");
               if (!pr.checksPassed) issues.push("Checks failed");
               return issues.join(" & ");
             })()}
