@@ -17,7 +17,22 @@ export function ExpandablePRSection({ title, prs, allowDistinguish = false }: Ex
   const displayedPRs = expanded ? prs : prs.slice(0, initialCount);
 
   if (prs.length === 0) {
-    return null;
+    return (
+      <div className="pr-list-section">
+        <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+          <tbody>
+            <tr>
+              <td className="pr-list-section-header-cell">
+                {title}<br/>{"-".repeat(title.length)}<br/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          No PRs in this category yet.
+        </div>
+      </div>
+    );
   }
 
   return (
