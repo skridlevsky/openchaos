@@ -292,6 +292,7 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
           target="_blank"
           rel="noopener noreferrer"
           className="pr-card-link"
+          suppressHydrationWarning
         >
           {pr.url}
         </a>
