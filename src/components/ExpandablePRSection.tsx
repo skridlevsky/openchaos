@@ -7,17 +7,32 @@ import { PRCard } from "./PRCard";
 interface ExpandablePRSectionProps {
   title: string;
   prs: PullRequest[];
-  showRank?: boolean;
+  allowDistinguish?: boolean;
 }
 
-export function ExpandablePRSection({ title, prs, showRank = false }: ExpandablePRSectionProps) {
+export function ExpandablePRSection({ title, prs, allowDistinguish = false }: ExpandablePRSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const initialCount = 10;
   const hasMore = prs.length > initialCount;
   const displayedPRs = expanded ? prs : prs.slice(0, initialCount);
 
   if (prs.length === 0) {
-    return null;
+    return (
+      <div className="pr-list-section">
+        <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+          <tbody>
+            <tr>
+              <td className="pr-list-section-header-cell">
+                {title}<br/>{"-".repeat(title.length)}<br/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div>
+          No PRs in this category yet.
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -32,11 +47,11 @@ export function ExpandablePRSection({ title, prs, showRank = false }: Expandable
         </tbody>
       </table>
       <div className="pr-list-container">
-        {displayedPRs.map((pr, index) => (
+        {displayedPRs.map((pr) => (
           <PRCard
             key={pr.number}
-            pr={showRank ? pr : { ...pr, isTrending: false }}
-            rank={index + 1}
+            pr={allowDistinguish ? pr : { ...pr, isTrending: false }}
+            distinguishLeading={allowDistinguish}
           />
         ))}
       </div>
