@@ -5,8 +5,8 @@ const GITHUB_ATTACHMENT_PATTERNS = [
 ];
 
 /**
- * Checks if a PR body contains at least one GitHub-uploaded image.
- * External image URLs don't count — you gotta actually upload something.
+ * Checks if a PR body contains at least one GitHub-uploaded image or video.
+ * Videos are just many pictures. External URLs don't count — actually upload something.
  */
 export function hasPicture(body: string | null): boolean {
   if (!body) return false;
