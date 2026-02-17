@@ -79,8 +79,15 @@ jobs:
               const now = new Date();
               const ageDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
 
-              // Count interactions - fetch all in parallel for speed
-              const [comments, reactions, reviews] = await Promise.all([
+              // Fetch full PR details and interactions in parallel
+              // pulls.list does NOT return mergeable/mergeable_state fields,
+              // so we must call pulls.get individually for each PR
+              const [fullPr, comments, reactions, reviews] = await Promise.all([
+                github.rest.pulls.get({
+                  owner,
+                  repo,
+                  pull_number: pr.number
+                }),
                 github.paginate(github.rest.issues.listComments, {
                   owner,
                   repo,
@@ -104,11 +111,10 @@ jobs:
               const interactions = comments.length + reactions.length + reviews.length;
 
               // Check if unmergeable (conflicts, behind, or can't merge)
-              // Note: mergeable can be null while GitHub calculates it
               const isUnmergeable =
-                pr.mergeable_state === 'dirty' ||
-                pr.mergeable_state === 'conflicting' ||
-                pr.mergeable === false;
+                fullPr.data.mergeable_state === 'dirty' ||
+                fullPr.data.mergeable_state === 'conflicting' ||
+                fullPr.data.mergeable === false;
 
               // Calculate death probability
               const deathProb = calculateDeathProbability(ageDays, interactions, isUnmergeable);
