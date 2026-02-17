@@ -1,0 +1,218 @@
+name: Old Age - Natural Selection for PRs
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # Daily at 6am UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  old-age:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Process aging PRs with natural selection
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Algorithm constants
+            const BASE_DEATH_CHANCE = 0.1;
+            const UNMERGEABLE_BASE_PENALTY = 5;
+            const UNMERGEABLE_MULTIPLIER = 400;
+
+            function calculateDeathProbability(ageDays, interactions, isUnmergeable) {
+              let deathChance = BASE_DEATH_CHANCE;
+
+              // Exponential age penalty - gets worse FAST
+              const agePenalty = Math.pow(ageDays, 1.6) * 0.06;
+              deathChance += agePenalty;
+
+              // Logarithmic fitness - diminishing returns, first interactions matter most
+              const logFitness = Math.log(interactions + 1) * 3.0;
+
+              // Age scaling: fitness matters more as you age
+              const ageScale = 0.5 + (ageDays / 90);
+
+              // Reduce death chance based on logarithmic fitness (scaled by age)
+              deathChance -= logFitness * ageScale;
+
+              // Apply unmergeable penalties (additive + multiplicative)
+              if (isUnmergeable) {
+                deathChance += UNMERGEABLE_BASE_PENALTY;
+                deathChance = deathChance * (1 + UNMERGEABLE_MULTIPLIER / 100);
+              }
+
+              // Clamp between 0 and 100
+              return Math.max(0, Math.min(100, deathChance));
+            }
+
+            // Get all open PRs
+            const { data: prs } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            if (prs.length === 0) {
+              console.log("No open PRs to process.");
+              return;
+            }
+
+            console.log(`Found ${prs.length} open PRs`);
+            console.log("\n" + "=".repeat(80));
+            console.log("PROCESSING PRs FOR OLD AGE");
+            console.log("=".repeat(80) + "\n");
+
+            const deaths = [];
+
+            for (const pr of prs) {
+              // Calculate age in days
+              const createdAt = new Date(pr.created_at);
+              const now = new Date();
+              const ageDays = Math.floor((now - createdAt) / (1000 * 60 * 60 * 24));
+
+              // Count interactions - fetch all in parallel for speed
+              const [comments, reactions, reviews] = await Promise.all([
+                github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  per_page: 100
+                }),
+                github.paginate(github.rest.reactions.listForIssue, {
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  per_page: 100
+                }),
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  per_page: 100
+                })
+              ]);
+
+              const interactions = comments.length + reactions.length + reviews.length;
+
+              // Check if unmergeable (conflicts, behind, or can't merge)
+              // Note: mergeable can be null while GitHub calculates it
+              const isUnmergeable =
+                pr.mergeable_state === 'dirty' ||
+                pr.mergeable_state === 'conflicting' ||
+                pr.mergeable === false;
+
+              // Calculate death probability
+              const deathProb = calculateDeathProbability(ageDays, interactions, isUnmergeable);
+
+              // Roll the dice
+              const roll = Math.random() * 100;
+              const died = roll < deathProb;
+
+              const status = died ? "💀 DIED" : "✓ SURVIVED";
+              const unmergeableFlag = isUnmergeable ? " [UNMERGEABLE]" : "";
+
+              console.log(`PR #${pr.number} | ${ageDays}d | ${interactions} int | ${deathProb.toFixed(2)}% | Roll: ${roll.toFixed(2)} | ${status}${unmergeableFlag}`);
+
+              if (died) {
+                deaths.push({
+                  pr,
+                  ageDays,
+                  interactions,
+                  deathProb,
+                  roll,
+                  isUnmergeable
+                });
+              }
+            }
+
+            // Process deaths
+            if (deaths.length === 0) {
+              console.log("\n✓ No PRs died today. All survived natural selection.");
+              return;
+            }
+
+            console.log("\n" + "=".repeat(80));
+            console.log(`💀 ${deaths.length} PR(s) DIED FROM OLD AGE`);
+            console.log("=".repeat(80) + "\n");
+
+            for (const death of deaths) {
+              console.log(`Closing PR #${death.pr.number}: ${death.pr.title}`);
+
+              // Create death message
+              const unmergeableNote = death.isUnmergeable
+                ? "\n\n⚠️ **Unmergeable Status:** This PR had merge conflicts, which significantly increased mortality risk."
+                : "";
+
+              const fitnessNote = death.interactions < 10
+                ? "\n\n💔 **Low Engagement:** This PR received minimal attention and care."
+                : death.interactions > 50
+                ? "\n\n💚 **High Engagement:** Despite significant community love, time caught up."
+                : "";
+
+              const deathMessage = [
+                "⏳ **SUCCUMBED TO OLD AGE** ⏳",
+                "",
+                `This PR has died from natural causes after ${death.ageDays} days.`,
+                "",
+                "**Mortality Report:**",
+                `- Age: ${death.ageDays} days`,
+                `- Fitness (interactions): ${death.interactions}`,
+                `- Death probability: ${death.deathProb.toFixed(2)}%`,
+                `- Fatal roll: ${death.roll.toFixed(2)}`,
+                unmergeableNote,
+                fitnessNote,
+                "",
+                "*In the chaos world, PRs must move fast or perish. Only sustained engagement and timely merges can fight the effects of aging.*",
+                "",
+                "**Senectus ipsa est morbus.** (Old age itself is a disease.)",
+                "",
+                "🔒 **This PR has been locked. No resurrection is possible.**",
+                "",
+                "---",
+                "🕊️ May this PR rest in the git log."
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: death.pr.number,
+                body: deathMessage
+              });
+
+              // Add death label
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: death.pr.number,
+                labels: ['dead']
+              });
+
+              // Close the PR
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: death.pr.number,
+                state: "closed"
+              });
+
+              // Lock the PR - no resurrection allowed
+              await github.rest.issues.lock({
+                owner,
+                repo,
+                issue_number: death.pr.number,
+                lock_reason: 'resolved'
+              });
+
+              console.log(`✓ Closed and locked PR #${death.pr.number}`);
+            }
+
+            console.log(`\n💀 Old age claimed ${deaths.length} PR(s) today.`);
