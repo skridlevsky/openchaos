@@ -13,28 +13,30 @@ export async function HallOfChaos() {
 
   if (error) {
     return (
-      <div className="hall-error-container">
-        <strong>{error}</strong>
+      <div>
+        {error}
         <br />
-        <span>Try refreshing the page in a minute.</span>
+        Try refreshing the page in a minute.
       </div>
     );
   }
 
   if (!prs || prs.length === 0) {
     return (
-      <div className="hall-empty-container">
-        <strong>No merged PRs yet.</strong>
+      <div>
+        No merged PRs yet.
         <br />
-        <span>The first winner will be immortalized here!</span>
+        The first winner will be immortalized here!
       </div>
     );
   }
 
   return (
-    <div className="hall-container">
+    <div className="mt-4">
       {prs.map((pr) => (
-        <HallOfChaosCard key={pr.number} pr={pr} />
+        <div key={pr.number} style={{ marginBottom: '20px' }}>
+          <HallOfChaosCard pr={pr} />
+        </div>
       ))}
     </div>
   );
