@@ -1,4 +1,4 @@
-/* GTA Radio Selector Styles */
+/* ASCII GTA Radio Styles */
 .gta-radio-container {
   position: fixed;
   bottom: 16px;
@@ -282,7 +282,6 @@
   border-color: #00ff00;
 }
 
-/* Scrollbar styling */
 .gta-radio-station-list::-webkit-scrollbar {
   width: 8px;
 }
@@ -301,7 +300,6 @@
   background: #00ff00;
 }
 
-/* Responsive tweaks: reduce default radio footprint on small screens */
 @media (max-width: 640px) {
   .gta-radio-overlay {
     min-width: 160px;
