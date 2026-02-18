@@ -65,6 +65,71 @@ pre {
 }
 
 
+.world-chaos {
+  color: var(--foreground);
+  font-weight: bold;
+  text-decoration: underline;
+  font-family: 'Courier New', 'Courier', monospace;
+}
+
+/* ASCII-style container for ControlledChaos */
+.ccContainer {
+  font-family: 'Courier New', 'Courier', monospace;
+  background: var(--background);
+  border: 2px solid var(--foreground);
+  padding: 12px;
+  margin: 16px 0;
+  width: 84ch;
+  max-width: 84ch;
+}
+
+.ccContainer h1 {
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--foreground);
+  font-family: 'Courier New', 'Courier', monospace;
+}
+
+/* ASCII-style toggle button */
+.chaos-toggle-button {
+  background: var(--background);
+  color: var(--foreground);
+  border: 2px solid var(--foreground);
+  padding: 4px 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 14px;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.chaos-toggle-button::before {
+  content: '[';
+  margin-right: 2px;
+}
+
+.chaos-toggle-button::after {
+  content: ']';
+  margin-left: 2px;
+}
+
+/* State-aware text prefixes */
+.chaos-toggle-button[data-state="encrypt"]::before { content: '[LOCK: '; }
+.chaos-toggle-button[data-state="encrypt"]::after { content: ']'; }
+.chaos-toggle-button[data-state="decrypt"]::before { content: '[UNLOCK: '; }
+.chaos-toggle-button[data-state="decrypt"]::after { content: ']'; }
+
+.chaos-toggle-button:hover {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.chaos-toggle-button:active {
+  border-style: double;
+}
+
 .auth-button {
   text-decoration: underline;
 }

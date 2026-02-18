@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/Countdown";
+import { ControlledChaos } from "@/components/ControlledChaos";
+
 import { PRList } from "@/components/PRList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/HallOfChaos";
@@ -21,7 +23,7 @@ export default function Home() {
         <ThemeToggle />
       </div>
       <Countdown />
-
+      <ControlledChaos />
       <div>
         <div>
           <AuthButton /> <a href="doom.html">[Play DOOM]</a>
