@@ -300,3 +300,27 @@
 .gta-radio-station-list::-webkit-scrollbar-thumb:hover {
   background: #00ff00;
 }
+
+/* Responsive tweaks: reduce default radio footprint on small screens */
+@media (max-width: 640px) {
+  .gta-radio-overlay {
+    min-width: 160px;
+    max-width: 260px;
+    padding: 6px;
+  }
+  .gta-radio-container {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 12px;
+  }
+  .gta-radio-display {
+    gap: 6px;
+  }
+  .gta-radio-logo-container {
+    width: 48px;
+    height: 48px;
+  }
+  .gta-radio-station-list {
+    max-height: 120px;
+  }
+}

@@ -64,6 +64,20 @@ export function MidiPlayer({ isOpen: isOpenProp, onClose }: MidiPlayerProps = {}
     );
   }, [alignment, isCollapsed, isOpen]);
 
+  // Default to collapsed on smaller screens so the radio doesn't take up all space
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const mq = window.matchMedia("(max-width: 640px)");
+        if (mq.matches) {
+          setIsCollapsed(true);
+        }
+      } catch (e) {
+        // ignore if matchMedia not available
+      }
+    }
+  }, []);
+
   const changeStation = (index: number) => {
     shouldAutoPlayRef.current = isPlaying;
     
