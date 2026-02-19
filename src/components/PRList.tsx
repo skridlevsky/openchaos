@@ -1,5 +1,5 @@
 import { getOrganizedPRs } from "@/lib/github";
-import { ExpandablePRSection } from "./ExpandablePRSection";
+import { Web2FramesLayout } from "./Web2FramesLayout";
 
 export async function PRList() {
   let data;
@@ -13,42 +13,43 @@ export async function PRList() {
 
   if (error) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="page-error-table">
-        <tbody>
-          <tr>
-            <td className="page-error-cell">
-              <b>{error}</b>
-              <br />
-              <span>Try refreshing the page in a minute.</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="web2-section">
+        <div className="web2-section-header">
+          <span className="web2-section-title">Open PRs</span>
+        </div>
+        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+          <strong>{error}</strong>
+          <br />
+          <span>Try refreshing the page in a minute.</span>
+        </div>
+      </div>
     );
   }
 
-  const { topByVotes, trending } = data!;
+  const { topByVotes, rising, newest, discussed, controversial } = data!;
 
-  if (topByVotes.length === 0 && trending.length === 0) {
+  if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
-        <tbody>
-          <tr>
-            <td className="page-empty-cell">
-              <b>No open PRs yet.</b>
-              <br />
-              <span>Be the first to submit one!</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="web2-section">
+        <div className="web2-section-header">
+          <span className="web2-section-title">Open PRs</span>
+        </div>
+        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+          <strong>No open PRs yet.</strong>
+          <br />
+          <span>Be the first to submit one!</span>
+        </div>
+      </div>
     );
   }
 
   return (
-    <>
-      <ExpandablePRSection title="TOP 10 BY VOTES" prs={topByVotes} showRank />
-      <ExpandablePRSection title="TRENDING THIS WEEK" prs={trending} />
-    </>
+    <Web2FramesLayout
+      topByVotes={topByVotes}
+      rising={rising}
+      newest={newest}
+      discussed={discussed}
+      controversial={controversial}
+    />
   );
 }
