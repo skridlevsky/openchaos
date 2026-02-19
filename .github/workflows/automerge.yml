@@ -1,8 +1,8 @@
-name: Merge top-voted PR weekly
+name: Merge top-voted PR daily
 
 on:
   schedule:
-    - cron: "0 12 * * 0"
+    - cron: "0 19 * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,6 +15,18 @@ jobs:
   merge-top-pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Merge highest-voted mergeable PR
         uses: actions/github-script@v7
         with:
@@ -22,6 +34,18 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
+
+            // Rhyming title check — mirrors src/lib/rhymes.ts
+            const rhymesWith = require('rhymes-with');
+            function hasRhymingWords(title) {
+              const words = title.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+              for (let i = 0; i < words.length; i++) {
+                for (let j = i + 1; j < words.length; j++) {
+                  if (words[i] !== words[j] && rhymesWith(words[i], words[j])) return true;
+                }
+              }
+              return false;
+            }
 
             // Fetch all open PRs, compute net votes, and return ranked by votes (newest first for ties)
             async function getRankedPRs() {
@@ -128,6 +152,12 @@ jobs:
                   continue;
                 }
 
+                // Check rhyming title requirement (README rule)
+                if (!hasRhymingWords(pr.title)) {
+                  console.log(`  PR #${pr.number} title doesn't contain rhyming words — skipping.`);
+                  continue;
+                }
+
                 // Check CI via both commit statuses API and check runs API (different CI systems report through different endpoints)
                 const statuses = await github.rest.repos.getCombinedStatusForRef({
                   owner, repo, ref: detail.data.head.sha
@@ -173,4 +203,4 @@ jobs:
             }
 
             console.log("\nNo mergeable PR with positive votes found.");
-            core.warning("Daily merge did not occur: no mergeable PR with positive votes was found.");
+            core.warning("Daily merge did not occur: no mergeable PR with positive votes and a rhyming title was found.");
