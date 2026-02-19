@@ -140,17 +140,26 @@ jobs:
               }
             }
 
-            // Process deaths
+            // Process deaths — cap at 1 per day
             if (deaths.length === 0) {
               console.log("\n✓ No PRs died today. All survived natural selection.");
               return;
             }
 
+            // Only the weakest PR dies each day — pick highest death probability
+            deaths.sort((a, b) => b.deathProb - a.deathProb);
+            const todaysVictim = deaths[0];
+
+            if (deaths.length > 1) {
+              console.log(`\n${deaths.length} PRs failed their rolls, but only 1 death per day is allowed.`);
+              console.log(`Spared: ${deaths.slice(1).map(d => `#${d.pr.number}`).join(', ')}`);
+            }
+
             console.log("\n" + "=".repeat(80));
-            console.log(`💀 ${deaths.length} PR(s) DIED FROM OLD AGE`);
+            console.log(`💀 1 PR DIED FROM OLD AGE`);
             console.log("=".repeat(80) + "\n");
 
-            for (const death of deaths) {
+            for (const death of [todaysVictim]) {
               console.log(`Closing PR #${death.pr.number}: ${death.pr.title}`);
 
               // Create death message
@@ -221,4 +230,4 @@ jobs:
               console.log(`✓ Closed and locked PR #${death.pr.number}`);
             }
 
-            console.log(`\n💀 Old age claimed ${deaths.length} PR(s) today.`);
+            console.log(`\n💀 Old age claimed 1 PR today.`);
