@@ -23,37 +23,53 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Fetch all open PRs with net vote counts
+            // Fetch all open PRs, compute net votes, and return ranked by votes (newest first for ties)
             async function getRankedPRs() {
-              const prs = await github.rest.pulls.list({
-                owner,
-                repo,
-                state: "open",
-                per_page: 100
-              });
+              let allPRs = [];
+              let page = 1;
+              while (true) {
+                const prs = await github.rest.pulls.list({
+                  owner, repo, state: "open", per_page: 100, page
+                });
+                allPRs = allPRs.concat(prs.data);
+                if (prs.data.length < 100) break;
+                page++;
+              }
 
-              const prsWithVotes = await Promise.all(
-                prs.data.map(async (pr) => {
-                  const reactions = await github.rest.reactions.listForIssue({
-                    owner,
-                    repo,
-                    issue_number: pr.number,
-                    per_page: 100
-                  });
+              const results = await Promise.allSettled(
+                allPRs.map(async (pr) => {
+                  let allReactions = [];
+                  let reactPage = 1;
+                  while (true) {
+                    const reactions = await github.rest.reactions.listForIssue({
+                      owner, repo, issue_number: pr.number, per_page: 100, page: reactPage
+                    });
+                    allReactions = allReactions.concat(reactions.data);
+                    if (reactions.data.length < 100) break;
+                    reactPage++;
+                  }
 
-                  const thumbsUp = reactions.data.filter(r => r.content === '+1').length;
-                  const thumbsDown = reactions.data.filter(r => r.content === '-1').length;
-                  const votes = thumbsUp - thumbsDown;
+                  const thumbsUp = allReactions.filter(r => r.content === '+1').length;
+                  const thumbsDown = allReactions.filter(r => r.content === '-1').length;
 
                   return {
                     number: pr.number,
                     title: pr.title,
                     author: pr.user.login,
                     createdAt: pr.created_at,
-                    votes
+                    votes: thumbsUp - thumbsDown
                   };
                 })
               );
+
+              const prsWithVotes = [];
+              for (const [i, result] of results.entries()) {
+                if (result.status === 'fulfilled') {
+                  prsWithVotes.push(result.value);
+                } else {
+                  console.log(`  WARNING: Failed to fetch reactions for PR #${allPRs[i].number}: ${result.reason.message}`);
+                }
+              }
 
               // Sort by net votes descending, then by newest first for tiebreaker
               prsWithVotes.sort((a, b) =>
@@ -85,60 +101,76 @@ jobs:
 
               console.log(`\nEvaluating PR #${pr.number} (${pr.votes} net votes)...`);
 
-              // Check mergeable status
-              const detail = await github.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: pr.number
-              });
-
-              // GitHub may return null if mergeability hasn't been computed yet — retry once
-              let mergeable = detail.data.mergeable;
-              if (mergeable === null) {
-                console.log(`  Mergeability not yet computed, retrying...`);
-                await new Promise(r => setTimeout(r, 3000));
-                const retry = await github.rest.pulls.get({
-                  owner,
-                  repo,
-                  pull_number: pr.number
+              try {
+                // Check mergeable status
+                const detail = await github.rest.pulls.get({
+                  owner, repo, pull_number: pr.number
                 });
-                mergeable = retry.data.mergeable;
-              }
 
-              if (!mergeable) {
-                console.log(`  PR #${pr.number} has merge conflicts — skipping.`);
+                // GitHub may return null if mergeability hasn't been computed yet — retry up to 3 times
+                let mergeable = detail.data.mergeable;
+                let retries = 0;
+                while (mergeable === null && retries < 3) {
+                  retries++;
+                  const delay = retries * 3000;
+                  console.log(`  Mergeability not yet computed, retry ${retries}/3 in ${delay}ms...`);
+                  await new Promise(r => setTimeout(r, delay));
+                  const retry = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
+                  mergeable = retry.data.mergeable;
+                }
+
+                if (mergeable === null) {
+                  console.log(`  PR #${pr.number} mergeability unknown after retries — skipping.`);
+                  continue;
+                }
+                if (mergeable === false) {
+                  console.log(`  PR #${pr.number} has merge conflicts — skipping.`);
+                  continue;
+                }
+
+                // Check CI via both commit statuses API and check runs API (different CI systems report through different endpoints)
+                const statuses = await github.rest.repos.getCombinedStatusForRef({
+                  owner, repo, ref: detail.data.head.sha
+                });
+                const checkRuns = await github.rest.checks.listForRef({
+                  owner, repo, ref: detail.data.head.sha
+                });
+
+                if (statuses.data.state === 'pending' || statuses.data.state === 'failure' || statuses.data.state === 'error') {
+                  console.log(`  PR #${pr.number} has ${statuses.data.state} commit status — skipping.`);
+                  continue;
+                }
+
+                const incompleteChecks = checkRuns.data.check_runs.filter(cr => cr.status !== 'completed');
+                if (incompleteChecks.length > 0) {
+                  console.log(`  PR #${pr.number} has ${incompleteChecks.length} check(s) still running — skipping.`);
+                  continue;
+                }
+
+                const failedChecks = checkRuns.data.check_runs.filter(
+                  cr => cr.conclusion !== 'success' && cr.conclusion !== 'skipped'
+                );
+                if (failedChecks.length > 0) {
+                  console.log(`  PR #${pr.number} has failing CI checks — skipping.`);
+                  continue;
+                }
+
+                // All clear — merge it
+                try {
+                  await github.rest.pulls.merge({
+                    owner, repo, pull_number: pr.number, merge_method: 'squash'
+                  });
+                  console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
+                  return;
+                } catch (mergeErr) {
+                  console.log(`  ERROR: Failed to merge PR #${pr.number}: ${mergeErr.message}. Trying next PR.`);
+                  continue;
+                }
+              } catch (err) {
+                console.log(`  ERROR: Failed to evaluate PR #${pr.number}: ${err.message}. Trying next PR.`);
                 continue;
               }
-
-              // Check CI status
-              const checks = await github.rest.repos.getCombinedStatusForRef({
-                owner,
-                repo,
-                ref: detail.data.head.sha
-              });
-              const checkRuns = await github.rest.checks.listForRef({
-                owner,
-                repo,
-                ref: detail.data.head.sha
-              });
-              const allChecksPassed = checkRuns.data.check_runs.every(
-                cr => cr.conclusion === 'success' || cr.conclusion === 'skipped'
-              );
-
-              if (checks.data.state === 'failure' || !allChecksPassed) {
-                console.log(`  PR #${pr.number} has failing CI checks — skipping.`);
-                continue;
-              }
-
-              // All clear — merge it
-              await github.rest.pulls.merge({
-                owner,
-                repo,
-                pull_number: pr.number,
-                merge_method: 'squash'
-              });
-              console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
-              return;
             }
 
             console.log("\nNo mergeable PR with positive votes found.");
+            core.warning("Daily merge did not occur: no mergeable PR with positive votes was found.");
