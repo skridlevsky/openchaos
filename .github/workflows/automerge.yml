@@ -81,6 +81,8 @@ jobs:
                     title: pr.title,
                     author: pr.user.login,
                     createdAt: pr.created_at,
+                    thumbsUp,
+                    thumbsDown,
                     votes: thumbsUp - thumbsDown
                   };
                 })
@@ -117,7 +119,8 @@ jobs:
             console.log("===================\n");
 
             // Iterate through ranked PRs, merge the first mergeable one
-            for (const pr of rankedPRs) {
+            for (let rank = 0; rank < rankedPRs.length; rank++) {
+              const pr = rankedPRs[rank];
               if (pr.votes <= 0) {
                 console.log(`PR #${pr.number} has ${pr.votes} net votes — stopping (no positive-vote PRs remain).`);
                 break;
@@ -191,6 +194,20 @@ jobs:
                     owner, repo, pull_number: pr.number, merge_method: 'squash'
                   });
                   console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
+
+                  // Leave a victory comment on the merged PR
+                  const body = [
+                    `This PR won the daily race,`,
+                    `Merged with chaos, grace, and pace!`,
+                    ``,
+                    `**Votes:** +${pr.votes} net (${pr.thumbsUp} :+1: / ${pr.thumbsDown} :-1:)`,
+                    `**Rank:** #${rank + 1} of ${rankedPRs.length} open PRs`,
+                    `**Author:** @${pr.author}`,
+                  ].join('\n');
+                  await github.rest.issues.createComment({
+                    owner, repo, issue_number: pr.number, body
+                  });
+
                   return;
                 } catch (mergeErr) {
                   console.log(`  ERROR: Failed to merge PR #${pr.number}: ${mergeErr.message}. Trying next PR.`);
