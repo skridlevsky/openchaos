@@ -9,28 +9,25 @@ import { soundPlayer } from "@/utils/sounds";
 
 interface PRCardProps {
   pr: PullRequest;
-  distinguishLeading?: boolean,
+  rank: number;
 }
 
-function chooseURL(url: string) {
+function chooseURL(url: string): string {
   // 10% chance to Rickroll
   if (Math.random() <= 0.10) {
-    // Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)
     return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  } else {
-    return url;
   }
+  return url;
 }
 
 type VoteStatus = 'idle' | 'voting' | 'success' | 'error';
 
-export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
-  const { user, isAuthenticated, login } = useAuth();
-  const linkHref = chooseURL(pr.url);
+export function PRCard({ pr, rank }: PRCardProps) {
+  const { isAuthenticated, login } = useAuth();
+  const url = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
-  const isLeading = pr.rank === 1 && distinguishLeading;
   const containsRhymes = hasRhymingWords(pr.title);
-  const hasConflict = !pr.isMergeable || !containsRhymes;
+  const isLeading = rank === 1;
 
   const [voteStatus, setVoteStatus] = useState<VoteStatus>('idle');
   const [optimisticVotes, setOptimisticVotes] = useState(pr.votes);
@@ -41,6 +38,27 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
   const [errorDetails, setErrorDetails] = useState<string>('');
   const [canRetry, setCanRetry] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const hasConflicts = !pr.isMergeable;
+
+  function getStatusTitle(): string {
+    if (pr.isMergeable && pr.checksPassed) {
+      return "All checks passed & no conflicts";
+    }
+    if (hasConflicts && !pr.checksPassed) {
+      return containsRhymes
+        ? "Merge conflicts & checks failed — will not merge"
+        : "No rhyme & checks failed — will not merge";
+    }
+    if (hasConflicts) {
+      return containsRhymes
+        ? "Has merge conflicts — will not merge"
+        : "No rhyme or reason — will not merge";
+    }
+    return "Checks pending — will still merge";
+  }
+
+  const statusTitle = getStatusTitle();
 
   // Reset optimistic votes when PR votes change
   useEffect(() => {
@@ -65,14 +83,10 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       return;
     }
 
-    // Reset error state
     setCanRetry(false);
     setErrorDetails('');
-
-    // Store vote attempt for retry
     localStorage.setItem('last_vote_attempt', JSON.stringify({ prNumber: pr.number, reaction }));
 
-    // Optimistic update
     setVoteStatus('voting');
     const optimisticDelta = reaction === '+1' ? 1 : -1;
     const newVoteCount = optimisticVotes + optimisticDelta;
@@ -86,38 +100,28 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       });
 
       if (response.ok) {
-        // Success! Play sound
-        if (reaction === '+1') {
-          soundPlayer.playUpvote();
-        } else {
-          soundPlayer.playDownvote();
-        }
+        reaction === '+1' ? soundPlayer.playUpvote() : soundPlayer.playDownvote();
         soundPlayer.playSuccess();
 
         setVoteStatus('success');
         setFeedbackMessage(reaction === '+1' ? '👍 Upvoted!' : '👎 Downvoted!');
 
-        // Check for milestones
         if (newVoteCount === 67 || newVoteCount === -67) {
-          // SixSeven special!
           setShowShake(true);
           soundPlayer.playMilestone();
           createConfetti();
           setTimeout(() => setShowShake(false), 500);
         } else if (newVoteCount % 10 === 0 && Math.abs(newVoteCount) >= 10) {
-          // Milestone (10, 20, 30, etc.)
           setShowCelebration(true);
           soundPlayer.playMilestone();
           createStarBurst();
           setTimeout(() => setShowCelebration(false), 600);
         }
       } else {
-        // Revert optimistic update
         setOptimisticVotes(pr.votes);
         setVoteStatus('error');
         setCanRetry(true);
 
-        // Better error messages
         if (response.status === 429) {
           setErrorDetails('Rate limited');
           setFeedbackMessage('⏱️ Too many votes! Slow down.');
@@ -135,20 +139,21 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
         soundPlayer.playError();
       }
     } catch (error) {
-      // Revert optimistic update
+      console.error('Vote failed:', error);
       setOptimisticVotes(pr.votes);
       setVoteStatus('error');
       setCanRetry(true);
-      setErrorDetails('Network error');
-      setFeedbackMessage('🌐 Network error. Check connection.');
+      const isNetworkError = error instanceof TypeError && String(error.message).includes('fetch');
+      setErrorDetails(isNetworkError ? 'Network error' : 'Unexpected error');
+      setFeedbackMessage(isNetworkError
+        ? '🌐 Network error. Check connection.'
+        : '❌ Something went wrong. Try again.');
       soundPlayer.playError();
     }
   };
 
-  // Create confetti particles
   const createConfetti = () => {
     if (!cardRef.current) return;
-
     const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
     for (let i = 0; i < 20; i++) {
       const confetti = document.createElement('div');
@@ -158,15 +163,12 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       confetti.style.animationDelay = `${Math.random() * 0.3}s`;
       cardRef.current.appendChild(confetti);
-
       setTimeout(() => confetti.remove(), 2000);
     }
   };
 
-  // Create star burst effect
   const createStarBurst = () => {
     if (!cardRef.current) return;
-
     const stars = ['⭐', '✨', '💫', '🌟'];
     for (let i = 0; i < 8; i++) {
       const star = document.createElement('div');
@@ -176,188 +178,206 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       star.style.top = '50%';
       star.style.animationDelay = `${i * 0.1}s`;
       cardRef.current.appendChild(star);
-
       setTimeout(() => star.remove(), 1000);
     }
   };
 
-  const cardClass = hasConflict
-    ? `pr-card pr-card-normal pr-card-conflict ${isSixtySeven ? "sixseven-shake" : ""}`
-    : `pr-card ${isLeading ? "pr-card-leading" : "pr-card-normal"} ${isSixtySeven ? "sixseven-shake" : ""}`;
-
-  const voteButtonStyle = {
-    opacity: voteStatus === "voting" ? 0.6 : 1,
-    cursor: voteStatus === "voting" ? "wait" : "pointer",
-    fontFamily: "inherit",
-    background: "transparent",
-    color: "var(--foreground)",
-    padding: "2px 6px",
-    border: "none",
-  } as const;
-
   return (
     <div
       ref={cardRef}
-      className={`${cardClass} ${showShake ? "shake-67-animation" : ""} ${showCelebration ? "celebrate-animation" : ""}`}
-      style={{
-        position: "relative",
-        marginBottom: "1.5em",
-      }}
+      style={{ position: 'relative' }}
+      className={`pr-card ${isLeading ? 'pr-card-leading' : 'pr-card-normal'}
+        ${isSixtySeven ? "sixseven-shake" : ""}
+        ${isLeading ? 'pr-card-featured' : ''}
+        ${showShake ? "shake-67-animation" : ""}
+        ${showCelebration ? "celebrate-animation" : ""}
+      `}
     >
-      {/* Line 1: Rank · #N · Title */}
-      <div>
-        <span>#{!hasConflict ? pr.rank : "N/A"}. </span>
-        
-        {isLeading && (
-          <span>[LEADING]</span>
-        )}
-        {pr.isTrending && (
-          <span>[TRENDING]</span>
-        )}
-        <span>
-          {pr.title}
-        </span>
-        <span>(#{pr.number})</span>
-      </div>
-
-      {/* Vote buttons on their own line */}
-      <div>
-        
-        <span
-          onMouseEnter={() => setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-        >
-          &nbsp;&nbsp;&nbsp;&nbsp;Score:&nbsp;
-          {voteStatus === "voting" ? "..." : optimisticVotes}
-          {showTooltip && (
-            <span
-              style={{
-                position: "absolute",
-                bottom: "100%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                marginBottom: "4px",
-                padding: "4px 8px",
-                border: "1px solid var(--foreground)",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                fontFamily: "inherit",
-                fontSize: "11px",
-                whiteSpace: "nowrap",
-                zIndex: 1000,
-              }}
-            >
-              Net: {optimisticVotes} | {isAuthenticated ? "arrows to vote" : "Login to vote"}
-            </span>
-          )}
-        </span>
-        <button
-          onClick={() => handleVote("+1")}
-          className="vote-arrow vote-arrow-up"
-          disabled={voteStatus === "voting"}
-          title="Upvote this PR"
-          style={voteButtonStyle}
-        >
-          ^
-        </button>
-        <button
-          onClick={() => handleVote("-1")}
-          className="vote-arrow vote-arrow-down"
-          disabled={voteStatus === "voting"}
-          title="Downvote this PR"
-          style={voteButtonStyle}
-        >
-          v
-        </button>
-      </div>
-
-      {/* Line 2: by @author · time */}
-      <div>
-      &nbsp;&nbsp;&nbsp;&nbsp;by{" "}
-        <a
-          href={`https://github.com/${pr.author}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="pr-card-author-link"
-        >
-          @{pr.author}
-        </a>{" "}
-        · <TimeAgo isoDate={pr.createdAt} />
-      </div>
-
-      {/* Line 3: link */}
-      <div>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a
-          href={linkHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="pr-card-link"
-          suppressHydrationWarning
-        >
-          {pr.url}
-        </a>
-      </div>
-
-      {/* Feedback / loading */}
-      {voteStatus === "voting" && (
-        <div style={{ marginBottom: "4px", fontSize: "12px" }}>...</div>
-      )}
-      {feedbackMessage && (
-        <div
-          style={{
-            marginBottom: "4px",
-            padding: "4px 8px",
-            border: "1px solid var(--foreground)",
-            background: "var(--background)",
-            color: "var(--foreground)",
-            fontFamily: "inherit",
-            fontSize: "11px",
-          }}
-        >
-          {feedbackMessage}
-          {errorDetails && (
-            <span style={{ fontSize: "10px", opacity: 0.9 }}> ({errorDetails})</span>
-          )}
-          {canRetry && (
-            <button
-              onClick={() => {
-                const lastVote = localStorage.getItem("last_vote_attempt");
-                if (lastVote) {
-                  const { reaction } = JSON.parse(lastVote);
-                  handleVote(reaction);
-                }
-              }}
-              style={{
-                marginLeft: "8px",
-                padding: "2px 6px",
-                border: "1px solid var(--foreground)",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                fontFamily: "inherit",
-                fontSize: "10px",
-                cursor: "pointer",
-              }}
-            >
-              [ Retry ]
-            </button>
+      <div className="pr-card-inner">
+        {/* Fixed-width number column */}
+        <div className={`pr-card-number-section ${isLeading ? 'pr-card-number-leading' : 'pr-card-number-normal'}`}>
+          <span className="pr-card-number-text">
+            #{pr.number}
+          </span>
+          {isLeading && (
+            <div className="pr-card-leading-icon" title="Currently leading — will be merged next!">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+              </svg>
+            </div>
           )}
         </div>
-      )}
 
-      {/* Merge status */}
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;
-        {(!pr.isMergeable || !pr.checksPassed) && (
-          <span>
-            {!pr.isMergeable && !pr.checksPassed
-              ? "Conflicts & Checks failed"
-              : !pr.isMergeable
-                ? containsRhymes
-                  ? "Merge conflicts"
-                  : "No rhyme or reason"
-                : "Checks failed"}
-          </span>
-        )}
-        {(!pr.isMergeable || !pr.checksPassed) && " "}
+        {/* Flexible content column */}
+        <div className="pr-card-content-section">
+          <div className="pr-card-title">
+            {pr.title}
+          </div>
+          <div className="pr-card-meta">
+            by{" "}
+            <a
+              href={`https://github.com/${pr.author}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pr-card-author-link"
+            >
+              @{pr.author}
+            </a>
+            {" · "}
+            <TimeAgo isoDate={pr.createdAt} />
+          </div>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pr-card-link"
+            suppressHydrationWarning
+          >
+            View &amp; Vote on GitHub →
+          </a>
+        </div>
+
+        {/* Fixed-width votes column */}
+        <div className={`pr-card-votes-section ${isLeading ? 'pr-card-votes-leading' : 'pr-card-votes-normal'}`}>
+          {/* Upvote Arrow */}
+          <button
+            onClick={() => handleVote('+1')}
+            className="vote-arrow vote-arrow-up"
+            disabled={voteStatus === 'voting'}
+            title="Upvote this PR"
+          >
+            ▲
+          </button>
+
+          {/* Vote Count */}
+          <div
+            style={{ position: 'relative' }}
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            <span
+              className={isLeading ? 'vote-count vote-count-leading' : 'vote-count vote-count-normal'}
+              style={{
+                transform: voteStatus === 'voting' ? 'scale(1.1)' : 'scale(1)',
+              }}
+            >
+              {optimisticVotes}
+            </span>
+            {showTooltip && (
+              <div className="vote-tooltip">
+                <strong>Net Score: {optimisticVotes}</strong><br/>
+                <span style={{ fontSize: '10px' }}>
+                  {isAuthenticated ? 'Click arrows to vote' : 'Login required to vote'}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Downvote Arrow */}
+          <button
+            onClick={() => handleVote('-1')}
+            className="vote-arrow vote-arrow-down"
+            disabled={voteStatus === 'voting'}
+            title="Downvote this PR"
+          >
+            ▼
+          </button>
+
+          {/* Loading Indicator */}
+          {voteStatus === 'voting' && (
+            <div className="web2-ajax-spinner" style={{ width: 16, height: 16, borderWidth: 2, marginTop: 2 }} />
+          )}
+
+          {/* Feedback Message */}
+          {feedbackMessage && (
+            <div className={`vote-feedback ${voteStatus === 'success' ? 'vote-feedback-success' : 'vote-feedback-error'}`}>
+              <div>{feedbackMessage}</div>
+              {errorDetails && (
+                <div style={{ fontSize: '9px', marginTop: '2px', opacity: 0.8 }}>
+                  ({errorDetails})
+                </div>
+              )}
+              {canRetry && (
+                <button
+                  className="vote-retry-button"
+                  onClick={() => {
+                    try {
+                      const lastVote = localStorage.getItem('last_vote_attempt');
+                      if (lastVote) {
+                        const parsed = JSON.parse(lastVote);
+                        if (parsed?.reaction) {
+                          handleVote(parsed.reaction);
+                        }
+                      }
+                    } catch (e) {
+                      console.error('Failed to parse last vote attempt:', e);
+                      localStorage.removeItem('last_vote_attempt');
+                    }
+                  }}
+                >
+                  🔄 Retry
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Status icon */}
+          <div
+            className="pr-card-status-icon"
+            title={statusTitle}
+          >
+            {pr.isMergeable && pr.checksPassed ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="#28a745"
+                width="16"
+                height="16"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : hasConflicts ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="#e74c3c"
+                width="16"
+                height="16"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="#e6a817"
+                width="16"
+                height="16"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
+            {pr.isTrending && (
+              <div className="pr-card-trending-badge">
+                <span className="pr-card-trending-badge-text">
+                  <b>🔥</b>
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -16,12 +16,29 @@ const NAV_ITEMS: { id: Section; label: string; icon: string }[] = [
   { id: "new", label: "NEWEST", icon: "+" },
 ];
 
-interface FramesLayoutProps {
+interface SectionDataProps {
   topByVotes: PullRequest[];
   rising: PullRequest[];
   newest: PullRequest[];
   discussed: PullRequest[];
   controversial: PullRequest[];
+}
+
+type FramesLayoutProps = SectionDataProps;
+
+function SectionContent({ section, topByVotes, rising, newest, discussed, controversial }: SectionDataProps & { section: Section }) {
+  switch (section) {
+    case "votes":
+      return <ExpandablePRSection title="[*] TOP VOTES" prs={topByVotes} allowDistinguish />;
+    case "rising":
+      return <ExpandablePRSection title="[^] HOT" prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))} />;
+    case "new":
+      return <ExpandablePRSection title="[+] NEWEST" prs={newest} />;
+    case "discussed":
+      return <ExpandablePRSection title="[#] DISCUSSED" prs={discussed} />;
+    case "controversial":
+      return <ExpandablePRSection title="[!] CONTROVERSIAL" prs={controversial} />;
+  }
 }
 
 export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: FramesLayoutProps) {
@@ -66,38 +83,14 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
         <div>{"-".repeat(72)}</div>
       </div>
 
-      {/* Active Section Content */}
-      {activeSection === "votes" && (
-        <ExpandablePRSection
-          title="[*] TOP VOTES"
-          prs={topByVotes}
-          allowDistinguish
-        />
-      )}
-      {activeSection === "rising" && (
-        <ExpandablePRSection
-          title="[^] HOT"
-          prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))}
-        />
-      )}
-      {activeSection === "new" && (
-        <ExpandablePRSection
-          title="[+] NEWEST"
-          prs={newest}
-        />
-      )}
-      {activeSection === "discussed" && (
-        <ExpandablePRSection
-          title="[#] DISCUSSED"
-          prs={discussed}
-        />
-      )}
-      {activeSection === "controversial" && (
-        <ExpandablePRSection
-          title="[!] CONTROVERSIAL"
-          prs={controversial}
-        />
-      )}
+      <SectionContent
+        section={activeSection}
+        topByVotes={topByVotes}
+        rising={rising}
+        newest={newest}
+        discussed={discussed}
+        controversial={controversial}
+      />
     </div>
   );
 }
