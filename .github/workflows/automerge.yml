@@ -36,7 +36,7 @@ jobs:
             const repo = context.repo.repo;
 
             // Rhyming title check — mirrors src/lib/rhymes.ts
-            const rhymesWith = require('rhymes-with');
+            const { default: rhymesWith } = await import('rhymes-with');
             function hasRhymingWords(title) {
               const words = title.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
               for (let i = 0; i < words.length; i++) {
