@@ -74,6 +74,13 @@ export function Web2Layout({ children }: Web2LayoutProps) {
                     >
                       Join the Chaos!
                     </a>
+                    <a
+                      href="/museum"
+                      className="guestbook-button"
+                      style={{ textAlign: 'center', margin: 0, display: 'block', textDecoration: 'none' }}
+                    >
+                      OpenChaos Museum
+                    </a>
                   </div>
                 </div>
 
@@ -87,11 +94,6 @@ export function Web2Layout({ children }: Web2LayoutProps) {
                 <Web2SocialBookmarks />
 
               </div>
-            </div>
-
-            {/* dickbutt image preserved */}
-            <div style={{ textAlign: 'center', margin: '20px 0' }}>
-              <img src="/dickbutt.gif" style={{ width: '200px', display: 'inline-block', borderRadius: '8px', opacity: 0.8 }} alt="" />
             </div>
           </div>
 

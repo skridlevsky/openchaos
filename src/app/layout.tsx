@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MidiPlayer } from "@/components/MidiPlayer";
+import { MidiPlayerGate } from "@/components/MidiPlayerGate";
 import "./globals.css";
 import { Fartscroll } from "@/components/Fartscroll";
 
@@ -33,7 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <MidiPlayer />
+        <MidiPlayerGate />
         <Fartscroll />
       </body>
     </html>
