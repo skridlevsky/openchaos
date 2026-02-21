@@ -696,12 +696,6 @@
   display: none !important;
 }
 
-/* --- ControlledChaos Override --- */
-.np-page .chaos-toggle {
-  font-family: var(--np-body-font) !important;
-  font-size: 0.75rem;
-}
-
 /* --- Footer --- */
 .np-footer {
   text-align: center;
@@ -831,12 +825,30 @@
   padding: 24px;
 }
 
-/* --- Theme Toggle Position --- */
-.np-theme-toggle {
+/* --- Top Controls (auth + theme toggle) --- */
+.np-top-controls {
   position: absolute;
   top: 8px;
   right: 16px;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.np-top-controls .auth-button {
+  font-family: var(--np-body-font);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border: 1px solid var(--np-rule);
+  background: transparent;
+  color: var(--np-ink);
+  cursor: pointer;
+}
+
+.np-top-controls .auth-button:hover {
+  background: var(--np-rule);
+  color: var(--np-cream);
 }
 
 /* --- Responsive --- */

@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { Countdown } from "@/components/newspaper/Countdown";
-import { ControlledChaos } from "@/components/ControlledChaos";
 import { PRList } from "@/components/newspaper/PRList";
 import { NewspaperLayout } from "@/components/newspaper/NewspaperLayout";
 import { HallOfChaos } from "@/components/newspaper/HallOfChaos";
@@ -10,15 +9,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 export default function NewspaperHome() {
   return (
     <NewspaperLayout>
-      <div className="np-theme-toggle">
+      <div className="np-top-controls">
+        <AuthButton />
         <ThemeToggle />
       </div>
       <Countdown />
-      <ControlledChaos />
-
-      <div style={{ marginBottom: "16px" }}>
-        <AuthButton />
-      </div>
 
       <Suspense fallback={<div className="np-loading">The reporters are filing their stories...</div>}>
         <PRList />
