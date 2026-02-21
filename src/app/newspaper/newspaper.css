@@ -13,46 +13,8 @@
   --np-gold: #8b7355;
   --np-rule: #2c2c2c;
   --np-bg-light: #f9f5ef;
-  --np-bg-aged: #efe8dc;
   --np-headline-font: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
   --np-body-font: 'Lora', 'Georgia', 'Times New Roman', serif;
-}
-
-/* --- Typography --- */
-.np-headline {
-  font-family: var(--np-headline-font);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  color: var(--np-ink);
-}
-
-.np-subheadline {
-  font-family: var(--np-headline-font);
-  font-weight: 700;
-  font-style: italic;
-  color: var(--np-gold);
-  letter-spacing: 0.02em;
-}
-
-.np-dateline {
-  font-family: var(--np-body-font);
-  font-variant: small-caps;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  color: var(--np-gold);
-  text-transform: uppercase;
-}
-
-.np-drop-cap::first-letter {
-  font-family: var(--np-headline-font);
-  font-size: 3.2em;
-  float: left;
-  line-height: 0.8;
-  margin-right: 6px;
-  margin-top: 4px;
-  color: var(--np-red);
-  font-weight: 900;
 }
 
 /* --- Ornamental Rules --- */
@@ -66,19 +28,6 @@
   border: none;
   border-top: 3px double var(--np-rule);
   margin: 20px 0;
-}
-
-.np-rule-thick-thin {
-  border: none;
-  border-top: 3px solid var(--np-rule);
-  margin: 4px 0 0 0;
-}
-
-.np-rule-thick-thin::after {
-  content: '';
-  display: block;
-  border-top: 1px solid var(--np-rule);
-  margin-top: 3px;
 }
 
 .np-ornament {
@@ -376,11 +325,6 @@
   color: #fff;
 }
 
-.np-badge-late-breaking {
-  background: var(--np-ink);
-  color: #fff;
-}
-
 .np-badge-trending {
   background: var(--np-gold);
   color: #fff;
@@ -499,7 +443,7 @@
   color: var(--np-bg);
 }
 
-/* --- Merge Status Icon --- */
+/* --- Merge Status --- */
 .np-merge-status {
   display: inline-flex;
   align-items: center;
@@ -630,19 +574,6 @@
   font-weight: 400;
   font-size: 0.7rem;
   color: var(--np-gold);
-}
-
-/* --- Section Heading (ExpandablePRSection) --- */
-.np-section-header {
-  font-family: var(--np-headline-font);
-  font-weight: 900;
-  font-size: 1.1rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--np-ink);
-  margin-bottom: 4px;
-  padding-bottom: 4px;
-  border-bottom: 2px solid var(--np-ink);
 }
 
 .np-section-empty {
@@ -848,7 +779,7 @@
 
 .np-top-controls .auth-button:hover {
   background: var(--np-rule);
-  color: var(--np-cream);
+  color: var(--np-bg);
 }
 
 /* --- Responsive --- */

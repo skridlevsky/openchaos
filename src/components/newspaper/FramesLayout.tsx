@@ -25,8 +25,6 @@ interface SectionDataProps {
   controversial: PullRequest[];
 }
 
-type FramesLayoutProps = SectionDataProps;
-
 function SectionContent({ section, topByVotes, rising, newest, discussed, controversial, skipFirst }: SectionDataProps & { section: Section; skipFirst: boolean }) {
   switch (section) {
     case "votes":
@@ -42,7 +40,7 @@ function SectionContent({ section, topByVotes, rising, newest, discussed, contro
   }
 }
 
-export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: FramesLayoutProps) {
+export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: SectionDataProps) {
   const [activeSection, setActiveSection] = useState<Section>("votes");
 
   useEffect(() => {
@@ -58,7 +56,7 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
   }, []);
 
   useEffect(() => {
-    window.location.hash = activeSection;
+    history.replaceState(null, "", `#${activeSection}`);
   }, [activeSection]);
 
   const leadingPR = activeSection === "votes" && topByVotes.length > 0 ? topByVotes[0] : null;

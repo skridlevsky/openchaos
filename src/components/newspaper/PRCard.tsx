@@ -20,6 +20,10 @@ function chooseURL(url: string): string {
   return url;
 }
 
+function playSound(fn: () => void): void {
+  try { fn(); } catch { /* sound is non-critical */ }
+}
+
 type VoteStatus = "idle" | "voting" | "success" | "error";
 
 export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCardProps) {
@@ -64,7 +68,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
     }
   }, [voteStatus]);
 
-  const handleVote = async (reaction: "+1" | "-1") => {
+  async function handleVote(reaction: "+1" | "-1") {
     if (!isAuthenticated) {
       localStorage.setItem("pending_vote", JSON.stringify({ prNumber: pr.number, reaction }));
       login();
@@ -91,19 +95,17 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
         setVoteStatus("success");
         setFeedbackMessage(reaction === "+1" ? "Ballot Cast: YEA" : "Ballot Cast: NAY");
 
-        try {
-          if (reaction === "+1") { soundPlayer.playUpvote(); } else { soundPlayer.playDownvote(); }
-          soundPlayer.playSuccess();
-        } catch { /* sound is non-critical */ }
+        playSound(() => reaction === "+1" ? soundPlayer.playUpvote() : soundPlayer.playDownvote());
+        playSound(() => soundPlayer.playSuccess());
 
         if (newVoteCount === 67 || newVoteCount === -67) {
           setShowShake(true);
-          try { soundPlayer.playMilestone(); } catch { /* sound is non-critical */ }
+          playSound(() => soundPlayer.playMilestone());
           createConfetti();
           setTimeout(() => setShowShake(false), 500);
         } else if (newVoteCount % 10 === 0 && Math.abs(newVoteCount) >= 10) {
           setShowCelebration(true);
-          try { soundPlayer.playMilestone(); } catch { /* sound is non-critical */ }
+          playSound(() => soundPlayer.playMilestone());
           createStarBurst();
           setTimeout(() => setShowCelebration(false), 600);
         }
@@ -125,7 +127,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
           setErrorDetails(`Server error (${response.status})`);
           setFeedbackMessage("Printing error. Try again.");
         }
-        try { soundPlayer.playError(); } catch { /* sound is non-critical */ }
+        playSound(() => soundPlayer.playError());
       }
     } catch (error) {
       console.error("Vote failed:", error);
@@ -137,11 +139,26 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
       setFeedbackMessage(isNetworkError
         ? "Telegraph lines down. Check connection."
         : "Something went wrong. Try again.");
-      try { soundPlayer.playError(); } catch { /* sound is non-critical */ }
+      playSound(() => soundPlayer.playError());
     }
-  };
+  }
 
-  const createConfetti = () => {
+  function retryLastVote(): void {
+    try {
+      const lastVote = localStorage.getItem("last_vote_attempt");
+      if (lastVote) {
+        const parsed = JSON.parse(lastVote);
+        if (parsed?.reaction) {
+          handleVote(parsed.reaction);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to parse last vote attempt:", e);
+      localStorage.removeItem("last_vote_attempt");
+    }
+  }
+
+  function createConfetti() {
     if (!cardRef.current) return;
     const colors = ["#8b0000", "#8b7355", "#1a1a1a", "#c4a55a", "#4a0000", "#d4c5a9"];
     for (let i = 0; i < 20; i++) {
@@ -154,9 +171,9 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
       cardRef.current.appendChild(confetti);
       setTimeout(() => confetti.remove(), 2000);
     }
-  };
+  }
 
-  const createStarBurst = () => {
+  function createStarBurst() {
     if (!cardRef.current) return;
     const stars = ["\u2605", "\u2736", "\u273B", "\u2726"];
     for (let i = 0; i < 8; i++) {
@@ -166,10 +183,14 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
       star.style.left = "50%";
       star.style.top = "50%";
       star.style.animationDelay = `${i * 0.1}s`;
+      const angle = (i / 8) * 2 * Math.PI;
+      const distance = 30 + Math.random() * 20;
+      star.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+      star.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
       cardRef.current.appendChild(star);
       setTimeout(() => star.remove(), 1000);
     }
-  };
+  }
 
   const ballotBox = (
     <div className="np-ballot" style={{ position: "relative" }}>
@@ -217,23 +238,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
             <span style={{ fontSize: "0.55rem", opacity: 0.8 }}> ({errorDetails})</span>
           )}
           {canRetry && (
-            <button
-              className="np-vote-retry"
-              onClick={() => {
-                try {
-                  const lastVote = localStorage.getItem("last_vote_attempt");
-                  if (lastVote) {
-                    const parsed = JSON.parse(lastVote);
-                    if (parsed?.reaction) {
-                      handleVote(parsed.reaction);
-                    }
-                  }
-                } catch (e) {
-                  console.error("Failed to parse last vote attempt:", e);
-                  localStorage.removeItem("last_vote_attempt");
-                }
-              }}
-            >
+            <button className="np-vote-retry" onClick={retryLastVote}>
               Retry
             </button>
           )}
@@ -242,11 +247,17 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
     </div>
   );
 
+  const animationClasses = [
+    isSixtySeven && "sixseven-shake",
+    showShake && "shake-67-animation",
+    showCelebration && "celebrate-animation",
+  ].filter(Boolean).join(" ");
+
   if (isBanner) {
     return (
       <div
         ref={cardRef}
-        className={`np-banner ${isSixtySeven ? "sixseven-shake" : ""} ${showShake ? "shake-67-animation" : ""} ${showCelebration ? "celebrate-animation" : ""}`}
+        className={`np-banner ${animationClasses}`}
         style={{ position: "relative" }}
       >
         <span className="np-banner-badge">EDITOR&apos;S CHOICE</span>
@@ -279,7 +290,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true }: PRCa
   return (
     <div
       ref={cardRef}
-      className={`np-article ${isSixtySeven ? "sixseven-shake" : ""} ${showShake ? "shake-67-animation" : ""} ${showCelebration ? "celebrate-animation" : ""}`}
+      className={`np-article ${animationClasses}`}
       style={{ position: "relative" }}
     >
       <div className="np-article-inner">

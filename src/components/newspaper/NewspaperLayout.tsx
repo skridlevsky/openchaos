@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { NewspaperTicker } from "./NewspaperTicker";
 
 interface NewspaperLayoutProps {
@@ -12,15 +12,15 @@ export function NewspaperLayout({ children }: NewspaperLayoutProps) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC",
   });
 
-  const dayOfYear = Math.floor(
-    (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 86400000
-  );
+  const startOfYear = Date.UTC(today.getUTCFullYear(), 0, 1);
+  const now = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+  const dayOfYear = Math.floor((now - startOfYear) / 86400000) + 1;
 
   return (
     <div className="np-page">
-      {/* Masthead */}
       <header className="np-masthead">
         <hr className="np-masthead-rule-top" />
         <h1 className="np-masthead-title">The Daily Chaos</h1>
@@ -33,13 +33,10 @@ export function NewspaperLayout({ children }: NewspaperLayoutProps) {
         <hr className="np-masthead-rule-bottom" />
       </header>
 
-      {/* Breaking news ticker */}
       <NewspaperTicker />
 
-      {/* Main content */}
       <main>{children}</main>
 
-      {/* Footer */}
       <footer className="np-footer">
         <div className="np-ornament">&sect; &bull; &sect;</div>
         <div className="np-footer-text">

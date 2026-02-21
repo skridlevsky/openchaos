@@ -10,6 +10,7 @@ const TICKER_MESSAGES = [
 ];
 
 export function NewspaperTicker() {
+  // Doubled for seamless infinite scroll (CSS animates to -50%)
   const doubled = [...TICKER_MESSAGES, ...TICKER_MESSAGES];
 
   return (
