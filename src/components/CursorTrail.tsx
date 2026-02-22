@@ -10,7 +10,7 @@ interface CursorPoint {
 
 export function CursorTrail() {
   const [cursors, setCursors] = useState<CursorPoint[]>([]);
-  const [emoji, setEmoji] = useState("🦋");
+  const [emoji, setEmoji] = useState("·");
 
   useEffect(() => {
     let cursorId = 0;
@@ -26,7 +26,7 @@ export function CursorTrail() {
 
       setTimeout(() => {
         setCursors((prev) => prev.filter((c) => c.id !== newCursor.id));
-      }, 800);
+      }, 500);
     };
 
     let throttleTimer: NodeJS.Timeout | null = null;
@@ -35,7 +35,7 @@ export function CursorTrail() {
       throttleTimer = setTimeout(() => {
         handleMouseMove(e);
         throttleTimer = null;
-      }, 50);
+      }, 80);
     };
 
     window.addEventListener("mousemove", throttledMouseMove);
@@ -78,8 +78,10 @@ export function CursorTrail() {
             left: cursor.x,
             top: cursor.y,
             transform: "translate(-50%, -50%)",
-            fontSize: "24px",
-            userSelect: "none"
+            fontSize: "12px",
+            userSelect: "none",
+            color: "#2a5db0",
+            opacity: 0.4,
           }}
         >
           {emoji}

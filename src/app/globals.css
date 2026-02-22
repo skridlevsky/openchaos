@@ -2,75 +2,91 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-:root,
-[data-theme="light"] {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
+* {
+  box-sizing: border-box;
 }
 
-[data-theme="dark"] {
-  --background: #0a0a0a;
-  --foreground: #fafafa;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Comic Sans MS', cursive;
-  --font-mono: 'Courier New', monospace;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Comic Sans MS', cursive;
-}
-
-/* Classic IE6 styles */
-marquee {
-  display: inline-block;
-}
-
-/* Restore classic HTML elements styling */
-table {
-  border-collapse: separate;
-}
-
-font {
-  display: inline;
-}
-
-center {
-  display: block;
-  text-align: center;
-}
-
-/* Add some retro animations */
+/* Shared keyframes */
 @keyframes rotate-hue {
   0% { filter: hue-rotate(0deg); }
   100% { filter: hue-rotate(360deg); }
 }
 
 @keyframes sixseven-shake {
-  0% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-5deg);
-  }
-  50% {
-    transform: rotate(0deg);
-  }
-  75% {
-    transform: rotate(5deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(0deg); }
+  75% { transform: rotate(5deg); }
+  100% { transform: rotate(0deg); }
 }
 
 .sixseven-shake {
   animation: sixseven-shake 0.7s ease-in-out infinite;
   transform-origin: center;
   will-change: transform;
+}
+
+.world-chaos {
+  color: var(--foreground);
+  font-weight: bold;
+  text-decoration: underline;
+  font-family: 'Courier New', 'Courier', monospace;
+}
+
+/* ASCII-style container for ControlledChaos */
+.ccContainer {
+  font-family: 'Courier New', 'Courier', monospace;
+  background: var(--background);
+  border: 2px solid var(--foreground);
+  padding: 12px;
+  margin: 16px 0;
+  width: 84ch;
+  max-width: 84ch;
+}
+
+.ccContainer h1 {
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  font-size: 16px;
+  color: var(--foreground);
+  font-family: 'Courier New', 'Courier', monospace;
+}
+
+/* ASCII-style toggle button */
+.chaos-toggle-button {
+  background: var(--background);
+  color: var(--foreground);
+  border: 2px solid var(--foreground);
+  padding: 4px 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 14px;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.chaos-toggle-button::before {
+  content: '[';
+  margin-right: 2px;
+}
+
+.chaos-toggle-button::after {
+  content: ']';
+  margin-left: 2px;
+}
+
+/* State-aware text prefixes */
+.chaos-toggle-button[data-state="encrypt"]::before { content: '[LOCK: '; }
+.chaos-toggle-button[data-state="encrypt"]::after { content: ']'; }
+.chaos-toggle-button[data-state="decrypt"]::before { content: '[UNLOCK: '; }
+.chaos-toggle-button[data-state="decrypt"]::after { content: ']'; }
+
+.chaos-toggle-button:hover {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.chaos-toggle-button:active {
+  border-style: double;
 }

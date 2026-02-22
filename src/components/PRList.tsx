@@ -1,43 +1,55 @@
-import { getOpenPRs } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { getOrganizedPRs } from "@/lib/github";
+import { Web2FramesLayout } from "./Web2FramesLayout";
 
 export async function PRList() {
-  let prs;
+  let data;
   let error = null;
 
   try {
-    prs = await getOpenPRs();
+    data = await getOrganizedPRs();
   } catch (e) {
     error = e instanceof Error ? e.message : "Failed to fetch PRs";
   }
 
   if (error) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-500">{error}</p>
-        <p className="mt-2 text-sm text-zinc-600">
-          Try refreshing the page in a minute.
-        </p>
+      <div className="web2-section">
+        <div className="web2-section-header">
+          <span className="web2-section-title">Open PRs</span>
+        </div>
+        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+          <strong>{error}</strong>
+          <br />
+          <span>Try refreshing the page in a minute.</span>
+        </div>
       </div>
     );
   }
 
-  if (!prs || prs.length === 0) {
+  const { topByVotes, rising, newest, discussed, controversial } = data!;
+
+  if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (
-      <div className="w-full max-w-xl text-center py-8">
-        <p className="text-zinc-400">No open PRs yet.</p>
-        <p className="mt-2 text-sm text-zinc-500">
-          Be the first to submit one!
-        </p>
+      <div className="web2-section">
+        <div className="web2-section-header">
+          <span className="web2-section-title">Open PRs</span>
+        </div>
+        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+          <strong>No open PRs yet.</strong>
+          <br />
+          <span>Be the first to submit one!</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-xl space-y-3">
-      {prs.map((pr, index) => (
-        <PRCard key={pr.number} pr={pr} rank={index + 1} />
-      ))}
-    </div>
+    <Web2FramesLayout
+      topByVotes={topByVotes}
+      rising={rising}
+      newest={newest}
+      discussed={discussed}
+      controversial={controversial}
+    />
   );
 }

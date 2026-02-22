@@ -21,10 +21,12 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 - **Vote**: Add a 👍 reaction to support a change, or a 👎 reaction to oppose it
 - **Highest Score Wins**: The winner is determined by (Total 👍) - (Total 👎)
 - **Ties favor the New**: If scores are equal, the **newest PR** (created most recently) wins
+- **Must have rhyming words**: Only PRs that contain **two rhyming words** in the title are eligible for merge (e.g., "botch" and "watch")
 - **CI must pass**: If the build fails, the PR is not eligible
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
 - **Note on RULES.md**: The RULES.md file is deprecated and no longer maintained. All current rules are documented here in the README.
+- Any time the maintainer pushes code to main without following the community voting process indicated above, he must post to his X account "I'm a naughty boy" with a link to the Github commit page. 
 
 ## What Can Be Changed
 

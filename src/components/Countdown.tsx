@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 
 function getNextMergeTime(): Date {
   const now = new Date();
@@ -38,6 +38,15 @@ function pad(n: number): string {
   return n.toString().padStart(2, "0");
 }
 
+function CountdownDigit({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="countdown-digit-box">
+      <div className="countdown-digit-value">{value}</div>
+      <div className="countdown-digit-label">{label}</div>
+    </div>
+  );
+}
+
 export function Countdown() {
   const [target, setTarget] = useState(() => getNextMergeTime());
   const [time, setTime] = useState(() => getTimeRemaining(target));
@@ -60,157 +69,40 @@ export function Countdown() {
     return () => clearInterval(interval);
   }, [target]);
 
-  if (!mounted) {
-    return (
-      <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
-        <tbody>
-          <tr>
-            <td className="countdown-header-cell">
-              <div className="countdown-header">
-                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
-                <marquee behavior="alternate" scrollamount="8">
-                  <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
-                {/* @ts-expect-error marquee is deprecated but used for retro styling */}
-                </marquee>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td className="countdown-content-cell">
-              <table width="100%" border={0} cellPadding={8} cellSpacing={10}>
-                <tbody>
-                  <tr>
-                    <td className="countdown-digit-cell">
-                      <div className="countdown-digit-value">
-                        <b>--</b>
-                      </div>
-                      <div className="countdown-digit-label">
-                        <b>DAYS</b>
-                      </div>
-                    </td>
-                    <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse">⭐</span>
-                    </td>
-                    <td className="countdown-digit-cell">
-                      <div className="countdown-digit-value">
-                        <b>--</b>
-                      </div>
-                      <div className="countdown-digit-label">
-                        <b>HOURS</b>
-                      </div>
-                    </td>
-                    <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
-                    </td>
-                    <td className="countdown-digit-cell">
-                      <div className="countdown-digit-value">
-                        <b>--</b>
-                      </div>
-                      <div className="countdown-digit-label">
-                        <b>MINS</b>
-                      </div>
-                    </td>
-                    <td className="countdown-separator-cell">
-                      <span className="countdown-separator sparkle-pulse">⭐</span>
-                    </td>
-                    <td className="countdown-digit-cell">
-                      <div className="countdown-digit-value">
-                        <b>--</b>
-                      </div>
-                      <div className="countdown-digit-label">
-                        <b>SECS</b>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-          <tr>
-            <td className="countdown-footer-cell">
-              <div className="countdown-footer">
-                <b>HURRY! TIME IS RUNNING OUT!</b>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    );
-  }
+  const digits: { value: string; label: string }[] = mounted
+    ? [
+        { value: String(time.days), label: "Days" },
+        { value: pad(time.hours), label: "Hours" },
+        { value: pad(time.minutes), label: "Mins" },
+        { value: pad(time.seconds), label: "Secs" },
+      ]
+    : [
+        { value: "--", label: "Days" },
+        { value: "--", label: "Hours" },
+        { value: "--", label: "Mins" },
+        { value: "--", label: "Secs" },
+      ];
 
   return (
-    <table border={5} cellPadding={0} cellSpacing={0} className="countdown-table">
-      <tbody>
-        <tr>
-          <td className="countdown-header-cell">
-            <div className="countdown-header">
-              {/* @ts-expect-error marquee is deprecated but used for retro styling */}
-              <marquee behavior="alternate" scrollamount="8">
-                <span className="sparkle-pulse">🔥</span> <b>⏰ NEXT MERGE COUNTDOWN ⏰</b> <span className="sparkle-pulse sparkle-delay-2">🔥</span>
-              {/* @ts-expect-error marquee is deprecated but used for retro styling */}
-              </marquee>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td className="countdown-content-cell">
-            <table width="100%" border={0} cellPadding={8} cellSpacing={10}>
-              <tbody>
-                <tr>
-                  <td className="countdown-digit-cell">
-                    <div className="countdown-digit-value blink-countdown">
-                      <b>{time.days}</b>
-                    </div>
-                    <div className="countdown-digit-label">
-                      <b>DAYS</b>
-                    </div>
-                  </td>
-                  <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
-                  </td>
-                  <td className="countdown-digit-cell">
-                    <div className="countdown-digit-value blink-countdown">
-                      <b>{pad(time.hours)}</b>
-                    </div>
-                    <div className="countdown-digit-label">
-                      <b>HOURS</b>
-                    </div>
-                  </td>
-                  <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse sparkle-delay-2">⭐</span>
-                  </td>
-                  <td className="countdown-digit-cell">
-                    <div className="countdown-digit-value blink-countdown">
-                      <b>{pad(time.minutes)}</b>
-                    </div>
-                    <div className="countdown-digit-label">
-                      <b>MINS</b>
-                    </div>
-                  </td>
-                  <td className="countdown-separator-cell">
-                    <span className="countdown-separator sparkle-pulse">⭐</span>
-                  </td>
-                  <td className="countdown-digit-cell">
-                    <div className="countdown-digit-value blink-countdown">
-                      <b>{pad(time.seconds)}</b>
-                    </div>
-                    <div className="countdown-digit-label">
-                      <b>SECS</b>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-        <tr>
-          <td className="countdown-footer-cell">
-            <div className="countdown-footer">
-              <b>HURRY! TIME IS RUNNING OUT!</b>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div className="countdown-container">
+      <div className="countdown-header-bar">
+        <div className="countdown-header">
+          Next Merge Countdown
+        </div>
+      </div>
+      <div className="countdown-digits-row">
+        {digits.map((digit, i) => (
+          <Fragment key={digit.label}>
+            {i > 0 && <span className="countdown-separator">:</span>}
+            <CountdownDigit value={digit.value} label={digit.label} />
+          </Fragment>
+        ))}
+      </div>
+      <div className="countdown-footer-bar">
+        <div className="countdown-footer">
+          Vote now — time is running out!
+        </div>
+      </div>
+    </div>
   );
 }

@@ -12,77 +12,50 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
   });
 
   return (
-    <table
-      width="100%"
-      border={2}
-      cellPadding={8}
-      cellSpacing={0}
-      className="hall-card"
-    >
-      <tbody>
-        <tr>
-          <td className="hall-card-number-cell">
-            <span className="hall-card-number-text">
-              <b>#{pr.number}</b>
-            </span>
-            <div className="hall-card-merged-badge">
-              <span className="hall-card-merged-badge-text">
-                <b>MERGED</b>
-              </span>
-            </div>
-          </td>
-          <td className="hall-card-content-cell">
-            <table width="100%" border={0} cellPadding={0} cellSpacing={0}>
-              <tbody>
-                <tr>
-                  <td>
-                    <span className="hall-card-title">
-                      <b>{pr.title}</b>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="hall-card-author-row">
-                    <span className="hall-card-author-text">
-                      by <a
-                        href={`https://github.com/${pr.author}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hall-card-author-link"
-                      >
-                        <b>@{pr.author}</b>
-                      </a>
-                      {" · "}
-                      <span className="hall-card-date">{mergedDate}</span>
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="hall-card-link-row">
-                    <a
-                      href={pr.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hall-card-link"
-                    >
-                      <b>[View on GitHub →]</b>
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-          <td className="hall-card-trophy-cell">
-            <span className="hall-card-trophy-emoji">
-              🏆
-            </span>
-            <br />
-            <span className="hall-card-winner-text">
-              <b>WINNER</b>
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div className="hall-card">
+      <div className="hall-card-inner">
+        <div className="hall-card-number-section">
+          <span className="hall-card-number-text">
+            #{pr.number}
+          </span>
+          <div className="hall-card-merged-icon" title="Merged">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8-8a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM4.25 4a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" />
+            </svg>
+          </div>
+        </div>
+        <div className="hall-card-content-section">
+          <div className="hall-card-title">
+            {pr.title}
+          </div>
+          <div className="hall-card-meta">
+            by{" "}
+            <a
+              href={`https://github.com/${pr.author}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hall-card-author-link"
+            >
+              @{pr.author}
+            </a>
+            {" · "}
+            <span className="hall-card-date">{mergedDate}</span>
+          </div>
+          <a
+            href={pr.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hall-card-link"
+          >
+            View on GitHub →
+          </a>
+        </div>
+        <div className="hall-card-trophy-section" title="Daily merge winner">
+          <span className="hall-card-trophy-emoji">
+            🏆
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }
