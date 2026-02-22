@@ -1,5 +1,5 @@
-import { getOrganizedPRs } from "@/lib/github";
-import { Web2FramesLayout } from "./Web2FramesLayout";
+import { getOrganizedPRs } from '@/lib/github';
+import { Web2FramesLayout } from './Web2FramesLayout';
 
 export async function PRList() {
   let data;
@@ -8,7 +8,7 @@ export async function PRList() {
   try {
     data = await getOrganizedPRs();
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch PRs";
+    error = e instanceof Error ? e.message : 'Failed to fetch PRs';
   }
 
   if (error) {
@@ -17,7 +17,10 @@ export async function PRList() {
         <div className="web2-section-header">
           <span className="web2-section-title">Open PRs</span>
         </div>
-        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+        <div
+          className="web2-section-body"
+          style={{ textAlign: 'center', padding: '24px' }}
+        >
           <strong>{error}</strong>
           <br />
           <span>Try refreshing the page in a minute.</span>
@@ -34,7 +37,10 @@ export async function PRList() {
         <div className="web2-section-header">
           <span className="web2-section-title">Open PRs</span>
         </div>
-        <div className="web2-section-body" style={{ textAlign: 'center', padding: '24px' }}>
+        <div
+          className="web2-section-body"
+          style={{ textAlign: 'center', padding: '24px' }}
+        >
           <strong>No open PRs yet.</strong>
           <br />
           <span>Be the first to submit one!</span>

@@ -1,19 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import type { PullRequest } from "@/lib/github";
-import { ExpandablePRSection } from "./ExpandablePRSection";
+import { useState, useEffect } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { ExpandablePRSection } from './ExpandablePRSection';
 
-type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
+type Section = 'votes' | 'rising' | 'new' | 'discussed' | 'controversial';
 
-const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial"];
+const VALID_SECTIONS: Section[] = [
+  'votes',
+  'rising',
+  'new',
+  'discussed',
+  'controversial',
+];
 
 const NAV_ITEMS: { id: Section; label: string; icon: string }[] = [
-  { id: "votes", label: "TOP VOTES", icon: "*" },
-  { id: "rising", label: "HOT", icon: "^" },
-  { id: "controversial", label: "CONTROVERSIAL", icon: "!" },
-  { id: "discussed", label: "DISCUSSED", icon: "#" },
-  { id: "new", label: "NEWEST", icon: "+" },
+  { id: 'votes', label: 'TOP VOTES', icon: '*' },
+  { id: 'rising', label: 'HOT', icon: '^' },
+  { id: 'controversial', label: 'CONTROVERSIAL', icon: '!' },
+  { id: 'discussed', label: 'DISCUSSED', icon: '#' },
+  { id: 'new', label: 'NEWEST', icon: '+' },
 ];
 
 interface SectionDataProps {
@@ -26,23 +32,49 @@ interface SectionDataProps {
 
 type FramesLayoutProps = SectionDataProps;
 
-function SectionContent({ section, topByVotes, rising, newest, discussed, controversial }: SectionDataProps & { section: Section }) {
+function SectionContent({
+  section,
+  topByVotes,
+  rising,
+  newest,
+  discussed,
+  controversial,
+}: SectionDataProps & { section: Section }) {
   switch (section) {
-    case "votes":
-      return <ExpandablePRSection title="[*] TOP VOTES" prs={topByVotes} allowDistinguish />;
-    case "rising":
-      return <ExpandablePRSection title="[^] HOT" prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))} />;
-    case "new":
+    case 'votes':
+      return (
+        <ExpandablePRSection
+          title="[*] TOP VOTES"
+          prs={topByVotes}
+          allowDistinguish
+        />
+      );
+    case 'rising':
+      return (
+        <ExpandablePRSection
+          title="[^] HOT"
+          prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))}
+        />
+      );
+    case 'new':
       return <ExpandablePRSection title="[+] NEWEST" prs={newest} />;
-    case "discussed":
+    case 'discussed':
       return <ExpandablePRSection title="[#] DISCUSSED" prs={discussed} />;
-    case "controversial":
-      return <ExpandablePRSection title="[!] CONTROVERSIAL" prs={controversial} />;
+    case 'controversial':
+      return (
+        <ExpandablePRSection title="[!] CONTROVERSIAL" prs={controversial} />
+      );
   }
 }
 
-export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: FramesLayoutProps) {
-  const [activeSection, setActiveSection] = useState<Section>("votes");
+export function FramesLayout({
+  topByVotes,
+  rising,
+  newest,
+  discussed,
+  controversial,
+}: FramesLayoutProps) {
+  const [activeSection, setActiveSection] = useState<Section>('votes');
 
   // Sync with URL hash on mount and hash changes
   useEffect(() => {
@@ -54,8 +86,8 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
     };
 
     handleHashChange(); // Initial check
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   // Sync hash to active section
@@ -72,15 +104,17 @@ export function FramesLayout({ topByVotes, rising, newest, discussed, controvers
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               className={`bg-transparent border-none cursor-pointer p-0 text-inherit whitespace-nowrap ${
-                activeSection === item.id ? "font-bold no-underline" : "font-normal underline"
+                activeSection === item.id
+                  ? 'font-bold no-underline'
+                  : 'font-normal underline'
               }`}
-              style={{ fontSize: "inherit", fontFamily: "inherit" }}
+              style={{ fontSize: 'inherit', fontFamily: 'inherit' }}
             >
               [{item.icon}] {item.label}
             </button>
           ))}
         </div>
-        <div>{"-".repeat(72)}</div>
+        <div>{'-'.repeat(72)}</div>
       </div>
 
       <SectionContent

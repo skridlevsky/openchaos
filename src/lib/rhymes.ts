@@ -11,7 +11,7 @@ export function hasRhymingWords(title: string): boolean {
     .toLowerCase()
     .replace(/[^\w\s]/g, ' ')
     .split(/\s+/)
-    .filter(word => word.length > 2); // Filter out very short words
+    .filter((word) => word.length > 2); // Filter out very short words
 
   // Check all pairs of words to see if any two rhyme
   for (let i = 0; i < words.length; i++) {

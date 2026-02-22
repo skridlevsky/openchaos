@@ -5,17 +5,22 @@ class SoundPlayer {
 
   private getContext(): AudioContext {
     if (!this.audioContext) {
-      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.audioContext = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
     }
     return this.audioContext;
   }
 
   // Play audio file helper - returns the Audio element so callers can listen for 'ended'
-  private playAudioFile(url: string, volume: number = 0.5): HTMLAudioElement | null {
+  private playAudioFile(
+    url: string,
+    volume: number = 0.5,
+  ): HTMLAudioElement | null {
     try {
       const audio = new Audio(url);
       audio.volume = volume;
-      audio.play().catch(e => console.log('Audio playback failed:', e));
+      audio.play().catch((e) => console.log('Audio playback failed:', e));
       return audio;
     } catch (e) {
       console.log('Audio playback failed:', e);
@@ -34,7 +39,10 @@ class SoundPlayer {
       gainNode.connect(ctx.destination);
 
       oscillator.frequency.setValueAtTime(800, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        1200,
+        ctx.currentTime + 0.1,
+      );
 
       gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
@@ -80,7 +88,10 @@ class SoundPlayer {
       gainNode.connect(ctx.destination);
 
       oscillator.frequency.setValueAtTime(600, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.15);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        900,
+        ctx.currentTime + 0.15,
+      );
 
       gainNode.gain.setValueAtTime(0.45, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
@@ -103,7 +114,10 @@ class SoundPlayer {
       gainNode.connect(ctx.destination);
 
       oscillator.frequency.setValueAtTime(900, ctx.currentTime);
-      oscillator.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.15);
+      oscillator.frequency.exponentialRampToValueAtTime(
+        600,
+        ctx.currentTime + 0.15,
+      );
 
       gainNode.gain.setValueAtTime(0.45, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
@@ -155,7 +169,7 @@ class SoundPlayer {
       audio.loop = false;
       const playPromise = audio.play();
       if (playPromise) {
-        playPromise.catch(e => console.log('Dialup playback failed:', e));
+        playPromise.catch((e) => console.log('Dialup playback failed:', e));
       }
       return audio;
     } catch (e) {

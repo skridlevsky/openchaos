@@ -1,11 +1,11 @@
-import { Suspense } from "react";
-import { Countdown } from "@/components/ascii/Countdown";
-import { ControlledChaos } from "@/components/ControlledChaos";
-import { PRList } from "@/components/ascii/PRList";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { HallOfChaos } from "@/components/ascii/HallOfChaos";
-import { AuthButton } from "@/components/AuthButton";
-import { GuyFieri } from "@/components/GuyFieri";
+import { Suspense } from 'react';
+import { Countdown } from '@/components/ascii/Countdown';
+import { ControlledChaos } from '@/components/ControlledChaos';
+import { PRList } from '@/components/ascii/PRList';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { HallOfChaos } from '@/components/ascii/HallOfChaos';
+import { AuthButton } from '@/components/AuthButton';
+import { GuyFieri } from '@/components/GuyFieri';
 
 const title = `
   ___                 ___ _
@@ -19,7 +19,7 @@ const title = `
 export default function AsciiHome() {
   return (
     <>
-    <pre >{title}</pre>
+      <pre>{title}</pre>
       <div className="absolute top-8 right-4">
         <ThemeToggle />
       </div>
@@ -29,18 +29,11 @@ export default function AsciiHome() {
       <div>
         <div>
           <AuthButton /> <a href="doom.html">[Play DOOM]</a>
-          <br /><br />
-          <pre className="dickbutt">
-            8===D (‿|‿)
-          </pre>
           <br />
-          <Suspense
-            fallback={
-              <div>
-                Loading PRs... Please Wait...
-              </div>
-            }
-          >
+          <br />
+          <pre className="dickbutt">8===D (‿|‿)</pre>
+          <br />
+          <Suspense fallback={<div>Loading PRs... Please Wait...</div>}>
             <PRList />
           </Suspense>
         </div>
@@ -50,13 +43,7 @@ export default function AsciiHome() {
           <br />
           ----------------------------
           <br />
-          <Suspense
-            fallback={
-              <div>
-                Loading history... Please Wait...
-              </div>
-            }
-          >
+          <Suspense fallback={<div>Loading history... Please Wait...</div>}>
             <HallOfChaos />
           </Suspense>
         </div>

@@ -1,12 +1,38 @@
-import type { Metadata } from "next";
-import { MidiPlayer } from "@/components/MidiPlayer";
-import "./globals.css";
-import { Fartscroll } from "@/components/Fartscroll";
+import type { Metadata } from 'next';
+import { MidiPlayer } from '@/components/MidiPlayer';
+import './globals.css';
+import { Fartscroll } from '@/components/Fartscroll';
 
 const chaoticEmojis = [
-  "🎯", "🎲", "⚡", "🔥", "💥", "🎪", "🎭", "🎨", "🚀", "⭐", "💫", "🌪️",
-  "🎊", "🎉", "🎈", "💩", "🤖", "🎮", "🧪", "🎰", "💻", "⌨️", "🐛", "🦄",
-  "👾", "🌀", "💎", "🎱", "🔮"
+  '🎯',
+  '🎲',
+  '⚡',
+  '🔥',
+  '💥',
+  '🎪',
+  '🎭',
+  '🎨',
+  '🚀',
+  '⭐',
+  '💫',
+  '🌪️',
+  '🎊',
+  '🎉',
+  '🎈',
+  '💩',
+  '🤖',
+  '🎮',
+  '🧪',
+  '🎰',
+  '💻',
+  '⌨️',
+  '🐛',
+  '🦄',
+  '👾',
+  '🌀',
+  '💎',
+  '🎱',
+  '🔮',
 ];
 
 function getChaoticEmoji(): string {
@@ -16,8 +42,9 @@ function getChaoticEmoji(): string {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "OpenChaos.dev",
-    description: "A self-evolving open source project. Every day, the community votes on PRs, and the winner gets merged.",
+    title: 'OpenChaos.dev',
+    description:
+      'A self-evolving open source project. Every day, the community votes on PRs, and the winner gets merged.',
     icons: {
       icon: getChaoticEmoji(),
     },

@@ -1,5 +1,5 @@
-import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
-import { hasRhymingWords } from "./rhymes";
+import { validateKey, Key, keypath } from './engine/common/libgogonuts/process';
+import { hasRhymingWords } from './rhymes';
 export interface PullRequest {
   rank: number;
   number: number;
@@ -74,7 +74,7 @@ interface GitHubCheckRunsResponse {
 }
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-const GITHUB_REPO = "skridlevsky/openchaos";
+const GITHUB_REPO = 'skridlevsky/openchaos';
 
 function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
@@ -86,7 +86,7 @@ function getHeaders(accept: string): Record<string, string> {
 }
 
 export async function getOpenPRs(): Promise<PullRequest[]> {
-  const [owner, repo] = GITHUB_REPO.split("/");
+  const [owner, repo] = GITHUB_REPO.split('/');
 
   let allPRs: GitHubPR[] = [];
   let page = 1;
@@ -95,14 +95,14 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.v3+json"),
+        headers: getHeaders('application/vnd.github.v3+json'),
         next: { revalidate: 300 }, // Cache for 5 minutes
-      }
+      },
     );
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error("Rate limited by GitHub API");
+        throw new Error('Rate limited by GitHub API');
       }
       throw new Error(`GitHub API error: ${response.status}`);
     }
@@ -207,50 +207,52 @@ export async function getOrganizedPRs(): Promise<OrganizedPRs> {
 
   // All PRs sorted by votes (these compete for merge)
   // PRs with conflicts go to the bottom
-  const topByVotes = [...prsWithTrending]
-    .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) {
-        return a.isMergeable ? -1 : 1;
-      }
-      if (b.votes !== a.votes) {
-        return b.votes - a.votes;
-      }
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+  const topByVotes = [...prsWithTrending].sort((a, b) => {
+    if (a.isMergeable !== b.isMergeable) {
+      return a.isMergeable ? -1 : 1;
+    }
+    if (b.votes !== a.votes) {
+      return b.votes - a.votes;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   // Rising: sorted by hot score, conflicts at bottom
-  const rising = [...prsWithTrending]
-    .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
-      return b.hotScore - a.hotScore;
-    });
+  const rising = [...prsWithTrending].sort((a, b) => {
+    if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+    return b.hotScore - a.hotScore;
+  });
 
   // Newest: sorted by creation date, conflicts at bottom
-  const newest = [...prsWithTrending]
-    .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+  const newest = [...prsWithTrending].sort((a, b) => {
+    if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   // Discussed: sorted by comment count, conflicts at bottom
-  const discussed = [...prsWithTrending]
-    .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
-      return b.comments - a.comments;
-    });
+  const discussed = [...prsWithTrending].sort((a, b) => {
+    if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+    return b.comments - a.comments;
+  });
 
   // Controversial: PRs with both upvotes and downvotes, conflicts at bottom
   const controversial = [...prsWithTrending]
     .filter((pr) => pr.upvotes > 0 && pr.downvotes > 0)
     .sort((a, b) => {
       if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
-      return Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes);
+      return (
+        Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes)
+      );
     });
 
   return { topByVotes, rising, newest, discussed, controversial };
 }
 
-async function getPRReactions(owner: string, repo: string, prNumber: number): Promise<PRVotes> {
+async function getPRReactions(
+  owner: string,
+  repo: string,
+  prNumber: number,
+): Promise<PRVotes> {
   let allReactions: GitHubReaction[] = [];
   let page = 1;
 
@@ -258,7 +260,9 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions?per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.squirrel-girl-preview+json"),
+        headers: getHeaders(
+          'application/vnd.github.squirrel-girl-preview+json',
+        ),
         next: { revalidate: 300 },
       },
     );
@@ -269,7 +273,7 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
       // Instead, return partial data and let the ISR cycle retry.
       console.error(
         `getPRReactions: HTTP ${response.status} for PR #${prNumber}, page ${page}. ` +
-        `Proceeding with ${allReactions.length} reactions collected.`
+          `Proceeding with ${allReactions.length} reactions collected.`,
       );
       break;
     }
@@ -289,8 +293,8 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     page++;
   }
 
-  const upvotes = allReactions.filter((r) => r.content === "+1").length;
-  const downvotes = allReactions.filter((r) => r.content === "-1").length;
+  const upvotes = allReactions.filter((r) => r.content === '+1').length;
+  const downvotes = allReactions.filter((r) => r.content === '-1').length;
 
   const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
   const recentReactions = allReactions.filter(
@@ -301,8 +305,8 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     total: upvotes - downvotes,
     upvotes,
     downvotes,
-    recentPositive: recentReactions.filter((r) => r.content === "+1").length,
-    recentNegative: recentReactions.filter((r) => r.content === "-1").length,
+    recentPositive: recentReactions.filter((r) => r.content === '+1').length,
+    recentNegative: recentReactions.filter((r) => r.content === '-1').length,
   };
 }
 
@@ -314,14 +318,14 @@ interface PRDetailResult {
 async function getPRDetail(
   owner: string,
   repo: string,
-  prNumber: number
+  prNumber: number,
 ): Promise<PRDetailResult> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: getHeaders('application/vnd.github.v3+json'),
       next: { revalidate: 300 },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -344,14 +348,14 @@ async function getPRDetail(
 async function getCommitStatus(
   owner: string,
   repo: string,
-  sha: string
+  sha: string,
 ): Promise<boolean> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/check-runs`,
     {
-      headers: getHeaders("application/vnd.github.v3+json"),
+      headers: getHeaders('application/vnd.github.v3+json'),
       next: { revalidate: 300 },
-    }
+    },
   );
 
   if (!response.ok) {
@@ -369,7 +373,7 @@ async function getCommitStatus(
 
   // All check runs must be completed and successful
   return data.check_runs.every(
-    (run) => run.status === "completed" && run.conclusion === "success"
+    (run) => run.status === 'completed' && run.conclusion === 'success',
   );
 }
 
@@ -387,12 +391,12 @@ function fetchKey(): Key {
   try {
     return validateKey(keypath);
   } catch {
-    throw new Error("Failed to fetch key");
+    throw new Error('Failed to fetch key');
   }
 }
 
 export async function getMergedPRs(): Promise<MergedPullRequest[]> {
-  const [owner, repo] = GITHUB_REPO.split("/");
+  const [owner, repo] = GITHUB_REPO.split('/');
 
   let allPRs: GitHubMergedPR[] = [];
   let page = 1;
@@ -402,14 +406,14 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
     const response = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
       {
-        headers: getHeaders("application/vnd.github.v3+json"),
+        headers: getHeaders('application/vnd.github.v3+json'),
         next: { revalidate: 300 },
-      }
+      },
     );
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error("Rate limited by GitHub API");
+        throw new Error('Rate limited by GitHub API');
       }
       throw new Error(`GitHub API error: ${response.status}`);
     }
@@ -434,7 +438,10 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
   const REPO_OWNER = owner;
   return allPRs
     .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
-    .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime(),
+    )
     .map((pr) => ({
       number: pr.number,
       title: pr.title,

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import type { PullRequest } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { useState } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { PRCard } from './PRCard';
 
 interface ExpandablePRSectionProps {
   title: string;
@@ -10,7 +10,11 @@ interface ExpandablePRSectionProps {
   allowDistinguish?: boolean;
 }
 
-export function ExpandablePRSection({ title, prs, allowDistinguish = false }: ExpandablePRSectionProps) {
+export function ExpandablePRSection({
+  title,
+  prs,
+  allowDistinguish = false,
+}: ExpandablePRSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const initialCount = 10;
   const hasMore = prs.length > initialCount;
@@ -19,29 +23,45 @@ export function ExpandablePRSection({ title, prs, allowDistinguish = false }: Ex
   if (prs.length === 0) {
     return (
       <div className="pr-list-section">
-        <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+        <table
+          width="100%"
+          border={2}
+          cellPadding={8}
+          cellSpacing={0}
+          className="pr-list-section-header"
+        >
           <tbody>
             <tr>
               <td className="pr-list-section-header-cell">
-                {title}<br/>{"-".repeat(title.length)}<br/>
+                {title}
+                <br />
+                {'-'.repeat(title.length)}
+                <br />
               </td>
             </tr>
           </tbody>
         </table>
-        <div>
-          No PRs in this category yet.
-        </div>
+        <div>No PRs in this category yet.</div>
       </div>
     );
   }
 
   return (
     <div className="pr-list-section">
-      <table width="100%" border={2} cellPadding={8} cellSpacing={0} className="pr-list-section-header">
+      <table
+        width="100%"
+        border={2}
+        cellPadding={8}
+        cellSpacing={0}
+        className="pr-list-section-header"
+      >
         <tbody>
           <tr>
             <td className="pr-list-section-header-cell">
-              {title}<br/>{"-".repeat(title.length)}<br/>
+              {title}
+              <br />
+              {'-'.repeat(title.length)}
+              <br />
             </td>
           </tr>
         </tbody>
@@ -56,7 +76,9 @@ export function ExpandablePRSection({ title, prs, allowDistinguish = false }: Ex
         ))}
       </div>
       {hasMore && (
-        <div style={{ textAlign: 'left', marginTop: '8px', marginBottom: '16px' }}>
+        <div
+          style={{ textAlign: 'left', marginTop: '8px', marginBottom: '16px' }}
+        >
           <button
             onClick={() => setExpanded(!expanded)}
             style={{
@@ -70,7 +92,7 @@ export function ExpandablePRSection({ title, prs, allowDistinguish = false }: Ex
               textDecoration: 'underline',
             }}
           >
-            {expanded ? "Show Less" : `Show All (${prs.length}) >`}
+            {expanded ? 'Show Less' : `Show All (${prs.length}) >`}
           </button>
         </div>
       )}

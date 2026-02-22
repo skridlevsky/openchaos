@@ -1,10 +1,10 @@
-"use client"
+'use client';
 
-import { useState, MouseEventHandler } from "react"
+import { useState, MouseEventHandler } from 'react';
 
 declare global {
   interface Window {
-    Module?: any
+    Module?: any;
   }
 }
 
@@ -24,11 +24,11 @@ function RunDoom({ onClose }: { onClose: MouseEventHandler<HTMLDivElement> }) {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 export function Doom() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
 
   return (
     <>
@@ -37,5 +37,5 @@ export function Doom() {
       </button>
       {open && <RunDoom onClose={() => setOpen(false)} />}
     </>
-  )
+  );
 }

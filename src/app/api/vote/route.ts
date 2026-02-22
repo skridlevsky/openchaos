@@ -12,7 +12,10 @@ export async function POST(request: NextRequest) {
     const { prNumber, reaction } = body;
 
     if (!prNumber || !reaction || (reaction !== '+1' && reaction !== '-1')) {
-      return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid parameters' },
+        { status: 400 },
+      );
     }
 
     const response = await fetch(
@@ -25,16 +28,22 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ content: reaction }),
-      }
+      },
     );
 
     if (!response.ok) {
       const errorData = await response.json();
-      return NextResponse.json({ error: errorData.message || 'Failed to add reaction' }, { status: response.status });
+      return NextResponse.json(
+        { error: errorData.message || 'Failed to add reaction' },
+        { status: response.status },
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 },
+    );
   }
 }

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -14,15 +14,17 @@ export function useAuth() {
 
   useEffect(() => {
     const getUserFromCookie = () => {
-      const cookies = document.cookie.split(';').map(c => c.trim());
-      const userCookie = cookies.find(c => c.startsWith('github_user='));
+      const cookies = document.cookie.split(';').map((c) => c.trim());
+      const userCookie = cookies.find((c) => c.startsWith('github_user='));
 
       if (userCookie) {
         try {
-          const userData = JSON.parse(decodeURIComponent(userCookie.substring('github_user='.length)));
+          const userData = JSON.parse(
+            decodeURIComponent(userCookie.substring('github_user='.length)),
+          );
           const prevUser = prevUserRef.current;
-          
-              if (!prevUser && userData) {
+
+          if (!prevUser && userData) {
             if (localStorage.getItem('oauth_login_pending')) {
               localStorage.removeItem('oauth_login_pending');
               try {
@@ -36,10 +38,17 @@ export function useAuth() {
                     const playOnInteraction = () => {
                       audio.play().catch(() => {});
                       document.removeEventListener('click', playOnInteraction);
-                      document.removeEventListener('keydown', playOnInteraction);
+                      document.removeEventListener(
+                        'keydown',
+                        playOnInteraction,
+                      );
                     };
-                    document.addEventListener('click', playOnInteraction, { once: true });
-                    document.addEventListener('keydown', playOnInteraction, { once: true });
+                    document.addEventListener('click', playOnInteraction, {
+                      once: true,
+                    });
+                    document.addEventListener('keydown', playOnInteraction, {
+                      once: true,
+                    });
                   });
                 }
                 audio.addEventListener('ended', () => {
@@ -56,17 +65,19 @@ export function useAuth() {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ prNumber, reaction }),
-                }).then(() => {
-                  // Vote cast successfully - no reload needed!
-                  console.log('✅ Pending vote cast successfully');
-                }).catch(() => console.error('Failed to cast pending vote'));
+                })
+                  .then(() => {
+                    // Vote cast successfully - no reload needed!
+                    console.log('✅ Pending vote cast successfully');
+                  })
+                  .catch(() => console.error('Failed to cast pending vote'));
               } catch (e) {
                 console.error('Failed to parse pending vote', e);
                 localStorage.removeItem('pending_vote');
               }
             }
           }
-          
+
           prevUserRef.current = userData;
           setUser(userData);
         } catch (e) {

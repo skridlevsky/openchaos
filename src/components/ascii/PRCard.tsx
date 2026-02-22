@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import type { PullRequest } from "@/lib/github";
-import { hasRhymingWords } from "@/lib/rhymes";
-import { TimeAgo } from "@/components/TimeAgo";
-import { useAuth } from "@/hooks/useAuth";
-import { soundPlayer } from "@/utils/sounds";
+import { useState, useEffect, useRef } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { hasRhymingWords } from '@/lib/rhymes';
+import { TimeAgo } from '@/components/TimeAgo';
+import { useAuth } from '@/hooks/useAuth';
+import { soundPlayer } from '@/utils/sounds';
 
 interface PRCardProps {
   pr: PullRequest;
-  distinguishLeading?: boolean,
+  distinguishLeading?: boolean;
 }
 
 function chooseURL(url: string): string {
   // 10% chance to Rickroll
-  if (Math.random() <= 0.10) {
-    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  if (Math.random() <= 0.1) {
+    return 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
   }
   return url;
 }
@@ -33,12 +33,12 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
 
   function getMergeStatusText(): string {
     if (!pr.isMergeable && !pr.checksPassed) {
-      return "Conflicts & Checks failed";
+      return 'Conflicts & Checks failed';
     }
     if (!pr.isMergeable) {
-      return containsRhymes ? "Merge conflicts" : "No rhyme or reason";
+      return containsRhymes ? 'Merge conflicts' : 'No rhyme or reason';
     }
-    return "Checks failed";
+    return 'Checks failed';
   }
 
   const [voteStatus, setVoteStatus] = useState<VoteStatus>('idle');
@@ -69,7 +69,10 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
 
   const handleVote = async (reaction: '+1' | '-1') => {
     if (!isAuthenticated) {
-      localStorage.setItem('pending_vote', JSON.stringify({ prNumber: pr.number, reaction }));
+      localStorage.setItem(
+        'pending_vote',
+        JSON.stringify({ prNumber: pr.number, reaction }),
+      );
       login();
       return;
     }
@@ -79,7 +82,10 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
     setErrorDetails('');
 
     // Store vote attempt for retry
-    localStorage.setItem('last_vote_attempt', JSON.stringify({ prNumber: pr.number, reaction }));
+    localStorage.setItem(
+      'last_vote_attempt',
+      JSON.stringify({ prNumber: pr.number, reaction }),
+    );
 
     // Optimistic update
     setVoteStatus('voting');
@@ -95,7 +101,9 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       });
 
       if (response.ok) {
-        reaction === '+1' ? soundPlayer.playUpvote() : soundPlayer.playDownvote();
+        reaction === '+1'
+          ? soundPlayer.playUpvote()
+          : soundPlayer.playDownvote();
         soundPlayer.playSuccess();
 
         setVoteStatus('success');
@@ -143,11 +151,14 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       setOptimisticVotes(pr.votes);
       setVoteStatus('error');
       setCanRetry(true);
-      const isNetworkError = error instanceof TypeError && String(error.message).includes('fetch');
+      const isNetworkError =
+        error instanceof TypeError && String(error.message).includes('fetch');
       setErrorDetails(isNetworkError ? 'Network error' : 'Unexpected error');
-      setFeedbackMessage(isNetworkError
-        ? '🌐 Network error. Check connection.'
-        : '❌ Something went wrong. Try again.');
+      setFeedbackMessage(
+        isNetworkError
+          ? '🌐 Network error. Check connection.'
+          : '❌ Something went wrong. Try again.',
+      );
       soundPlayer.playError();
     }
   };
@@ -156,13 +167,21 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
   const createConfetti = () => {
     if (!cardRef.current) return;
 
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const colors = [
+      '#ff0000',
+      '#00ff00',
+      '#0000ff',
+      '#ffff00',
+      '#ff00ff',
+      '#00ffff',
+    ];
     for (let i = 0; i < 20; i++) {
       const confetti = document.createElement('div');
       confetti.className = 'confetti-particle';
       confetti.style.left = `${Math.random() * 100}%`;
       confetti.style.top = '0';
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
       confetti.style.animationDelay = `${Math.random() * 0.3}s`;
       cardRef.current.appendChild(confetti);
 
@@ -189,88 +208,82 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
   };
 
   const cardClass = hasConflict
-    ? `pr-card pr-card-normal pr-card-conflict ${isSixtySeven ? "sixseven-shake" : ""}`
-    : `pr-card ${isLeading ? "pr-card-leading" : "pr-card-normal"} ${isSixtySeven ? "sixseven-shake" : ""}`;
+    ? `pr-card pr-card-normal pr-card-conflict ${isSixtySeven ? 'sixseven-shake' : ''}`
+    : `pr-card ${isLeading ? 'pr-card-leading' : 'pr-card-normal'} ${isSixtySeven ? 'sixseven-shake' : ''}`;
 
   const voteButtonStyle = {
-    opacity: voteStatus === "voting" ? 0.6 : 1,
-    cursor: voteStatus === "voting" ? "wait" : "pointer",
-    fontFamily: "inherit",
-    background: "transparent",
-    color: "var(--foreground)",
-    padding: "2px 6px",
-    border: "none",
+    opacity: voteStatus === 'voting' ? 0.6 : 1,
+    cursor: voteStatus === 'voting' ? 'wait' : 'pointer',
+    fontFamily: 'inherit',
+    background: 'transparent',
+    color: 'var(--foreground)',
+    padding: '2px 6px',
+    border: 'none',
   } as const;
 
   return (
     <div
       ref={cardRef}
-      className={`${cardClass} ${showShake ? "shake-67-animation" : ""} ${showCelebration ? "celebrate-animation" : ""}`}
+      className={`${cardClass} ${showShake ? 'shake-67-animation' : ''} ${showCelebration ? 'celebrate-animation' : ''}`}
       style={{
-        position: "relative",
-        marginBottom: "1.5em",
+        position: 'relative',
+        marginBottom: '1.5em',
       }}
     >
       {/* Line 1: Rank · #N · Title */}
       <div>
-        <span>#{!hasConflict ? pr.rank : "N/A"}. </span>
+        <span>#{!hasConflict ? pr.rank : 'N/A'}. </span>
 
-        {isLeading && (
-          <span>[LEADING]</span>
-        )}
-        {pr.isTrending && (
-          <span>[TRENDING]</span>
-        )}
-        <span>
-          {pr.title}
-        </span>
+        {isLeading && <span>[LEADING]</span>}
+        {pr.isTrending && <span>[TRENDING]</span>}
+        <span>{pr.title}</span>
         <span>(#{pr.number})</span>
       </div>
 
       {/* Vote buttons on their own line */}
       <div>
-
         <span
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
           &nbsp;&nbsp;&nbsp;&nbsp;Score:&nbsp;
-          {voteStatus === "voting" ? "..." : optimisticVotes}
+          {voteStatus === 'voting' ? '...' : optimisticVotes}
           {showTooltip && (
             <span
               style={{
-                position: "absolute",
-                bottom: "100%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                marginBottom: "4px",
-                padding: "4px 8px",
-                border: "1px solid var(--foreground)",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                fontFamily: "inherit",
-                fontSize: "11px",
-                whiteSpace: "nowrap",
+                position: 'absolute',
+                bottom: '100%',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                marginBottom: '4px',
+                padding: '4px 8px',
+                border: '1px solid var(--foreground)',
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+                fontFamily: 'inherit',
+                fontSize: '11px',
+                whiteSpace: 'nowrap',
                 zIndex: 1000,
               }}
             >
-              Net: {optimisticVotes} | {isAuthenticated ? "arrows to vote" : "Login to vote"}
+              Net: {optimisticVotes} |{' '}
+              {isAuthenticated ? 'arrows to vote' : 'Login to vote'}
             </span>
           )}
         </span>
         <button
-          onClick={() => handleVote("+1")}
+          onClick={() => handleVote('+1')}
           className="vote-arrow vote-arrow-up"
-          disabled={voteStatus === "voting"}
+          disabled={voteStatus === 'voting'}
           title="Upvote this PR"
           style={voteButtonStyle}
         >
           ^
         </button>
         <button
-          onClick={() => handleVote("-1")}
+          onClick={() => handleVote('-1')}
           className="vote-arrow vote-arrow-down"
-          disabled={voteStatus === "voting"}
+          disabled={voteStatus === 'voting'}
           title="Downvote this PR"
           style={voteButtonStyle}
         >
@@ -280,7 +293,7 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
 
       {/* Line 2: by @author · time */}
       <div>
-      &nbsp;&nbsp;&nbsp;&nbsp;by{" "}
+        &nbsp;&nbsp;&nbsp;&nbsp;by{' '}
         <a
           href={`https://github.com/${pr.author}`}
           target="_blank"
@@ -288,13 +301,14 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
           className="pr-card-author-link"
         >
           @{pr.author}
-        </a>{" "}
+        </a>{' '}
         · <TimeAgo isoDate={pr.createdAt} />
       </div>
 
       {/* Line 3: link */}
       <div>
-      &nbsp;&nbsp;&nbsp;&nbsp;<a
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <a
           href={linkHref}
           target="_blank"
           rel="noopener noreferrer"
@@ -306,30 +320,33 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       </div>
 
       {/* Feedback / loading */}
-      {voteStatus === "voting" && (
-        <div style={{ marginBottom: "4px", fontSize: "12px" }}>...</div>
+      {voteStatus === 'voting' && (
+        <div style={{ marginBottom: '4px', fontSize: '12px' }}>...</div>
       )}
       {feedbackMessage && (
         <div
           style={{
-            marginBottom: "4px",
-            padding: "4px 8px",
-            border: "1px solid var(--foreground)",
-            background: "var(--background)",
-            color: "var(--foreground)",
-            fontFamily: "inherit",
-            fontSize: "11px",
+            marginBottom: '4px',
+            padding: '4px 8px',
+            border: '1px solid var(--foreground)',
+            background: 'var(--background)',
+            color: 'var(--foreground)',
+            fontFamily: 'inherit',
+            fontSize: '11px',
           }}
         >
           {feedbackMessage}
           {errorDetails && (
-            <span style={{ fontSize: "10px", opacity: 0.9 }}> ({errorDetails})</span>
+            <span style={{ fontSize: '10px', opacity: 0.9 }}>
+              {' '}
+              ({errorDetails})
+            </span>
           )}
           {canRetry && (
             <button
               onClick={() => {
                 try {
-                  const lastVote = localStorage.getItem("last_vote_attempt");
+                  const lastVote = localStorage.getItem('last_vote_attempt');
                   if (lastVote) {
                     const parsed = JSON.parse(lastVote);
                     if (parsed?.reaction) {
@@ -338,18 +355,18 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
                   }
                 } catch {
                   console.error('Failed to parse last vote attempt');
-                  localStorage.removeItem("last_vote_attempt");
+                  localStorage.removeItem('last_vote_attempt');
                 }
               }}
               style={{
-                marginLeft: "8px",
-                padding: "2px 6px",
-                border: "1px solid var(--foreground)",
-                background: "var(--background)",
-                color: "var(--foreground)",
-                fontFamily: "inherit",
-                fontSize: "10px",
-                cursor: "pointer",
+                marginLeft: '8px',
+                padding: '2px 6px',
+                border: '1px solid var(--foreground)',
+                background: 'var(--background)',
+                color: 'var(--foreground)',
+                fontFamily: 'inherit',
+                fontSize: '10px',
+                cursor: 'pointer',
               }}
             >
               [ Retry ]
@@ -359,7 +376,8 @@ export function PRCard({ pr, distinguishLeading = true }: PRCardProps) {
       )}
 
       {/* Merge status */}
-      <div>&nbsp;&nbsp;&nbsp;&nbsp;
+      <div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
         {hasMergeIssues && <span>{getMergeStatusText()} </span>}
       </div>
     </div>

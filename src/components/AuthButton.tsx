@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from '@/hooks/useAuth';
 
 export function AuthButton() {
   const { user, loading, login, logout } = useAuth();

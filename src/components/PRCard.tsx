@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useRef } from "react";
-import type { PullRequest } from "@/lib/github";
-import { hasRhymingWords } from "@/lib/rhymes";
-import { TimeAgo } from "./TimeAgo";
-import { useAuth } from "@/hooks/useAuth";
-import { soundPlayer } from "@/utils/sounds";
+import { useState, useEffect, useRef } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { hasRhymingWords } from '@/lib/rhymes';
+import { TimeAgo } from './TimeAgo';
+import { useAuth } from '@/hooks/useAuth';
+import { soundPlayer } from '@/utils/sounds';
 
 interface PRCardProps {
   pr: PullRequest;
@@ -14,8 +14,8 @@ interface PRCardProps {
 
 function chooseURL(url: string): string {
   // 10% chance to Rickroll
-  if (Math.random() <= 0.10) {
-    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  if (Math.random() <= 0.1) {
+    return 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
   }
   return url;
 }
@@ -43,19 +43,19 @@ export function PRCard({ pr, rank }: PRCardProps) {
 
   function getStatusTitle(): string {
     if (pr.isMergeable && pr.checksPassed) {
-      return "All checks passed & no conflicts";
+      return 'All checks passed & no conflicts';
     }
     if (hasConflicts && !pr.checksPassed) {
       return containsRhymes
-        ? "Merge conflicts & checks failed — will not merge"
-        : "No rhyme & checks failed — will not merge";
+        ? 'Merge conflicts & checks failed — will not merge'
+        : 'No rhyme & checks failed — will not merge';
     }
     if (hasConflicts) {
       return containsRhymes
-        ? "Has merge conflicts — will not merge"
-        : "No rhyme or reason — will not merge";
+        ? 'Has merge conflicts — will not merge'
+        : 'No rhyme or reason — will not merge';
     }
-    return "Checks pending — will still merge";
+    return 'Checks pending — will still merge';
   }
 
   const statusTitle = getStatusTitle();
@@ -78,14 +78,20 @@ export function PRCard({ pr, rank }: PRCardProps) {
 
   const handleVote = async (reaction: '+1' | '-1') => {
     if (!isAuthenticated) {
-      localStorage.setItem('pending_vote', JSON.stringify({ prNumber: pr.number, reaction }));
+      localStorage.setItem(
+        'pending_vote',
+        JSON.stringify({ prNumber: pr.number, reaction }),
+      );
       login();
       return;
     }
 
     setCanRetry(false);
     setErrorDetails('');
-    localStorage.setItem('last_vote_attempt', JSON.stringify({ prNumber: pr.number, reaction }));
+    localStorage.setItem(
+      'last_vote_attempt',
+      JSON.stringify({ prNumber: pr.number, reaction }),
+    );
 
     setVoteStatus('voting');
     const optimisticDelta = reaction === '+1' ? 1 : -1;
@@ -100,7 +106,9 @@ export function PRCard({ pr, rank }: PRCardProps) {
       });
 
       if (response.ok) {
-        reaction === '+1' ? soundPlayer.playUpvote() : soundPlayer.playDownvote();
+        reaction === '+1'
+          ? soundPlayer.playUpvote()
+          : soundPlayer.playDownvote();
         soundPlayer.playSuccess();
 
         setVoteStatus('success');
@@ -143,24 +151,35 @@ export function PRCard({ pr, rank }: PRCardProps) {
       setOptimisticVotes(pr.votes);
       setVoteStatus('error');
       setCanRetry(true);
-      const isNetworkError = error instanceof TypeError && String(error.message).includes('fetch');
+      const isNetworkError =
+        error instanceof TypeError && String(error.message).includes('fetch');
       setErrorDetails(isNetworkError ? 'Network error' : 'Unexpected error');
-      setFeedbackMessage(isNetworkError
-        ? '🌐 Network error. Check connection.'
-        : '❌ Something went wrong. Try again.');
+      setFeedbackMessage(
+        isNetworkError
+          ? '🌐 Network error. Check connection.'
+          : '❌ Something went wrong. Try again.',
+      );
       soundPlayer.playError();
     }
   };
 
   const createConfetti = () => {
     if (!cardRef.current) return;
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    const colors = [
+      '#ff0000',
+      '#00ff00',
+      '#0000ff',
+      '#ffff00',
+      '#ff00ff',
+      '#00ffff',
+    ];
     for (let i = 0; i < 20; i++) {
       const confetti = document.createElement('div');
       confetti.className = 'confetti-particle';
       confetti.style.left = `${Math.random() * 100}%`;
       confetti.style.top = '0';
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.backgroundColor =
+        colors[Math.floor(Math.random() * colors.length)];
       confetti.style.animationDelay = `${Math.random() * 0.3}s`;
       cardRef.current.appendChild(confetti);
       setTimeout(() => confetti.remove(), 2000);
@@ -187,21 +206,29 @@ export function PRCard({ pr, rank }: PRCardProps) {
       ref={cardRef}
       style={{ position: 'relative' }}
       className={`pr-card ${isLeading ? 'pr-card-leading' : 'pr-card-normal'}
-        ${isSixtySeven ? "sixseven-shake" : ""}
+        ${isSixtySeven ? 'sixseven-shake' : ''}
         ${isLeading ? 'pr-card-featured' : ''}
-        ${showShake ? "shake-67-animation" : ""}
-        ${showCelebration ? "celebrate-animation" : ""}
+        ${showShake ? 'shake-67-animation' : ''}
+        ${showCelebration ? 'celebrate-animation' : ''}
       `}
     >
       <div className="pr-card-inner">
         {/* Fixed-width number column */}
-        <div className={`pr-card-number-section ${isLeading ? 'pr-card-number-leading' : 'pr-card-number-normal'}`}>
-          <span className="pr-card-number-text">
-            #{pr.number}
-          </span>
+        <div
+          className={`pr-card-number-section ${isLeading ? 'pr-card-number-leading' : 'pr-card-number-normal'}`}
+        >
+          <span className="pr-card-number-text">#{pr.number}</span>
           {isLeading && (
-            <div className="pr-card-leading-icon" title="Currently leading — will be merged next!">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <div
+              className="pr-card-leading-icon"
+              title="Currently leading — will be merged next!"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
               </svg>
             </div>
@@ -210,11 +237,9 @@ export function PRCard({ pr, rank }: PRCardProps) {
 
         {/* Flexible content column */}
         <div className="pr-card-content-section">
-          <div className="pr-card-title">
-            {pr.title}
-          </div>
+          <div className="pr-card-title">{pr.title}</div>
           <div className="pr-card-meta">
-            by{" "}
+            by{' '}
             <a
               href={`https://github.com/${pr.author}`}
               target="_blank"
@@ -223,7 +248,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
             >
               @{pr.author}
             </a>
-            {" · "}
+            {' · '}
             <TimeAgo isoDate={pr.createdAt} />
           </div>
           <a
@@ -238,7 +263,9 @@ export function PRCard({ pr, rank }: PRCardProps) {
         </div>
 
         {/* Fixed-width votes column */}
-        <div className={`pr-card-votes-section ${isLeading ? 'pr-card-votes-leading' : 'pr-card-votes-normal'}`}>
+        <div
+          className={`pr-card-votes-section ${isLeading ? 'pr-card-votes-leading' : 'pr-card-votes-normal'}`}
+        >
           {/* Upvote Arrow */}
           <button
             onClick={() => handleVote('+1')}
@@ -256,7 +283,11 @@ export function PRCard({ pr, rank }: PRCardProps) {
             onMouseLeave={() => setShowTooltip(false)}
           >
             <span
-              className={isLeading ? 'vote-count vote-count-leading' : 'vote-count vote-count-normal'}
+              className={
+                isLeading
+                  ? 'vote-count vote-count-leading'
+                  : 'vote-count vote-count-normal'
+              }
               style={{
                 transform: voteStatus === 'voting' ? 'scale(1.1)' : 'scale(1)',
               }}
@@ -265,9 +296,12 @@ export function PRCard({ pr, rank }: PRCardProps) {
             </span>
             {showTooltip && (
               <div className="vote-tooltip">
-                <strong>Net Score: {optimisticVotes}</strong><br/>
+                <strong>Net Score: {optimisticVotes}</strong>
+                <br />
                 <span style={{ fontSize: '10px' }}>
-                  {isAuthenticated ? 'Click arrows to vote' : 'Login required to vote'}
+                  {isAuthenticated
+                    ? 'Click arrows to vote'
+                    : 'Login required to vote'}
                 </span>
               </div>
             )}
@@ -285,15 +319,22 @@ export function PRCard({ pr, rank }: PRCardProps) {
 
           {/* Loading Indicator */}
           {voteStatus === 'voting' && (
-            <div className="web2-ajax-spinner" style={{ width: 16, height: 16, borderWidth: 2, marginTop: 2 }} />
+            <div
+              className="web2-ajax-spinner"
+              style={{ width: 16, height: 16, borderWidth: 2, marginTop: 2 }}
+            />
           )}
 
           {/* Feedback Message */}
           {feedbackMessage && (
-            <div className={`vote-feedback ${voteStatus === 'success' ? 'vote-feedback-success' : 'vote-feedback-error'}`}>
+            <div
+              className={`vote-feedback ${voteStatus === 'success' ? 'vote-feedback-success' : 'vote-feedback-error'}`}
+            >
               <div>{feedbackMessage}</div>
               {errorDetails && (
-                <div style={{ fontSize: '9px', marginTop: '2px', opacity: 0.8 }}>
+                <div
+                  style={{ fontSize: '9px', marginTop: '2px', opacity: 0.8 }}
+                >
                   ({errorDetails})
                 </div>
               )}
@@ -302,7 +343,8 @@ export function PRCard({ pr, rank }: PRCardProps) {
                   className="vote-retry-button"
                   onClick={() => {
                     try {
-                      const lastVote = localStorage.getItem('last_vote_attempt');
+                      const lastVote =
+                        localStorage.getItem('last_vote_attempt');
                       if (lastVote) {
                         const parsed = JSON.parse(lastVote);
                         if (parsed?.reaction) {
@@ -322,10 +364,7 @@ export function PRCard({ pr, rank }: PRCardProps) {
           )}
 
           {/* Status icon */}
-          <div
-            className="pr-card-status-icon"
-            title={statusTitle}
-          >
+          <div className="pr-card-status-icon" title={statusTitle}>
             {pr.isMergeable && pr.checksPassed ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"

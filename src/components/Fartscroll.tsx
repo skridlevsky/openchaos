@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import Script from "next/script";
-import { useEffect, useState, useRef } from "react";
+import Script from 'next/script';
+import { useEffect, useState, useRef } from 'react';
 
 declare global {
   interface Window {
@@ -38,15 +38,17 @@ export function Fartscroll() {
       initializedRef.current = true;
 
       // Remove interaction listeners after initialization
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
 
       if (ie6ContentArea) {
         // IE6 layout: manually monitor the scroll position and play farts
         const playFartOnScroll = (e: Event) => {
           const scrollElement = e.currentTarget as HTMLElement;
-          const scrollOffset = Math.floor(scrollElement.scrollTop / FARTSCROLL_TRIGGER_DISTANCE_PX);
+          const scrollOffset = Math.floor(
+            scrollElement.scrollTop / FARTSCROLL_TRIGGER_DISTANCE_PX,
+          );
 
           if (lastOffsetRef.current !== scrollOffset) {
             // Call the exposed play function from fartscroll.js
@@ -75,14 +77,14 @@ export function Fartscroll() {
       }
     };
 
-    window.addEventListener("click", handleInteraction);
-    window.addEventListener("touchstart", handleInteraction, { passive: true });
-    window.addEventListener("keydown", handleInteraction);
+    window.addEventListener('click', handleInteraction);
+    window.addEventListener('touchstart', handleInteraction, { passive: true });
+    window.addEventListener('keydown', handleInteraction);
 
     return () => {
-      window.removeEventListener("click", handleInteraction);
-      window.removeEventListener("touchstart", handleInteraction);
-      window.removeEventListener("keydown", handleInteraction);
+      window.removeEventListener('click', handleInteraction);
+      window.removeEventListener('touchstart', handleInteraction);
+      window.removeEventListener('keydown', handleInteraction);
 
       // Clean up scroll listener for IE6 layout
       if (ie6ContentArea && scrollHandlerRef.current) {

@@ -7,7 +7,8 @@ export async function GET(request: NextRequest) {
 
   const storedState = request.cookies.get('oauth_state')?.value;
   const redirectPath = request.cookies.get('oauth_redirect')?.value || '/';
-  const origin = request.cookies.get('oauth_origin')?.value || request.nextUrl.origin;
+  const origin =
+    request.cookies.get('oauth_origin')?.value || request.nextUrl.origin;
 
   if (!code || !state || state !== storedState) {
     return NextResponse.redirect(new URL('/?error=oauth_failed', origin));
@@ -20,18 +21,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL('/?error=config_missing', origin));
   }
 
-  const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+  const tokenResponse = await fetch(
+    'https://github.com/login/oauth/access_token',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+      }),
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-    }),
-  });
+  );
 
   const tokenData = await tokenResponse.json();
 
@@ -57,16 +61,20 @@ export async function GET(request: NextRequest) {
     path: '/',
   });
 
-  response.cookies.set('github_user', JSON.stringify({
-    login: userData.login,
-    avatar_url: userData.avatar_url,
-  }), {
-    httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 2592000,
-    path: '/',
-  });
+  response.cookies.set(
+    'github_user',
+    JSON.stringify({
+      login: userData.login,
+      avatar_url: userData.avatar_url,
+    }),
+    {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2592000,
+      path: '/',
+    },
+  );
 
   response.cookies.delete('oauth_state');
   response.cookies.delete('oauth_redirect');

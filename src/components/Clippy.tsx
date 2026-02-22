@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 const CLIPPY_TIPS = [
-  "Hey there! 👋 The top-voted PR gets merged daily at 19:00 UTC.",
-  "Pro tip: Only 👍 and 👎 reactions count as votes. Blog about it!",
+  'Hey there! 👋 The top-voted PR gets merged daily at 19:00 UTC.',
+  'Pro tip: Only 👍 and 👎 reactions count as votes. Blog about it!',
   "Submit a PR to join the chaos. It's like editing a wiki, but with more merge conflicts.",
   "IMPORTANT: PRs with merge conflicts won't win. Keep your branch rebased!",
-  "This site is powered by Next.js and AJAX. Web 2.0 is the future!",
+  'This site is powered by Next.js and AJAX. Web 2.0 is the future!',
   "Have you Dugg this page yet? Don't forget to bookmark it on del.icio.us!",
-  "You should totally add us to your RSS reader. We have a feed!",
-  "Remember when every site had a BETA badge? Oh wait, we still do.",
+  'You should totally add us to your RSS reader. We have a feed!',
+  'Remember when every site had a BETA badge? Oh wait, we still do.',
   "Fun fact: This site runs on Web 2.0 technology. It's all about the rounded corners.",
-  "Want to contribute? Fork the repo, submit a PR, and let the community decide!",
+  'Want to contribute? Fork the repo, submit a PR, and let the community decide!',
   "The community decides which PRs get merged. It's like Digg, but for code.",
   "Did you know you can vote on PRs directly on GitHub? It's very Web 2.0.",
-  "Tag cloud not interactive enough? Try submitting a PR to make it better!",
-  "This site is in perpetual BETA. Just like Gmail was for five years.",
-  "Is your startup idea disrupting something? Submit a PR about it.",
+  'Tag cloud not interactive enough? Try submitting a PR to make it better!',
+  'This site is in perpetual BETA. Just like Gmail was for five years.',
+  'Is your startup idea disrupting something? Submit a PR about it.',
   "We don't have a podcast yet, but we're thinking about it. Stay tuned!",
   "Don't forget to StumbleUpon this page. Wait, does that still work?",
 ];
@@ -33,19 +33,22 @@ function getRandomTip(currentIndex: number): number {
 export function Clippy() {
   const [isVisible, setIsVisible] = useState(false);
   const [currentTip, setCurrentTip] = useState(() =>
-    Math.floor(Math.random() * CLIPPY_TIPS.length)
+    Math.floor(Math.random() * CLIPPY_TIPS.length),
   );
   const [isDismissed, setIsDismissed] = useState(false);
   const [showClippy, setShowClippy] = useState(true);
-  const [alignment, setAlignment] = useState<"left" | "right">("right");
+  const [alignment, setAlignment] = useState<'left' | 'right'>('right');
 
   useEffect(() => {
-    const opposite = (side: "left" | "right") => (side === "left" ? "right" : "left");
+    const opposite = (side: 'left' | 'right') =>
+      side === 'left' ? 'right' : 'left';
 
     const syncFromRadioDom = () => {
-      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
+      const radio = document.querySelector(
+        '.gta-radio-container',
+      ) as HTMLElement | null;
       const side = radio?.dataset.chaosSide;
-      if (side === "left" || side === "right") {
+      if (side === 'left' || side === 'right') {
         setAlignment(opposite(side));
       }
     };
@@ -53,14 +56,24 @@ export function Clippy() {
     syncFromRadioDom();
 
     const handleRadioLayout = (event: Event) => {
-      const customEvent = event as CustomEvent<{ side?: "left" | "right" }>;
-      if (customEvent.detail?.side === "left" || customEvent.detail?.side === "right") {
+      const customEvent = event as CustomEvent<{ side?: 'left' | 'right' }>;
+      if (
+        customEvent.detail?.side === 'left' ||
+        customEvent.detail?.side === 'right'
+      ) {
         setAlignment(opposite(customEvent.detail.side));
       }
     };
 
-    window.addEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
-    return () => window.removeEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
+    window.addEventListener(
+      'openchaos:radio-layout',
+      handleRadioLayout as EventListener,
+    );
+    return () =>
+      window.removeEventListener(
+        'openchaos:radio-layout',
+        handleRadioLayout as EventListener,
+      );
   }, []);
 
   useEffect(() => {
@@ -111,15 +124,13 @@ export function Clippy() {
       className={`web2-chat-widget web2-chat-widget-${alignment}`}
       data-chaos-side={alignment}
       style={{
-        right: alignment === "right" ? "20px" : undefined,
-        left: alignment === "left" ? "20px" : undefined,
+        right: alignment === 'right' ? '20px' : undefined,
+        left: alignment === 'left' ? '20px' : undefined,
       }}
     >
       {isVisible && !isDismissed && (
         <div className="web2-chat-bubble web2-chat-bubble-border">
-          <p className="web2-chat-message">
-            {CLIPPY_TIPS[currentTip]}
-          </p>
+          <p className="web2-chat-message">{CLIPPY_TIPS[currentTip]}</p>
 
           <div className="web2-chat-actions">
             <button onClick={handleDismiss} className="web2-chat-btn">

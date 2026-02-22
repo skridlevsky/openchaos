@@ -1,15 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import type { PullRequest } from "@/lib/github";
-import { PRCard } from "./PRCard";
+import { useState } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { PRCard } from './PRCard';
 
 interface ExpandablePRSectionProps {
   prs: PullRequest[];
   showRank?: boolean;
 }
 
-export function ExpandablePRSection({ prs, showRank = false }: ExpandablePRSectionProps) {
+export function ExpandablePRSection({
+  prs,
+  showRank = false,
+}: ExpandablePRSectionProps) {
   const [expanded, setExpanded] = useState(false);
   const initialCount = 10;
   const hasMore = prs.length > initialCount;
@@ -36,7 +39,7 @@ export function ExpandablePRSection({ prs, showRank = false }: ExpandablePRSecti
             onClick={() => setExpanded(!expanded)}
             className="pr-list-expand-button"
           >
-            {expanded ? "Show Less" : `Show All (${prs.length})`}
+            {expanded ? 'Show Less' : `Show All (${prs.length})`}
           </button>
         </div>
       )}

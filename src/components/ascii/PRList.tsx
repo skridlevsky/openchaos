@@ -1,5 +1,5 @@
-import { getOrganizedPRs } from "@/lib/github";
-import { FramesLayout } from "./FramesLayout";
+import { getOrganizedPRs } from '@/lib/github';
+import { FramesLayout } from './FramesLayout';
 
 export async function PRList() {
   let data;
@@ -8,12 +8,17 @@ export async function PRList() {
   try {
     data = await getOrganizedPRs();
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch PRs";
+    error = e instanceof Error ? e.message : 'Failed to fetch PRs';
   }
 
   if (error) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="page-error-table">
+      <table
+        width="90%"
+        border={1}
+        cellPadding={10}
+        className="page-error-table"
+      >
         <tbody>
           <tr>
             <td className="page-error-cell">
@@ -31,7 +36,12 @@ export async function PRList() {
 
   if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (
-      <table width="90%" border={1} cellPadding={10} className="page-empty-table">
+      <table
+        width="90%"
+        border={1}
+        cellPadding={10}
+        className="page-empty-table"
+      >
         <tbody>
           <tr>
             <td className="page-empty-cell">

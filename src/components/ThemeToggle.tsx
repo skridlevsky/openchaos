@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -9,21 +9,23 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
     // Get system preference and reverse it
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const reversedTheme = prefersDark ? "light" : "dark";
-    setIsDark(reversedTheme === "dark");
-    document.documentElement.setAttribute("data-theme", reversedTheme);
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
+    const reversedTheme = prefersDark ? 'light' : 'dark';
+    setIsDark(reversedTheme === 'dark');
+    document.documentElement.setAttribute('data-theme', reversedTheme);
 
     // Listen for system preference changes
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = (e: MediaQueryListEvent) => {
-      const reversedTheme = e.matches ? "light" : "dark";
-      setIsDark(reversedTheme === "dark");
-      document.documentElement.setAttribute("data-theme", reversedTheme);
+      const reversedTheme = e.matches ? 'light' : 'dark';
+      setIsDark(reversedTheme === 'dark');
+      document.documentElement.setAttribute('data-theme', reversedTheme);
     };
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   if (!mounted) {
@@ -32,9 +34,9 @@ export function ThemeToggle() {
 
   return (
     <button
-      onClick={() => alert("No.")}
+      onClick={() => alert('No.')}
       className="web2-theme-toggle"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDark ? (
         <svg

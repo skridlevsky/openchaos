@@ -1,19 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import type { PullRequest } from "@/lib/github";
-import { ExpandablePRSection } from "./ExpandablePRSection";
+import { useState, useEffect } from 'react';
+import type { PullRequest } from '@/lib/github';
+import { ExpandablePRSection } from './ExpandablePRSection';
 
-type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
+type Section = 'votes' | 'rising' | 'new' | 'discussed' | 'controversial';
 
-const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial"];
+const VALID_SECTIONS: Section[] = [
+  'votes',
+  'rising',
+  'new',
+  'discussed',
+  'controversial',
+];
 
 const TAB_ITEMS: { id: Section; label: string }[] = [
-  { id: "votes", label: "Top Votes" },
-  { id: "rising", label: "Hot" },
-  { id: "controversial", label: "Controversial" },
-  { id: "discussed", label: "Discussed" },
-  { id: "new", label: "Newest" },
+  { id: 'votes', label: 'Top Votes' },
+  { id: 'rising', label: 'Hot' },
+  { id: 'controversial', label: 'Controversial' },
+  { id: 'discussed', label: 'Discussed' },
+  { id: 'new', label: 'Newest' },
 ];
 
 interface SectionDataProps {
@@ -26,23 +32,40 @@ interface SectionDataProps {
 
 type Web2FramesLayoutProps = SectionDataProps;
 
-function SectionContent({ section, topByVotes, rising, newest, discussed, controversial }: SectionDataProps & { section: Section }) {
+function SectionContent({
+  section,
+  topByVotes,
+  rising,
+  newest,
+  discussed,
+  controversial,
+}: SectionDataProps & { section: Section }) {
   switch (section) {
-    case "votes":
+    case 'votes':
       return <ExpandablePRSection prs={topByVotes} showRank />;
-    case "rising":
-      return <ExpandablePRSection prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))} />;
-    case "new":
+    case 'rising':
+      return (
+        <ExpandablePRSection
+          prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))}
+        />
+      );
+    case 'new':
       return <ExpandablePRSection prs={newest} />;
-    case "discussed":
+    case 'discussed':
       return <ExpandablePRSection prs={discussed} />;
-    case "controversial":
+    case 'controversial':
       return <ExpandablePRSection prs={controversial} />;
   }
 }
 
-export function Web2FramesLayout({ topByVotes, rising, newest, discussed, controversial }: Web2FramesLayoutProps) {
-  const [activeSection, setActiveSection] = useState<Section>("votes");
+export function Web2FramesLayout({
+  topByVotes,
+  rising,
+  newest,
+  discussed,
+  controversial,
+}: Web2FramesLayoutProps) {
+  const [activeSection, setActiveSection] = useState<Section>('votes');
 
   // Sync with URL hash on mount and hash changes
   useEffect(() => {
@@ -54,8 +77,8 @@ export function Web2FramesLayout({ topByVotes, rising, newest, discussed, contro
     };
 
     handleHashChange();
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   // Sync hash to active section
@@ -70,7 +93,7 @@ export function Web2FramesLayout({ topByVotes, rising, newest, discussed, contro
           <button
             key={item.id}
             onClick={() => setActiveSection(item.id)}
-            className={`web2-pr-tab ${activeSection === item.id ? "web2-pr-tab-active" : ""}`}
+            className={`web2-pr-tab ${activeSection === item.id ? 'web2-pr-tab-active' : ''}`}
           >
             {item.label}
           </button>

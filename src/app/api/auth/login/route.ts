@@ -4,7 +4,10 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.GITHUB_CLIENT_ID;
 
   if (!clientId) {
-    return NextResponse.json({ error: 'GITHUB_CLIENT_ID not configured' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'GITHUB_CLIENT_ID not configured' },
+      { status: 500 },
+    );
   }
 
   const state = crypto.randomUUID();

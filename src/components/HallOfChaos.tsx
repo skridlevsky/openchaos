@@ -1,5 +1,5 @@
-import { getMergedPRs } from "@/lib/github";
-import { HallOfChaosCard } from "./HallOfChaosCard";
+import { getMergedPRs } from '@/lib/github';
+import { HallOfChaosCard } from './HallOfChaosCard';
 
 export async function HallOfChaos() {
   let prs;
@@ -8,7 +8,7 @@ export async function HallOfChaos() {
   try {
     prs = await getMergedPRs();
   } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch merged PRs";
+    error = e instanceof Error ? e.message : 'Failed to fetch merged PRs';
   }
 
   if (error) {

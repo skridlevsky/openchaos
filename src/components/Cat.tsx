@@ -1,46 +1,47 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from 'react';
 
 const ASCII_FRAMES = [
-  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n / /    \\ \\",
-  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
-  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  \\ \\  / /",
-  "          /\\_/\\    \n ____/ o o \\\n(____   \"  )\n  ||    ||",
+  '          /\\_/\\    \n ____/ o o \\\n(____   "  )\n / /    \\ \\',
+  '          /\\_/\\    \n ____/ o o \\\n(____   "  )\n  ||    ||',
+  '          /\\_/\\    \n ____/ o o \\\n(____   "  )\n  \\ \\  / /',
+  '          /\\_/\\    \n ____/ o o \\\n(____   "  )\n  ||    ||',
 ];
 
 // Function to flip ASCII art horizontally
 function flipAscii(ascii: string): string {
-  const lines = ascii.split("\n");
+  const lines = ascii.split('\n');
   const maxWidth = Math.max(...lines.map((line) => line.length));
-  
+
   return lines
     .map((line) => {
-      const padded = line.padEnd(maxWidth, " ");
+      const padded = line.padEnd(maxWidth, ' ');
       return padded
-        .split("")
+        .split('')
         .reverse()
         .map((char) => {
           // Swap mirror characters
-          if (char === "/") return "\\";
-          if (char === "\\") return "/";
-          if (char === "(") return ")";
-          if (char === ")") return "(";
+          if (char === '/') return '\\';
+          if (char === '\\') return '/';
+          if (char === '(') return ')';
+          if (char === ')') return '(';
           return char;
         })
-        .join("")
+        .join('')
         .trimEnd();
     })
-    .join("\n");
+    .join('\n');
 }
-
 
 export function Cat() {
   // starts on the midi player
   // drag it around
   // drops back down
   // looks where it goes
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [isSettling, setIsSettling] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -57,7 +58,9 @@ export function Cat() {
 
   useEffect(() => {
     const checkRadioOpen = () => {
-      setIsMidiPlayerOpen(Boolean(document.querySelector(".gta-radio-container")));
+      setIsMidiPlayerOpen(
+        Boolean(document.querySelector('.gta-radio-container')),
+      );
     };
 
     checkRadioOpen();
@@ -153,17 +156,19 @@ export function Cat() {
     };
 
     if (isDragging) {
-      window.addEventListener("mousemove", handleWindowMouseMove);
-      window.addEventListener("mouseup", handleWindowEnd);
-      window.addEventListener("touchmove", handleWindowTouchMove, { passive: false });
-      window.addEventListener("touchend", handleWindowEnd);
+      window.addEventListener('mousemove', handleWindowMouseMove);
+      window.addEventListener('mouseup', handleWindowEnd);
+      window.addEventListener('touchmove', handleWindowTouchMove, {
+        passive: false,
+      });
+      window.addEventListener('touchend', handleWindowEnd);
     }
 
     return () => {
-      window.removeEventListener("mousemove", handleWindowMouseMove);
-      window.removeEventListener("mouseup", handleWindowEnd);
-      window.removeEventListener("touchmove", handleWindowTouchMove);
-      window.removeEventListener("touchend", handleWindowEnd);
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowEnd);
+      window.removeEventListener('touchmove', handleWindowTouchMove);
+      window.removeEventListener('touchend', handleWindowEnd);
     };
   }, [isDragging]);
 
@@ -209,14 +214,18 @@ export function Cat() {
     const catEl = catRef.current;
 
     const getAnchorRect = (): DOMRect | null => {
-      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
-      const clippy = document.querySelector(".clippy-container") as HTMLElement | null;
+      const radio = document.querySelector(
+        '.gta-radio-container',
+      ) as HTMLElement | null;
+      const clippy = document.querySelector(
+        '.clippy-container',
+      ) as HTMLElement | null;
 
       if (!radio && !clippy) return null;
       if (!radio) return clippy?.getBoundingClientRect() ?? null;
 
       const radioSide = radio.dataset.chaosSide;
-      const radioCollapsed = radio.classList.contains("gta-radio-collapsed");
+      const radioCollapsed = radio.classList.contains('gta-radio-collapsed');
 
       const clippyOnSameSide =
         !!clippy &&
@@ -265,7 +274,10 @@ export function Cat() {
 
       const topY = Math.max(0, anchorRect.top - catRect.height);
       const minX = anchorRect.left;
-      const maxX = Math.max(minX, anchorRect.left + anchorRect.width - catRect.width);
+      const maxX = Math.max(
+        minX,
+        anchorRect.left + anchorRect.width - catRect.width,
+      );
 
       x += dir * speed * dt;
       if (x <= minX) {
@@ -330,9 +342,9 @@ export function Cat() {
 
   // Determine default position based on midi player state
   const getDefaultPositionClass = () => {
-    if (position) return "top-0 left-0"; // being dragged or fallen
-    if (isMidiPlayerOpen) return ""; // player open, use style positioning
-    return "bottom-0 left-5"; // player closed, sit at bottom-left
+    if (position) return 'top-0 left-0'; // being dragged or fallen
+    if (isMidiPlayerOpen) return ''; // player open, use style positioning
+    return 'bottom-0 left-5'; // player closed, sit at bottom-left
   };
 
   return (
@@ -342,14 +354,16 @@ export function Cat() {
       onTouchStart={handleTouchStart}
       className={`fixed z-[1001] cursor-grab active:cursor-grabbing select-none touch-none
         ${getDefaultPositionClass()}
-        ${isSettling ? "transition-transform duration-500 ease-out" : ""}
+        ${isSettling ? 'transition-transform duration-500 ease-out' : ''}
       `}
       style={{
         // When not dragged and player is open, position on top of the player
-        ...(!position && isMidiPlayerOpen ? {
-          bottom: "200px", // above the midi player
-          left: "20px",
-        } : {}),
+        ...(!position && isMidiPlayerOpen
+          ? {
+              bottom: '200px', // above the midi player
+              left: '20px',
+            }
+          : {}),
         transform: position
           ? `translate3d(${position.x}px, ${position.y}px, 0)`
           : undefined,
@@ -357,17 +371,20 @@ export function Cat() {
     >
       <pre
         className="font-mono text-xs leading-tight whitespace-pre text-center"
-        style={{ 
-          width: "128px", 
-          height: "128px", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center",
+        style={{
+          width: '128px',
+          height: '128px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           margin: 0,
         }}
         draggable={false}
-      >{isFlipped ? flipAscii(ASCII_FRAMES[currentFrame]) : ASCII_FRAMES[currentFrame]}</pre>
+      >
+        {isFlipped
+          ? flipAscii(ASCII_FRAMES[currentFrame])
+          : ASCII_FRAMES[currentFrame]}
+      </pre>
     </div>
   );
 }
-

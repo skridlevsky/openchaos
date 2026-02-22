@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from 'react';
 
 function getNextMergeTime(): Date {
   const now = new Date();
@@ -35,7 +35,7 @@ function getTimeRemaining(target: Date): {
 }
 
 function pad(n: number): string {
-  return n.toString().padStart(2, "0");
+  return n.toString().padStart(2, '0');
 }
 
 function CountdownDigit({ value, label }: { value: string; label: string }) {
@@ -71,24 +71,22 @@ export function Countdown() {
 
   const digits: { value: string; label: string }[] = mounted
     ? [
-        { value: String(time.days), label: "Days" },
-        { value: pad(time.hours), label: "Hours" },
-        { value: pad(time.minutes), label: "Mins" },
-        { value: pad(time.seconds), label: "Secs" },
+        { value: String(time.days), label: 'Days' },
+        { value: pad(time.hours), label: 'Hours' },
+        { value: pad(time.minutes), label: 'Mins' },
+        { value: pad(time.seconds), label: 'Secs' },
       ]
     : [
-        { value: "--", label: "Days" },
-        { value: "--", label: "Hours" },
-        { value: "--", label: "Mins" },
-        { value: "--", label: "Secs" },
+        { value: '--', label: 'Days' },
+        { value: '--', label: 'Hours' },
+        { value: '--', label: 'Mins' },
+        { value: '--', label: 'Secs' },
       ];
 
   return (
     <div className="countdown-container">
       <div className="countdown-header-bar">
-        <div className="countdown-header">
-          Next Merge Countdown
-        </div>
+        <div className="countdown-header">Next Merge Countdown</div>
       </div>
       <div className="countdown-digits-row">
         {digits.map((digit, i) => (
@@ -99,9 +97,7 @@ export function Countdown() {
         ))}
       </div>
       <div className="countdown-footer-bar">
-        <div className="countdown-footer">
-          Vote now — time is running out!
-        </div>
+        <div className="countdown-footer">Vote now — time is running out!</div>
       </div>
     </div>
   );

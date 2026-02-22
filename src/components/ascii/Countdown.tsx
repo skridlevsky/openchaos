@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 function getNextMergeTime(): Date {
   const now = new Date();
@@ -35,7 +35,7 @@ function getTimeRemaining(target: Date): {
 }
 
 function pad(n: number, count: number = 2): string {
-  return n.toString().padStart(count, "0");
+  return n.toString().padStart(count, '0');
 }
 
 export function Countdown() {
@@ -62,7 +62,7 @@ export function Countdown() {
 
   const display = mounted
     ? `${pad(time.hours)} HOURS : ${pad(time.minutes)} MINS : ${pad(time.seconds)} SECS : ${pad(time.milliseconds, 3)} MS`
-    : "-- DAYS : -- HOURS : -- MINS : -- SECS";
+    : '-- DAYS : -- HOURS : -- MINS : -- SECS';
 
   return (
     <div>
