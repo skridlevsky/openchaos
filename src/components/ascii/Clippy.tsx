@@ -42,7 +42,24 @@ const CLIPPY_ASCII_FRAMES = [
 ];
 
 const CLIPPY_TIPS = [
-  "It looks like you're trying to fix bugs in my implementation. Would you like help with that?",
+  "It looks like you're trying to vote on a PR! Would you like help with that?",
+  "Did you know? The top-voted PR gets merged every day at 19:00 UTC!",
+  "TIP: Thumbs up 👍 = good. Thumbs down 👎 = bad. You're welcome!",
+  "I see you're browsing PRs. Have you considered submitting your own?",
+  "Fun fact: This website was definitely NOT made in Microsoft FrontPage 2000.",
+  "Remember to sign the guestbook! It's 1999 and everyone's doing it!",
+  "Would you like me to search AltaVista for 'how to vote on GitHub'?",
+  "You look like you could use a break. Want me to open Minesweeper?",
+  "IMPORTANT: Make sure your PR passes the build or it won't be merged!",
+  "I notice you haven't clicked anything in 10 seconds. Are you okay?",
+  "Pro tip: The 🎉 and ❤️ reactions don't count. Only 👍 and 👎!",
+  "This site is best viewed at 800x600. Trust me, I'm a paperclip.",
+  "Have you tried turning it off and on again?",
+  "It looks like you're trying to write a PR. Would you like help making it chaotic?",
+  "Remember: In OpenChaos, the community decides. Democracy is beautiful! 🦅",
+  // Clippy's conspiracy theories
+  "Did you know the top PR always has exactly the votes needed to win? 🤔 Coincidence?",
+  "I've been tracking the vote patterns. They follow the Fibonacci sequence. Wake up, sheeple!",
 ];
 
 function getRandomTip(currentIndex: number): number {
