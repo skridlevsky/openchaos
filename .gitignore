@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# compiled voting module for GitHub Actions workflow
+.github/workflows/voting.js

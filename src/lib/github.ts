@@ -1,5 +1,5 @@
 import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
-import { hasRhymingWords } from "./rhymes";
+import { PRVotes, tallyReactions, calculateHotScore, checksPassed, hasRhymingWords } from "./voting";
 export interface PullRequest {
   rank: number;
   number: number;
@@ -17,21 +17,6 @@ export interface PullRequest {
   isTrending: boolean;
 }
 
-interface PRVotes {
-  total: number;
-  upvotes: number;
-  downvotes: number;
-  recentPositive: number;
-  recentNegative: number;
-}
-
-/**
- * Calculate a "hot score" based on net votes from the last 7 days.
- * Simple and transparent: the PR with the most recent voting activity wins.
- */
-function calculateHotScore(votes: PRVotes): number {
-  return votes.recentPositive - votes.recentNegative;
-}
 
 export interface MergedPullRequest {
   number: number;
@@ -73,7 +58,6 @@ interface GitHubCheckRunsResponse {
   }[];
 }
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 const GITHUB_REPO = "skridlevsky/openchaos";
 
 function getHeaders(accept: string): Record<string, string> {
@@ -289,21 +273,7 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     page++;
   }
 
-  const upvotes = allReactions.filter((r) => r.content === "+1").length;
-  const downvotes = allReactions.filter((r) => r.content === "-1").length;
-
-  const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
-  const recentReactions = allReactions.filter(
-    (r) => new Date(r.created_at).getTime() >= sevenDaysAgo,
-  );
-
-  return {
-    total: upvotes - downvotes,
-    upvotes,
-    downvotes,
-    recentPositive: recentReactions.filter((r) => r.content === "+1").length,
-    recentNegative: recentReactions.filter((r) => r.content === "-1").length,
-  };
+  return tallyReactions(allReactions);
 }
 
 interface PRDetailResult {
@@ -362,15 +332,7 @@ async function getCommitStatus(
 
   const data: GitHubCheckRunsResponse = await response.json();
 
-  // No check runs means nothing to fail
-  if (data.total_count === 0) {
-    return true;
-  }
-
-  // All check runs must be completed and successful
-  return data.check_runs.every(
-    (run) => run.status === "completed" && run.conclusion === "success"
-  );
+  return checksPassed(data.check_runs);
 }
 
 interface GitHubMergedPR {

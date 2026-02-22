@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:voting": "tsc src/lib/voting.ts --outDir .github/workflows --module commonjs --target ES2020 --skipLibCheck",
     "start": "next start",
     "lint": "eslint"
   },

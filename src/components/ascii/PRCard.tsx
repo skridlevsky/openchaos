@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { PullRequest } from "@/lib/github";
-import { hasRhymingWords } from "@/lib/rhymes";
+import { hasRhymingWords } from "@/lib/voting";
 import { TimeAgo } from "@/components/TimeAgo";
 import { useAuth } from "@/hooks/useAuth";
 import { soundPlayer } from "@/utils/sounds";
