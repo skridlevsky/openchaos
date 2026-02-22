@@ -42,24 +42,7 @@ const CLIPPY_ASCII_FRAMES = [
 ];
 
 const CLIPPY_TIPS = [
-  "It looks like you're trying to vote on a PR! Would you like help with that?",
-  "Did you know? The top-voted PR gets merged every day at 19:00 UTC!",
-  "TIP: Thumbs up 👍 = good. Thumbs down 👎 = bad. You're welcome!",
-  "I see you're browsing PRs. Have you considered submitting your own?",
-  "Fun fact: This website was definitely NOT made in Microsoft FrontPage 2000.",
-  "Remember to sign the guestbook! It's 1999 and everyone's doing it!",
-  "Would you like me to search AltaVista for 'how to vote on GitHub'?",
-  "You look like you could use a break. Want me to open Minesweeper?",
-  "IMPORTANT: Make sure your PR passes the build or it won't be merged!",
-  "I notice you haven't clicked anything in 10 seconds. Are you okay?",
-  "Pro tip: The 🎉 and ❤️ reactions don't count. Only 👍 and 👎!",
-  "This site is best viewed at 800x600. Trust me, I'm a paperclip.",
-  "Have you tried turning it off and on again?",
-  "It looks like you're trying to write a PR. Would you like help making it chaotic?",
-  "Remember: In OpenChaos, the community decides. Democracy is beautiful! 🦅",
-  // Clippy's conspiracy theories
-  "Did you know the top PR always has exactly the votes needed to win? 🤔 Coincidence?",
-  "I've been tracking the vote patterns. They follow the Fibonacci sequence. Wake up, sheeple!",
+  "It looks like you're trying to fix bugs in my implementation. Would you like help with that?",
 ];
 
 function getRandomTip(currentIndex: number): number {
@@ -88,28 +71,28 @@ function wrapText(text: string, maxWidth: number): string[] {
   return lines;
 }
 
-function createSpeechBubble(text: string, maxWidth: number = 40): string {
+function createSpeechBubble(
+  text: string,
+  maxWidth: number = 40
+): { bubbleLines: string[]; innerWidth: number; width: number } {
   const lines = wrapText(text, maxWidth);
   const maxLineLength = Math.max(...lines.map((line) => line.length), 10);
   const width = maxLineLength + 4; // padding on each side
+  const innerWidth = width - 2; // inside the │ │
 
-  let bubble = `┌${"─".repeat(width)}┐\n`;
+  const bubbleLines: string[] = [];
+  bubbleLines.push(`┌${"─".repeat(width)}┐`);
 
   for (const line of lines) {
-    const paddedLine = line.padEnd(maxLineLength+2, " ");
-    bubble += `│ ${paddedLine} │\n`;
+    const paddedLine = line.padEnd(maxLineLength + 2, " ");
+    bubbleLines.push(`│ ${paddedLine} │`);
   }
 
-  // Add button row with proper spacing - ensure enough padding on the right
-  const buttonText = `  [OK]  [Don't show tips]  `;
-  const buttonRowPadded = buttonText.padEnd(maxLineLength+2, " ");
-  bubble += `│ ${buttonRowPadded} │\n`;
-  bubble += `└${"─".repeat(width)}┘\n`;
-  // Arrow on the right side - align to right edge of bubble
-  const arrowOffset = width - 2; // Position arrow near right edge
-  bubble += `${" ".repeat(arrowOffset)}\\/\n`; // pointer pointing down on the right
+  bubbleLines.push(`└${"─".repeat(width)}┘`);
+  const arrowOffset = width - 2;
+  bubbleLines.push(`${" ".repeat(arrowOffset)}\\/`);
 
-  return bubble;
+  return { bubbleLines, innerWidth, width };
 }
 
 export function Clippy() {
@@ -188,60 +171,86 @@ export function Clippy() {
       }}
     >
       {/* Speech Bubble */}
-      {isVisible && !isDismissed && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "140px",
-            right: "0",
-            fontFamily: "Courier New, monospace",
-            fontSize: "12px",
-            lineHeight: "1.2",
-            color: "var(--foreground)",
-            whiteSpace: "pre",
-            animation: "clippy-bounce 0.3s ease-out",
-          }}
-        >
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <pre
-              className="font-mono text-xs leading-tight whitespace-pre"
+      {isVisible && !isDismissed && (() => {
+        const { bubbleLines, innerWidth } = createSpeechBubble(CLIPPY_TIPS[currentTip]);
+        // Split: top + content lines, then we insert button row, then bottom + arrow
+        const contentEnd = bubbleLines.findIndex((l) => l.startsWith("└"));
+        const topAndContent = bubbleLines.slice(0, contentEnd);
+        const bottomAndArrow = bubbleLines.slice(contentEnd);
+        const buttonRowText = "  [OK]  [Don't show tips]  ";
+        const buttonRowPadding = Math.max(0, innerWidth - buttonRowText.length);
+        return (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "140px",
+              right: "0",
+              fontFamily: "Courier New, monospace",
+              fontSize: "12px",
+              lineHeight: "1.2",
+              color: "var(--foreground)",
+              whiteSpace: "pre",
+              animation: "clippy-bounce 0.3s ease-out",
+            }}
+          >
+            <div
               style={{
-                margin: 0,
-                color: "var(--foreground)",
+                position: "relative",
+                display: "inline-block",
+                backgroundColor: "black",
+                padding: "2px 0",
               }}
             >
-              {createSpeechBubble(CLIPPY_TIPS[currentTip])}
-            </pre>
-            {/* Clickable button areas over ASCII art */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "1.2em",
-                left: "0.5ch",
-                width: "4ch",
-                height: "1.2em",
-                cursor: "pointer",
-                zIndex: 1,
-              }}
-              onClick={handleDismiss}
-              title="OK"
-            />
-            <div
-              style={{
-                position: "absolute",
-                bottom: "1.2em",
-                left: "7ch",
-                width: "14ch",
-                height: "1.2em",
-                cursor: "pointer",
-                zIndex: 1,
-              }}
-              onClick={handleHideClippy}
-              title="Don't show tips"
-            />
+              <pre
+                className="font-mono text-xs leading-tight whitespace-pre"
+                style={{
+                  margin: 0,
+                  color: "var(--foreground)",
+                }}
+              >
+                {topAndContent.join("\n")}
+                {"\n"}
+                {"│ "}
+                {"  "}
+                <button
+                  type="button"
+                  onClick={handleDismiss}
+                  title="OK"
+                  style={{
+                    font: "inherit",
+                    color: "inherit",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  [OK]
+                </button>
+                {"  "}
+                <button
+                  type="button"
+                  onClick={handleHideClippy}
+                  title="Don't show tips"
+                  style={{
+                    font: "inherit",
+                    color: "inherit",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  {"[Don't show tips]"}
+                </button>
+                {buttonRowPadding > 0 ? " ".repeat(buttonRowPadding) : ""}
+                {"   │\n"}
+                {bottomAndArrow.join("\n")}
+              </pre>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Clippy Character */}
       <div
