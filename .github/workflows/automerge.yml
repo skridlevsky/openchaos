@@ -1,19 +1,33 @@
-name: Merge top-voted PR weekly
+name: Merge top-voted PR daily
 
 on:
   schedule:
-    - cron: "0 12 * * 0"
+    - cron: "0 19 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
   pull-requests: write
+  checks: read
+  statuses: read
 
 jobs:
   merge-top-pr:
     runs-on: ubuntu-latest
     steps:
-      - name: Merge highest-voted PR
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Merge highest-voted mergeable PR
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -21,58 +35,189 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            async function getOpenPRs() {
-              const prs = await github.rest.pulls.list({
-                owner,
-                repo,
-                state: "open",
-                per_page: 100
-              });
+            // Rhyming title check — mirrors src/lib/rhymes.ts
+            const rhymesWith = require('rhymes-with');
+            function hasRhymingWords(title) {
+              const words = title.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+              for (let i = 0; i < words.length; i++) {
+                for (let j = i + 1; j < words.length; j++) {
+                  if (words[i] !== words[j] && rhymesWith(words[i], words[j])) return true;
+                }
+              }
+              return false;
+            }
 
-              const prsWithVotes = await Promise.all(
-                prs.data.map(async (pr) => {
-                  const reactions = await github.rest.reactions.listForIssue({
-                    owner,
-                    repo,
-                    issue_number: pr.number,
-                    per_page: 100
-                  });
+            // Fetch all open PRs, compute net votes, and return ranked by votes (newest first for ties)
+            async function getRankedPRs() {
+              let allPRs = [];
+              let page = 1;
+              while (true) {
+                const prs = await github.rest.pulls.list({
+                  owner, repo, state: "open", per_page: 100, page
+                });
+                allPRs = allPRs.concat(prs.data);
+                if (prs.data.length < 100) break;
+                page++;
+              }
 
-                  const votes = reactions.data.filter(r => r.content === '+1').length;
+              const results = await Promise.allSettled(
+                allPRs.map(async (pr) => {
+                  let allReactions = [];
+                  let reactPage = 1;
+                  while (true) {
+                    const reactions = await github.rest.reactions.listForIssue({
+                      owner, repo, issue_number: pr.number, per_page: 100, page: reactPage
+                    });
+                    allReactions = allReactions.concat(reactions.data);
+                    if (reactions.data.length < 100) break;
+                    reactPage++;
+                  }
+
+                  const thumbsUp = allReactions.filter(r => r.content === '+1').length;
+                  const thumbsDown = allReactions.filter(r => r.content === '-1').length;
 
                   return {
                     number: pr.number,
                     title: pr.title,
                     author: pr.user.login,
-                    votes
+                    createdAt: pr.created_at,
+                    thumbsUp,
+                    thumbsDown,
+                    votes: thumbsUp - thumbsDown
                   };
                 })
               );
 
-              prsWithVotes.sort((a,b) => b.votes - a.votes);
+              const prsWithVotes = [];
+              for (const [i, result] of results.entries()) {
+                if (result.status === 'fulfilled') {
+                  prsWithVotes.push(result.value);
+                } else {
+                  console.log(`  WARNING: Failed to fetch reactions for PR #${allPRs[i].number}: ${result.reason.message}`);
+                }
+              }
+
+              // Sort by net votes descending, then by newest first for tiebreaker
+              prsWithVotes.sort((a, b) =>
+                (b.votes - a.votes) ||
+                (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              );
 
               return prsWithVotes;
             }
 
-            const openPRs = await getOpenPRs();
-            if (openPRs.length === 0) {
+            const rankedPRs = await getRankedPRs();
+            if (rankedPRs.length === 0) {
               console.log("No open PRs found.");
               return;
             }
 
-            const topPR = openPRs[0];
-            console.log(`Top PR (#${topPR.number}) by @${topPR.author}: ${topPR.title} with ${topPR.votes} votes`);
+            console.log("=== PR Rankings ===");
+            for (const pr of rankedPRs) {
+              console.log(`#${pr.number} — ${pr.votes} net votes — "${pr.title}" by @${pr.author}`);
+            }
+            console.log("===================\n");
 
-            if (topPR.votes === 0) {
-              console.log("No votes — skipping merge.");
-              return;
+            // Iterate through ranked PRs, merge the first mergeable one
+            for (let rank = 0; rank < rankedPRs.length; rank++) {
+              const pr = rankedPRs[rank];
+              if (pr.votes <= 0) {
+                console.log(`PR #${pr.number} has ${pr.votes} net votes — stopping (no positive-vote PRs remain).`);
+                break;
+              }
+
+              console.log(`\nEvaluating PR #${pr.number} (${pr.votes} net votes)...`);
+
+              try {
+                // Check mergeable status
+                const detail = await github.rest.pulls.get({
+                  owner, repo, pull_number: pr.number
+                });
+
+                // GitHub may return null if mergeability hasn't been computed yet — retry up to 3 times
+                let mergeable = detail.data.mergeable;
+                let retries = 0;
+                while (mergeable === null && retries < 3) {
+                  retries++;
+                  const delay = retries * 3000;
+                  console.log(`  Mergeability not yet computed, retry ${retries}/3 in ${delay}ms...`);
+                  await new Promise(r => setTimeout(r, delay));
+                  const retry = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
+                  mergeable = retry.data.mergeable;
+                }
+
+                if (mergeable === null) {
+                  console.log(`  PR #${pr.number} mergeability unknown after retries — skipping.`);
+                  continue;
+                }
+                if (mergeable === false) {
+                  console.log(`  PR #${pr.number} has merge conflicts — skipping.`);
+                  continue;
+                }
+
+                // Check rhyming title requirement (README rule)
+                if (!hasRhymingWords(pr.title)) {
+                  console.log(`  PR #${pr.number} title doesn't contain rhyming words — skipping.`);
+                  continue;
+                }
+
+                // Check CI via both commit statuses API and check runs API (different CI systems report through different endpoints)
+                const statuses = await github.rest.repos.getCombinedStatusForRef({
+                  owner, repo, ref: detail.data.head.sha
+                });
+                const checkRuns = await github.rest.checks.listForRef({
+                  owner, repo, ref: detail.data.head.sha
+                });
+
+                if (statuses.data.state === 'pending' || statuses.data.state === 'failure' || statuses.data.state === 'error') {
+                  console.log(`  PR #${pr.number} has ${statuses.data.state} commit status — skipping.`);
+                  continue;
+                }
+
+                const incompleteChecks = checkRuns.data.check_runs.filter(cr => cr.status !== 'completed');
+                if (incompleteChecks.length > 0) {
+                  console.log(`  PR #${pr.number} has ${incompleteChecks.length} check(s) still running — skipping.`);
+                  continue;
+                }
+
+                const failedChecks = checkRuns.data.check_runs.filter(
+                  cr => cr.conclusion !== 'success' && cr.conclusion !== 'skipped'
+                );
+                if (failedChecks.length > 0) {
+                  console.log(`  PR #${pr.number} has failing CI checks — skipping.`);
+                  continue;
+                }
+
+                // All clear — merge it
+                try {
+                  await github.rest.pulls.merge({
+                    owner, repo, pull_number: pr.number, merge_method: 'squash'
+                  });
+                  console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
+
+                  // Leave a victory comment on the merged PR
+                  const body = [
+                    `This PR won the daily race,`,
+                    `Merged with chaos, grace, and pace!`,
+                    ``,
+                    `**Votes:** +${pr.votes} net (${pr.thumbsUp} :+1: / ${pr.thumbsDown} :-1:)`,
+                    `**Rank:** #${rank + 1} of ${rankedPRs.length} open PRs`,
+                    `**Author:** @${pr.author}`,
+                  ].join('\n');
+                  await github.rest.issues.createComment({
+                    owner, repo, issue_number: pr.number, body
+                  });
+
+                  return;
+                } catch (mergeErr) {
+                  console.log(`  ERROR: Failed to merge PR #${pr.number}: ${mergeErr.message}. Trying next PR.`);
+                  continue;
+                }
+              } catch (err) {
+                console.log(`  ERROR: Failed to evaluate PR #${pr.number}: ${err.message}. Trying next PR.`);
+                continue;
+              }
             }
 
-            await github.rest.pulls.merge({
-              owner,
-              repo,
-              pull_number: topPR.number,
-              merge_method: 'squash',
-            });
-
-            console.log(`Merged PR #${topPR.number}`);
+            console.log("\nNo mergeable PR with positive votes found.");
+            core.warning("Daily merge did not occur: no mergeable PR with positive votes and a rhyming title was found.");

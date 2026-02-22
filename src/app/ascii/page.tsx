@@ -5,6 +5,7 @@ import { PRList } from "@/components/ascii/PRList";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/ascii/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
+import { GuyFieri } from "@/components/GuyFieri";
 
 const title = `
   ___                 ___ _
@@ -24,7 +25,7 @@ export default function AsciiHome() {
       </div>
       <Countdown />
       <ControlledChaos />
-
+      <GuyFieri />
       <div>
         <div>
           <AuthButton /> <a href="doom.html">[Play DOOM]</a>
