@@ -300,6 +300,23 @@
   text-decoration: underline;
 }
 
+.np-article-rank {
+  font-family: var(--np-headline-font);
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--np-gold);
+  min-width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.25;
+  padding-top: 2px;
+}
+
+.np-article-rank-na {
+  opacity: 0.4;
+  font-size: 1rem;
+}
+
 .np-article-number {
   font-family: var(--np-headline-font);
   font-weight: 400;
@@ -620,11 +637,6 @@
 
 .np-page .auth-button-disabled {
   opacity: 0.5;
-}
-
-/* --- Hide MIDI Player (doesn't fit newspaper aesthetic) --- */
-.gta-radio-container {
-  display: none !important;
 }
 
 /* --- Footer --- */

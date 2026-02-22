@@ -1,23 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import type { PullRequest } from "@/lib/github";
-import { ExpandablePRSection } from "./ExpandablePRSection";
+import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
+import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
 import { PRCard } from "./PRCard";
 
-type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
-
-const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial"];
-
-const TAB_ITEMS: { id: Section; label: string }[] = [
-  { id: "votes", label: "FRONT PAGE" },
-  { id: "rising", label: "BREAKING NEWS" },
-  { id: "controversial", label: "LETTERS TO THE EDITOR" },
-  { id: "discussed", label: "TOWN HALL" },
-  { id: "new", label: "LATE EDITION" },
+const NEWSPAPER_TABS = [
+  { id: "votes" as const, label: "FRONT PAGE" },
+  { id: "rising" as const, label: "BREAKING NEWS" },
+  { id: "controversial" as const, label: "LETTERS TO THE EDITOR" },
+  { id: "discussed" as const, label: "TOWN HALL" },
+  { id: "new" as const, label: "LATE EDITION" },
 ];
 
-interface SectionDataProps {
+function NewspaperExpandable({ prs, allowDistinguish = false, scoreLabel }: { prs: PullRequest[]; allowDistinguish?: boolean; scoreLabel?: string }) {
+  return (
+    <ExpandablePRSection
+      prs={prs}
+      PRCardComponent={PRCard}
+      allowDistinguish={allowDistinguish}
+      scoreLabel={scoreLabel}
+      emptyMessage={<div className="np-section-empty">No stories filed in this section.</div>}
+      expandLabel={(count) => `Continue Reading (${count} articles)`}
+      collapseLabel="Return to Front Page"
+      buttonClassName="np-expand-btn"
+    />
+  );
+}
+
+interface Props {
   topByVotes: PullRequest[];
   rising: PullRequest[];
   newest: PullRequest[];
@@ -25,71 +36,27 @@ interface SectionDataProps {
   controversial: PullRequest[];
 }
 
-function SectionContent({ section, topByVotes, rising, newest, discussed, controversial, skipFirst }: SectionDataProps & { section: Section; skipFirst: boolean }) {
-  switch (section) {
-    case "votes":
-      return <ExpandablePRSection prs={skipFirst ? topByVotes.slice(1) : topByVotes} allowDistinguish />;
-    case "rising":
-      return <ExpandablePRSection prs={rising.map((pr) => ({ ...pr, votes: pr.hotScore }))} />;
-    case "new":
-      return <ExpandablePRSection prs={newest} />;
-    case "discussed":
-      return <ExpandablePRSection prs={discussed} />;
-    case "controversial":
-      return <ExpandablePRSection prs={controversial} />;
-  }
-}
-
-export function FramesLayout({ topByVotes, rising, newest, discussed, controversial }: SectionDataProps) {
-  const [activeSection, setActiveSection] = useState<Section>("votes");
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1) as Section;
-      if (VALID_SECTIONS.includes(hash)) {
-        setActiveSection(hash);
-      }
-    };
-    handleHashChange();
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
-
-  useEffect(() => {
-    history.replaceState(null, "", `#${activeSection}`);
-  }, [activeSection]);
-
-  const leadingPR = activeSection === "votes" && topByVotes.length > 0 ? topByVotes[0] : null;
-
+export function FramesLayout(props: Props) {
   return (
-    <div>
-      <nav className="np-section-nav">
-        {TAB_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveSection(item.id)}
-            className={`np-section-tab ${activeSection === item.id ? "np-section-tab-active" : ""}`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-
-      {leadingPR && (
-        <PRCard pr={leadingPR} isBanner />
+    <SharedFramesLayout
+      {...props}
+      tabs={NEWSPAPER_TABS}
+      ExpandableSection={NewspaperExpandable}
+      renderBanner={(pr) => <PRCard pr={pr} isBanner />}
+      separator={<hr className="np-rule-double" />}
+      renderTabs={(tabs, activeSection, setActiveSection) => (
+        <nav className="np-section-nav">
+          {tabs.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveSection(item.id)}
+              className={`np-section-tab ${activeSection === item.id ? "np-section-tab-active" : ""}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
       )}
-
-      <hr className="np-rule-double" />
-
-      <SectionContent
-        section={activeSection}
-        topByVotes={topByVotes}
-        rising={rising}
-        newest={newest}
-        discussed={discussed}
-        controversial={controversial}
-        skipFirst={!!leadingPR}
-      />
-    </div>
+    />
   );
 }
