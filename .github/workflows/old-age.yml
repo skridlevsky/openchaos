@@ -53,13 +53,22 @@ jobs:
               return Math.max(0, Math.min(100, deathChance));
             }
 
-            // Get all open PRs
-            const { data: prs } = await github.rest.pulls.list({
-              owner,
-              repo,
-              state: "open",
-              per_page: 100
-            });
+            // Get all open PRs (paginated)
+            let prs = [];
+            try {
+              let page = 1;
+              while (true) {
+                const { data } = await github.rest.pulls.list({
+                  owner, repo, state: "open", per_page: 100, page
+                });
+                prs = prs.concat(data);
+                if (data.length < 100) break;
+                page++;
+              }
+            } catch (err) {
+              core.setFailed(`Failed to fetch open PRs: ${err.message}`);
+              return;
+            }
 
             if (prs.length === 0) {
               console.log("No open PRs to process.");
@@ -72,6 +81,7 @@ jobs:
             console.log("=".repeat(80) + "\n");
 
             const deaths = [];
+            let skippedCount = 0;
 
             for (const pr of prs) {
               try {
@@ -111,22 +121,27 @@ jobs:
 
                 const interactions = comments.length + reactions.length + reviews.length;
 
-                // Retry if mergeability hasn't been computed yet
+                // Retry up to 3 times if mergeability hasn't been computed yet
                 let mergeable = fullPr.data.mergeable;
                 let mergeableState = fullPr.data.mergeable_state;
-                if (mergeable === null) {
-                  await new Promise(r => setTimeout(r, 2000));
+                let retries = 0;
+                while (mergeable === null && retries < 3) {
+                  retries++;
+                  const delay = retries * 3000;
+                  console.log(`  PR #${pr.number}: mergeability not computed, retry ${retries}/3 in ${delay}ms...`);
+                  await new Promise(r => setTimeout(r, delay));
                   const retry = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
                   mergeable = retry.data.mergeable;
                   mergeableState = retry.data.mergeable_state;
-                  if (mergeable === null) {
-                    console.log(`  PR #${pr.number}: mergeability not computed, treating as unmergeable`);
-                  }
+                }
+
+                if (mergeable === null) {
+                  core.warning(`PR #${pr.number}: mergeability not computed after ${retries} retries, skipping this cycle.`);
+                  continue;
                 }
 
                 // Check if unmergeable (conflicts or can't merge)
                 const isUnmergeable =
-                  mergeable === null ||
                   mergeable === false ||
                   mergeableState === 'dirty' ||
                   mergeableState === 'conflicting';
@@ -152,9 +167,18 @@ jobs:
                   });
                 }
               } catch (err) {
-                console.log(`  WARNING: Failed to process PR #${pr.number}: ${err.message}. Skipping.`);
+                skippedCount++;
+                core.warning(`Failed to process PR #${pr.number}: ${err.message}. Skipping.`);
                 continue;
               }
+            }
+
+            if (skippedCount === prs.length) {
+              core.setFailed(`All ${prs.length} PRs failed processing. This likely indicates a systemic issue (rate limiting, auth failure, etc.).`);
+              return;
+            }
+            if (skippedCount > 0) {
+              core.warning(`${skippedCount}/${prs.length} PRs skipped due to errors.`);
             }
 
             // Process deaths — cap at 1 per day
@@ -213,7 +237,8 @@ jobs:
             ].join("\n");
 
             try {
-              // Close first — this is the most critical action
+              // Close first — if subsequent steps (comment, label, lock) fail,
+              // the PR is still dead. The close is the only irreversible action.
               await github.rest.pulls.update({
                 owner,
                 repo,
@@ -221,25 +246,40 @@ jobs:
                 state: "closed"
               });
 
+              const postCloseFailures = [];
+
               try {
                 await github.rest.issues.createComment({
                   owner, repo, issue_number: death.pr.number, body: deathMessage
                 });
-              } catch (e) { console.log(`  WARNING: Failed to add death comment to #${death.pr.number}: ${e.message}`); }
+              } catch (e) {
+                postCloseFailures.push('comment');
+                core.warning(`Failed to add death comment to #${death.pr.number}: ${e.message}`);
+              }
 
               try {
                 await github.rest.issues.addLabels({
                   owner, repo, issue_number: death.pr.number, labels: ['dead']
                 });
-              } catch (e) { console.log(`  WARNING: Failed to add 'dead' label to #${death.pr.number}: ${e.message}`); }
+              } catch (e) {
+                postCloseFailures.push('label');
+                core.warning(`Failed to add 'dead' label to #${death.pr.number}: ${e.message}`);
+              }
 
               try {
                 await github.rest.issues.lock({
                   owner, repo, issue_number: death.pr.number, lock_reason: 'resolved'
                 });
-              } catch (e) { console.log(`  WARNING: Failed to lock #${death.pr.number}: ${e.message}`); }
+              } catch (e) {
+                postCloseFailures.push('lock');
+                core.warning(`Failed to lock #${death.pr.number}: ${e.message}`);
+              }
 
-              console.log(`✓ Closed and locked PR #${death.pr.number}`);
+              if (postCloseFailures.length > 0) {
+                console.log(`✓ Closed PR #${death.pr.number} (but failed: ${postCloseFailures.join(', ')})`);
+              } else {
+                console.log(`✓ Closed and locked PR #${death.pr.number}`);
+              }
             } catch (err) {
               core.setFailed(`Failed to close PR #${death.pr.number}: ${err.message}`);
             }
