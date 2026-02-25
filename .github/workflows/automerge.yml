@@ -36,7 +36,17 @@ jobs:
             const repo = context.repo.repo;
 
             // Rhyming title check — mirrors src/lib/rhymes.ts
-            const rhymesWith = require('rhymes-with');
+            let rhymesWith;
+            try {
+              const mod = await import('rhymes-with');
+              rhymesWith = mod.default;
+              if (typeof rhymesWith !== 'function') {
+                throw new Error(`Expected default export to be a function, got ${typeof rhymesWith}`);
+              }
+            } catch (err) {
+              core.setFailed(`Failed to load rhymes-with package: ${err.message}`);
+              return;
+            }
             function hasRhymingWords(title) {
               const words = title.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
               for (let i = 0; i < words.length; i++) {
@@ -155,7 +165,7 @@ jobs:
                   continue;
                 }
 
-                // Check rhyming title requirement (README rule)
+                // Check rhyming title requirement (titles must contain 2+ rhyming words)
                 if (!hasRhymingWords(pr.title)) {
                   console.log(`  PR #${pr.number} title doesn't contain rhyming words — skipping.`);
                   continue;
@@ -193,9 +203,15 @@ jobs:
                   await github.rest.pulls.merge({
                     owner, repo, pull_number: pr.number, merge_method: 'squash'
                   });
-                  console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
+                } catch (mergeErr) {
+                  console.log(`  ERROR: Failed to merge PR #${pr.number}: ${mergeErr.message}. Trying next PR.`);
+                  continue;
+                }
 
-                  // Leave a victory comment on the merged PR
+                // Merge succeeded — always return after this point (one merge per run)
+                console.log(`\nMerged PR #${pr.number} by @${pr.author}: "${pr.title}" (${pr.votes} net votes)`);
+
+                try {
                   const body = [
                     `This PR won the daily race,`,
                     `Merged with chaos, grace, and pace!`,
@@ -207,12 +223,11 @@ jobs:
                   await github.rest.issues.createComment({
                     owner, repo, issue_number: pr.number, body
                   });
-
-                  return;
-                } catch (mergeErr) {
-                  console.log(`  ERROR: Failed to merge PR #${pr.number}: ${mergeErr.message}. Trying next PR.`);
-                  continue;
+                } catch (commentErr) {
+                  core.warning(`Merged PR #${pr.number} but failed to leave victory comment: ${commentErr.message}`);
                 }
+
+                return;
               } catch (err) {
                 console.log(`  ERROR: Failed to evaluate PR #${pr.number}: ${err.message}. Trying next PR.`);
                 continue;

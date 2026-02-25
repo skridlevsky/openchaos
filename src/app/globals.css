@@ -31,6 +31,9 @@
   font-weight: bold;
   text-decoration: underline;
   font-family: 'Courier New', 'Courier', monospace;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 /* ASCII-style container for ControlledChaos */
@@ -40,8 +43,15 @@
   border: 2px solid var(--foreground);
   padding: 12px;
   margin: 16px 0;
-  width: 84ch;
-  max-width: 84ch;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .ccContainer {
+    width: 84ch;
+    max-width: 84ch;
+  }
 }
 
 .ccContainer h1 {

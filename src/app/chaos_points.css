@@ -1,0 +1,51 @@
+.chaos-point-counter {
+  position: fixed;
+  bottom: 45px;
+  right: 80px;
+  width: 180px;
+  height: 100px;
+
+  p {
+    text-align: end;
+    font-family: monospace;
+    font-weight: bolder;
+    font-size: larger;
+    font-style: italic;
+    white-space: nowrap;
+    padding-right: 8px;
+    color: #fff;
+    text-shadow: 0 0 4px #000;
+    filter: drop-shadow(0 10px 20px #000);
+  }
+
+  p::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+
+    background: linear-gradient(to bottom,  #aebcbf 0%,#6e7774 50%,#0a0e0a 51%,#0a0809 100%);
+    mask-image: linear-gradient(to left, #000 25%, transparent );
+    border-radius: 4px;
+  }
+
+  img {
+    filter: drop-shadow(0 10px 20px #000);
+    animation: chaos_shake 1s infinite ease-in-out;   
+  }
+}
+
+@keyframes chaos_shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+  20% { transform: translate(-0px, 0px) rotate(0.5deg); }
+  30% { transform: translate(-1px, 1px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(0.5deg); }
+  50% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+  60% { transform: translate(0px, 1px) rotate(0deg); }
+  70% { transform: translate(1px, 1px) rotate(-0.5deg); }
+  80% { transform: translate(-1px, -1px) rotate(0.5deg); }
+  90% { transform: translate(1px, 1px) rotate(0deg); }
+  100% { transform: translate(0px, -1px) rotate(-0.5deg); }
+}
