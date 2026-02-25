@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import type { PullRequest } from "@/lib/github";
 import { ExpandablePRSection } from "./ExpandablePRSection";
+import { ChaosPointCounter } from "./ChaosPointCounter";
 
 type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
 
@@ -24,7 +25,14 @@ interface SectionDataProps {
   controversial: PullRequest[];
 }
 
-type Web2FramesLayoutProps = SectionDataProps;
+interface Web2FramesLayoutProps {
+  topByVotes: PullRequest[];
+  rising: PullRequest[];
+  newest: PullRequest[];
+  discussed: PullRequest[];
+  controversial: PullRequest[];
+  chaosPts: number;
+}
 
 function SectionContent({ section, topByVotes, rising, newest, discussed, controversial }: SectionDataProps & { section: Section }) {
   switch (section) {
@@ -41,7 +49,7 @@ function SectionContent({ section, topByVotes, rising, newest, discussed, contro
   }
 }
 
-export function Web2FramesLayout({ topByVotes, rising, newest, discussed, controversial }: Web2FramesLayoutProps) {
+export function Web2FramesLayout({ topByVotes, rising, newest, discussed, controversial, chaosPts }: Web2FramesLayoutProps) {
   const [activeSection, setActiveSection] = useState<Section>("votes");
 
   // Sync with URL hash on mount and hash changes
@@ -87,6 +95,8 @@ export function Web2FramesLayout({ topByVotes, rising, newest, discussed, contro
           controversial={controversial}
         />
       </div>
+
+      <ChaosPointCounter pts={chaosPts} />
     </div>
   );
 }

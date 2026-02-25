@@ -26,7 +26,8 @@ export async function PRList() {
     );
   }
 
-  const { topByVotes, rising, newest, discussed, controversial } = data!;
+  const { topByVotes, rising, newest, discussed, controversial,  merged, totalVotes } = data!;
+  const chaosPts = totalVotes + (merged.length * 100);
 
   if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (
@@ -50,6 +51,7 @@ export async function PRList() {
       newest={newest}
       discussed={discussed}
       controversial={controversial}
+      chaosPts={chaosPts}
     />
   );
 }
