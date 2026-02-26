@@ -51,6 +51,9 @@ export function NewspaperLayout({ children }: NewspaperLayoutProps) {
           >
             View the Press Room
           </a>
+          <a href="/museum" className="np-footer-link">
+            The Museum
+          </a>
           <a
             href="https://discord.gg/6S5T5DyzZq"
             target="_blank"

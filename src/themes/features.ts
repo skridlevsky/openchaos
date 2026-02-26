@@ -10,7 +10,6 @@ export const THEME_FEATURES = {
   cat:             { description: "Draggable cat companion", location: "layout" },
   controlledChaos: { description: "World chaos display with encrypt/decrypt toggle", location: "page" },
   cursorTrail:     { description: "Emoji cursor trail with Konami code", location: "layout" },
-  doom:            { description: "Playable DOOM easter egg", location: "page" },
   statusBar:       { description: "Scrolling status messages", location: "layout" },
   midiPlayer:      { description: "Retro MIDI music player", location: "layout" },
   worldChaos:      { description: "Real-time world chaos data display", location: "page" },
