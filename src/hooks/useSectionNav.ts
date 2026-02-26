@@ -22,7 +22,7 @@ export function useSectionNav(defaultSection: Section = "votes") {
   }, []);
 
   useEffect(() => {
-    try { history.replaceState(null, "", `#${activeSection}`); } catch {}
+    try { history.replaceState(null, "", `#${activeSection}`); } catch (e) { console.debug("Could not update URL hash:", e); }
   }, [activeSection]);
 
   return { activeSection, setActiveSection };

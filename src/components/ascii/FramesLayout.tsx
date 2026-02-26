@@ -4,7 +4,6 @@ import type { PullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
 import { PRCard } from "./PRCard";
-import type { Section } from "@/hooks/useSectionNav";
 
 const ASCII_TABS = [
   { id: "votes" as const, label: "TOP VOTES", icon: "*" },
@@ -71,7 +70,7 @@ export function FramesLayout(props: Props) {
       renderTabs={(tabs, activeSection, setActiveSection) => (
         <div className="mb-6">
           <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {tabs.map((item: { id: Section; label: string; icon?: string }) => (
+            {tabs.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveSection(item.id)}

@@ -3,7 +3,8 @@
 import type { PullRequest } from "@/lib/github";
 import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
-import { useVoting, chooseURL } from "@/hooks/useVoting";
+import { useVoting } from "@/hooks/useVoting";
+import { chooseURL } from "@/lib/utils";
 
 interface PRCardProps {
   pr: PullRequest;

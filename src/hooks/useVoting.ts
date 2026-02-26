@@ -57,14 +57,6 @@ function playSound(fn: () => void): void {
   try { fn(); } catch (e) { console.debug("Sound playback failed (non-critical):", e); }
 }
 
-/** Replaces the URL with a rickroll ~10% of the time. Evaluated at render, not on click. */
-export function chooseURL(url: string): string {
-  if (Math.random() <= 0.10) {
-    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  }
-  return url;
-}
-
 export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingState {
   const {
     confettiColors = DEFAULT_CONFETTI_COLORS,
@@ -139,14 +131,14 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
 
   async function handleVote(reaction: "+1" | "-1") {
     if (!isAuthenticated) {
-      try { localStorage.setItem("pending_vote", JSON.stringify({ prNumber: pr.number, reaction })); } catch {}
+      try { localStorage.setItem("pending_vote", JSON.stringify({ prNumber: pr.number, reaction })); } catch (e) { console.debug("Could not persist pending vote:", e); }
       login();
       return;
     }
 
     setCanRetry(false);
     setErrorDetails("");
-    try { localStorage.setItem("last_vote_attempt", JSON.stringify({ prNumber: pr.number, reaction })); } catch {}
+    try { localStorage.setItem("last_vote_attempt", JSON.stringify({ prNumber: pr.number, reaction })); } catch (e) { console.debug("Could not persist last vote attempt:", e); }
 
     setVoteStatus("voting");
     const optimisticDelta = reaction === "+1" ? 1 : -1;

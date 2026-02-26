@@ -3,7 +3,8 @@
 import type { PullRequest } from "@/lib/github";
 import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
-import { useVoting, chooseURL } from "@/hooks/useVoting";
+import { useVoting } from "@/hooks/useVoting";
+import { chooseURL } from "@/lib/utils";
 
 const NEWSPAPER_VOTING_OPTIONS = {
   confettiColors: ["#8b0000", "#8b7355", "#1a1a1a", "#c4a55a", "#4a0000", "#d4c5a9"],
@@ -36,7 +37,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   const isLeading = pr.rank === 1 && distinguishLeading;
   const containsRhymes = hasRhymingWords(pr.title);
-  const hasConflict = !pr.isMergeable || !containsRhymes;
+  const isIneligible = !pr.isMergeable || !containsRhymes;
   const hasMergeIssues = !pr.isMergeable || !pr.checksPassed;
 
   function getMergeStatusText(): string {
@@ -106,8 +107,8 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
   return (
     <div ref={cardRef} className={`np-article ${animationClasses}`} style={{ position: "relative" }}>
       <div className="np-article-inner">
-        <div className={`np-article-rank ${hasConflict ? "np-article-rank-na" : ""}`}>
-          {hasConflict ? "\u2014" : distinguishLeading ? pr.rank : `#${pr.number}`}
+        <div className={`np-article-rank ${isIneligible ? "np-article-rank-na" : ""}`}>
+          {isIneligible ? "\u2014" : distinguishLeading ? pr.rank : `#${pr.number}`}
         </div>
         <div className="np-article-content">
           <div className="np-article-headline">
