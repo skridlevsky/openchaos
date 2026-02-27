@@ -5,6 +5,7 @@ import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
 import { useUserVote } from "@/contexts/VoteStatusContext";
+import { reactionToVote } from "@/lib/votes";
 import { chooseURL } from "@/lib/utils";
 
 const NEWSPAPER_VOTING_OPTIONS = {
@@ -36,7 +37,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
   } = useVoting(pr, {
     ...NEWSPAPER_VOTING_OPTIONS,
-    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reaction === "+1" ? "up" : "down"),
+    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reactionToVote(reaction)),
   });
   const linkHref = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;

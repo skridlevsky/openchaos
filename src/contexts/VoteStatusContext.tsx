@@ -6,6 +6,7 @@ import { useVoteStatus, type UserVote, type VoteStatusMap } from "@/hooks/useVot
 
 interface VoteStatusContextValue {
   voteStatusMap: VoteStatusMap;
+  error: string | null;
   updateVoteStatus: (prNumber: number, status: UserVote) => void;
 }
 
@@ -13,10 +14,10 @@ const VoteStatusContext = createContext<VoteStatusContextValue | null>(null);
 
 export function VoteStatusProvider({ prNumbers, children }: { prNumbers: number[]; children: ReactNode }) {
   const { isAuthenticated } = useAuth();
-  const { voteStatusMap, updateVoteStatus } = useVoteStatus(prNumbers, isAuthenticated);
+  const { voteStatusMap, error, updateVoteStatus } = useVoteStatus(prNumbers, isAuthenticated);
 
   return (
-    <VoteStatusContext.Provider value={{ voteStatusMap, updateVoteStatus }}>
+    <VoteStatusContext.Provider value={{ voteStatusMap, error, updateVoteStatus }}>
       {children}
     </VoteStatusContext.Provider>
   );
@@ -24,6 +25,11 @@ export function VoteStatusProvider({ prNumbers, children }: { prNumbers: number[
 
 export function useUserVote(prNumber: number) {
   const ctx = useContext(VoteStatusContext);
-  if (!ctx) return { userVote: null as UserVote, updateVoteStatus: (_pr: number, _status: UserVote) => {} };
-  return { userVote: ctx.voteStatusMap[prNumber] ?? null, updateVoteStatus: ctx.updateVoteStatus };
+  if (!ctx) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('useUserVote called outside VoteStatusProvider — vote indicators disabled');
+    }
+    return { userVote: null as UserVote, error: null, updateVoteStatus: (_pr: number, _status: UserVote) => {} };
+  }
+  return { userVote: ctx.voteStatusMap[prNumber] ?? null, error: ctx.error, updateVoteStatus: ctx.updateVoteStatus };
 }

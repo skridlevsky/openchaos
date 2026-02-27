@@ -5,6 +5,7 @@ import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "./TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
 import { useUserVote } from "@/contexts/VoteStatusContext";
+import { reactionToVote } from "@/lib/votes";
 import { chooseURL } from "@/lib/utils";
 
 interface PRCardProps {
@@ -19,7 +20,7 @@ export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net Score"
     cardRef, voteStatus, optimisticVotes, feedbackMessage, showTooltip, showShake,
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
   } = useVoting(pr, {
-    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reaction === "+1" ? "up" : "down"),
+    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reactionToVote(reaction)),
   });
   const url = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;

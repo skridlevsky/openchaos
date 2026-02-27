@@ -157,7 +157,7 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
       if (response.ok) {
         setVoteStatus("success");
         setFeedbackMessage(reaction === "+1" ? feedbackMessages.upvote : feedbackMessages.downvote);
-        onVoteSuccess?.(pr.number, reaction);
+        try { onVoteSuccess?.(pr.number, reaction); } catch (e) { console.error("onVoteSuccess callback failed:", e); }
 
         playSound(() => reaction === "+1" ? soundPlayer.playUpvote() : soundPlayer.playDownvote());
         playSound(() => soundPlayer.playSuccess());

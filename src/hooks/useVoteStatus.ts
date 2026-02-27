@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import type { UserVote, VoteStatusMap } from '@/lib/votes';
 
-export type UserVote = 'up' | 'down' | null;
-export type VoteStatusMap = Record<number, UserVote>;
+export type { UserVote, VoteStatusMap } from '@/lib/votes';
+export { reactionToVote } from '@/lib/votes';
 
 export function useVoteStatus(prNumbers: number[], isAuthenticated: boolean) {
   const [voteStatusMap, setVoteStatusMap] = useState<VoteStatusMap>({});

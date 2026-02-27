@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import type { UserVote } from '@/hooks/useVoteStatus';
+import { reactionToVote, type UserVote } from '@/lib/votes';
 
 interface ReactionWithUser {
   content: string;
@@ -86,7 +86,7 @@ async function fetchUserVoteForPR(
     );
 
     if (userReaction) {
-      lastVote = userReaction.content === '+1' ? 'up' : 'down';
+      lastVote = reactionToVote(userReaction.content as '+1' | '-1');
     }
 
     if (reactions.length < REACTIONS_PER_PAGE) break;
@@ -107,7 +107,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       userLogin = await fetchAuthenticatedUser(token);
     } catch (error) {
       console.error('Failed to authenticate user:', error);
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+      if (error instanceof GitHubApiError) {
+        if (error.statusCode === 401) {
+          return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+        }
+        if (error.statusCode === 403) {
+          return NextResponse.json({ error: 'GitHub rate limit exceeded' }, { status: 429 });
+        }
+        return NextResponse.json({ error: `GitHub API error (${error.statusCode})` }, { status: 502 });
+      }
+      return NextResponse.json({ error: 'Failed to verify authentication' }, { status: 502 });
     }
 
     const prsParam = request.nextUrl.searchParams.get('prs');
@@ -125,6 +134,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
 
     const votes: Record<number, UserVote> = {};
+    const failedPrs: number[] = [];
     let hasAuthError = false;
 
     for (const result of results) {
@@ -139,6 +149,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           } else if (result.reason.statusCode === 403) {
             console.warn('GitHub 403 (possible rate limit) for PR:', result.reason.prNumber);
           }
+          if (result.reason.prNumber != null) {
+            failedPrs.push(result.reason.prNumber);
+          }
         }
       }
     }
@@ -147,7 +160,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'GitHub authentication failed' }, { status: 401 });
     }
 
-    return NextResponse.json({ votes });
+    return NextResponse.json({ votes, ...(failedPrs.length > 0 && { failedPrs }) });
   } catch (error) {
     console.error('Vote status API error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
