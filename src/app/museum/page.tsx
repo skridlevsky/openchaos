@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MuseumTracker } from "@/components/MuseumTracker";
 import "./museum.css";
 
 export const metadata = {
@@ -9,6 +10,7 @@ export const metadata = {
 export default function MuseumPage() {
   return (
     <div className="museum">
+      <MuseumTracker />
       <header className="museum-header">
         <h1 className="museum-title">OpenChaos Museum</h1>
         <p className="museum-subtitle">Permanent Collection</p>

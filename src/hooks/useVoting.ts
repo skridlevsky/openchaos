@@ -156,6 +156,11 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
         setVoteStatus("success");
         setFeedbackMessage(reaction === "+1" ? feedbackMessages.upvote : feedbackMessages.downvote);
 
+        // Dispatch vote success event for achievement tracking
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("vote_success"));
+        }
+
         playSound(() => reaction === "+1" ? soundPlayer.playUpvote() : soundPlayer.playDownvote());
         playSound(() => soundPlayer.playSuccess());
 

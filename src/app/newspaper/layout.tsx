@@ -1,3 +1,8 @@
+"use client";
+
+import { VoteTracker } from "@/components/VoteTracker";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useEffect } from "react";
 import "./newspaper.css";
 
 export default function NewspaperLayout({
@@ -5,5 +10,16 @@ export default function NewspaperLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const { trackThemeVisit } = useAchievements();
+
+  useEffect(() => {
+    trackThemeVisit("newspaper");
+  }, [trackThemeVisit]);
+
+  return (
+    <>
+      <VoteTracker />
+      {children}
+    </>
+  );
 }

@@ -12,14 +12,25 @@ import { Web2RssIcon } from "./Web2RssIcon";
 import { Web2TagCloud } from "./Web2TagCloud";
 import { Web2SocialBookmarks } from "./Web2SocialBookmarks";
 import { Web2DiggCounter } from "./Web2DiggCounter";
+import { AwardBoard } from "./AwardBoard";
+import { VoteTracker } from "./VoteTracker";
+import { useAchievements } from "@/hooks/useAchievements";
+import { useEffect } from "react";
 
 interface Web2LayoutProps {
   children: ReactNode;
 }
 
 export function Web2Layout({ children }: Web2LayoutProps) {
+  const { trackThemeVisit } = useAchievements();
+
+  useEffect(() => {
+    trackThemeVisit("web2");
+  }, [trackThemeVisit]);
+
   return (
     <>
+      <VoteTracker />
       <CursorTrail />
       <Web2BrowserChrome>
         {/* Announcement Bar */}
@@ -86,6 +97,9 @@ export function Web2Layout({ children }: Web2LayoutProps) {
 
                 {/* Tag Cloud */}
                 <Web2TagCloud />
+
+                {/* Award Board */}
+                <AwardBoard />
 
                 {/* Digg-style Vote Counter */}
                 <Web2DiggCounter />
