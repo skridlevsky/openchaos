@@ -6,26 +6,23 @@ export async function HallOfChaos() {
 
   if (!result.ok) {
     return (
-      <div className="hall-error-container">
-        <strong>{result.error}</strong>
-        <br />
-        <span>Try refreshing the page in a minute.</span>
+      <div className="np-error">
+        STOP THE PRESSES!
+        <div className="np-error-sub">{result.error}. Try refreshing in a minute.</div>
       </div>
     );
   }
 
   if (result.data.length === 0) {
     return (
-      <div className="hall-empty-container">
-        <strong>No merged PRs yet.</strong>
-        <br />
-        <span>The first winner will be immortalized here!</span>
+      <div className="np-empty">
+        No stories have gone to press yet. The first edition awaits!
       </div>
     );
   }
 
   return (
-    <div className="hall-container">
+    <div>
       {result.data.map((pr) => (
         <HallOfChaosCard key={pr.number} pr={pr} />
       ))}
