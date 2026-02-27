@@ -10,7 +10,7 @@ export function AwardBoard() {
       <br />
       {`╔════════════════════════════════════════════╗`}
       <br />
-      {`║ 🏆 AWARD BOARD (${unlockedCount}/${totalCount})${" ".repeat(Math.max(0, 24 - unlockedCount.toString().length - totalCount.toString().length))}║`}
+      {`║ 🏆 AWARD BOARD (${unlockedCount}/${totalCount})${" ".repeat(Math.max(0, 24 - unlockedCount.toString().length - totalCount.toString().length))}`}
       <br />
       {`╚════════════════════════════════════════════╝`}
       <br />
