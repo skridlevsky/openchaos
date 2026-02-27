@@ -7,6 +7,7 @@ import { Web2Layout } from "@/components/Web2Layout";
 import { HallOfChaos } from "@/components/HallOfChaos";
 import { Web2LoadingSpinner } from "@/components/Web2LoadingSpinner";
 import { GuyFieri } from "@/components/GuyFieri";
+import { Web2CollapsibleSection } from "@/components/Web2CollapsibleSection";
 
 export default function Web2Home() {
   return (
@@ -20,16 +21,11 @@ export default function Web2Home() {
         </Suspense>
 
         {/* Hall of Chaos Section */}
-        <div className="web2-section">
-          <div className="web2-section-header">
-            <span className="web2-section-title">Hall of Chaos — Past Winners</span>
-          </div>
-          <div className="web2-section-body">
-            <Suspense fallback={<Web2LoadingSpinner text="Loading history..." />}>
-              <HallOfChaos />
-            </Suspense>
-          </div>
-        </div>
+        <Web2CollapsibleSection title="Hall of Chaos — Past Winners" defaultExpanded={false}>
+          <Suspense fallback={<Web2LoadingSpinner text="Loading history..." />}>
+            <HallOfChaos />
+          </Suspense>
+        </Web2CollapsibleSection>
       </div>
     </Web2Layout>
   );

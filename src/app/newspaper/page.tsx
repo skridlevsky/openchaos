@@ -5,6 +5,8 @@ import { NewspaperLayout } from "@/components/newspaper/NewspaperLayout";
 import { HallOfChaos } from "@/components/newspaper/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AwardBoard } from "@/components/newspaper/AwardBoard";
+import { CollapsibleSection } from "@/components/newspaper/CollapsibleSection";
 
 export default function NewspaperHome() {
   return (
@@ -19,15 +21,13 @@ export default function NewspaperHome() {
         <PRList />
       </Suspense>
 
-      <hr className="np-rule-double" />
+      <CollapsibleSection title="THE ARCHIVES" subtitle="Previously Published Editions" defaultExpanded={false}>
+        <Suspense fallback={<div className="np-loading">Searching the morgue files...</div>}>
+          <HallOfChaos />
+        </Suspense>
+      </CollapsibleSection>
 
-      <div className="np-archives-header">THE ARCHIVES</div>
-      <div className="np-archives-subheader">Previously Published Editions</div>
-      <hr className="np-rule-single" />
-
-      <Suspense fallback={<div className="np-loading">Searching the morgue files...</div>}>
-        <HallOfChaos />
-      </Suspense>
+      <AwardBoard />
     </NewspaperLayout>
   );
 }

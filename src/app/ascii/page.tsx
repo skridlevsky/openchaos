@@ -6,6 +6,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/ascii/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
 import { GuyFieri } from "@/components/GuyFieri";
+import { AwardBoard } from "@/components/ascii/AwardBoard";
+import { CollapsibleSection } from "@/components/ascii/CollapsibleSection";
 
 const title = `
   ___                 ___ _
@@ -41,11 +43,7 @@ export default function AsciiHome() {
           </Suspense>
         </div>
 
-        <div>
-          HALL OF CHAOS - PAST WINNERS
-          <br />
-          ----------------------------
-          <br />
+        <CollapsibleSection title="HALL OF CHAOS - PAST WINNERS" defaultExpanded={false}>
           <Suspense
             fallback={
               <div>
@@ -55,7 +53,9 @@ export default function AsciiHome() {
           >
             <HallOfChaos />
           </Suspense>
-        </div>
+        </CollapsibleSection>
+
+        <AwardBoard />
       </div>
     </>
   );
