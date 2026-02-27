@@ -23,6 +23,7 @@ export interface VotingOptions {
     networkError: string;
     genericError: string;
   };
+  onVoteSuccess?: (prNumber: number, reaction: "+1" | "-1") => void;
 }
 
 const DEFAULT_CONFETTI_COLORS = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff"];
@@ -64,6 +65,7 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
     useDirectionalStarBurst = false,
     feedbackMessages = DEFAULT_FEEDBACK,
     errorMessages = DEFAULT_ERRORS,
+    onVoteSuccess,
   } = options;
 
   const { isAuthenticated, login } = useAuth();
@@ -155,6 +157,7 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
       if (response.ok) {
         setVoteStatus("success");
         setFeedbackMessage(reaction === "+1" ? feedbackMessages.upvote : feedbackMessages.downvote);
+        try { onVoteSuccess?.(pr.number, reaction); } catch (e) { console.error("onVoteSuccess callback failed:", e); }
 
         // Dispatch vote success event for achievement tracking
         if (typeof window !== "undefined") {

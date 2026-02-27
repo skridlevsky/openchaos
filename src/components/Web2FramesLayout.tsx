@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import type { PullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
+import { VoteStatusProvider } from "@/contexts/VoteStatusContext";
 import { PRCard } from "./PRCard";
 import { ChaosPointCounter } from "./ChaosPointCounter";
 
@@ -38,8 +40,13 @@ interface Props {
 }
 
 export function Web2FramesLayout(props: Props & { chaosPts?: number }) {
+  const prNumbers = useMemo(
+    () => [...new Set([...props.topByVotes, ...props.rising, ...props.newest, ...props.discussed, ...props.controversial].map(pr => pr.number))],
+    [props.topByVotes, props.rising, props.newest, props.discussed, props.controversial],
+  );
+
   return (
-    <>
+    <VoteStatusProvider prNumbers={prNumbers}>
       <SharedFramesLayout
         {...props}
         tabs={WEB2_TABS}
@@ -60,6 +67,6 @@ export function Web2FramesLayout(props: Props & { chaosPts?: number }) {
         )}
       />
       {props.chaosPts != null && <ChaosPointCounter pts={props.chaosPts} />}
-    </>
+    </VoteStatusProvider>
   );
 }

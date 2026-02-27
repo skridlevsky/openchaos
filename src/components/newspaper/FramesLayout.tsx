@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import type { PullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
+import { VoteStatusProvider } from "@/contexts/VoteStatusContext";
 import { PRCard } from "./PRCard";
 
 const NEWSPAPER_TABS = [
@@ -37,26 +39,33 @@ interface Props {
 }
 
 export function FramesLayout(props: Props) {
+  const prNumbers = useMemo(
+    () => [...new Set([...props.topByVotes, ...props.rising, ...props.newest, ...props.discussed, ...props.controversial].map(pr => pr.number))],
+    [props.topByVotes, props.rising, props.newest, props.discussed, props.controversial],
+  );
+
   return (
-    <SharedFramesLayout
-      {...props}
-      tabs={NEWSPAPER_TABS}
-      ExpandableSection={NewspaperExpandable}
-      renderBanner={(pr) => <PRCard pr={pr} isBanner />}
-      separator={<hr className="np-rule-double" />}
-      renderTabs={(tabs, activeSection, setActiveSection) => (
-        <nav className="np-section-nav">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`np-section-tab ${activeSection === item.id ? "np-section-tab-active" : ""}`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-      )}
-    />
+    <VoteStatusProvider prNumbers={prNumbers}>
+      <SharedFramesLayout
+        {...props}
+        tabs={NEWSPAPER_TABS}
+        ExpandableSection={NewspaperExpandable}
+        renderBanner={(pr) => <PRCard pr={pr} isBanner />}
+        separator={<hr className="np-rule-double" />}
+        renderTabs={(tabs, activeSection, setActiveSection) => (
+          <nav className="np-section-nav">
+            {tabs.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`np-section-tab ${activeSection === item.id ? "np-section-tab-active" : ""}`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        )}
+      />
+    </VoteStatusProvider>
   );
 }
