@@ -4,6 +4,8 @@ import type { PullRequest } from "@/lib/github";
 import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "./TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
+import { useUserVote } from "@/contexts/VoteStatusContext";
+import { reactionToVote } from "@/lib/votes";
 import { chooseURL } from "@/lib/utils";
 
 interface PRCardProps {
@@ -13,10 +15,13 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net Score" }: PRCardProps) {
+  const { userVote, updateVoteStatus } = useUserVote(pr.number);
   const {
     cardRef, voteStatus, optimisticVotes, feedbackMessage, showTooltip, showShake,
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
-  } = useVoting(pr);
+  } = useVoting(pr, {
+    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reactionToVote(reaction)),
+  });
   const url = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   const containsRhymes = hasRhymingWords(pr.title);
@@ -80,7 +85,7 @@ export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net Score"
 
         {/* Fixed-width votes column */}
         <div className={`pr-card-votes-section ${isLeading ? "pr-card-votes-leading" : "pr-card-votes-normal"}`}>
-          <button onClick={() => handleVote("+1")} className="vote-arrow vote-arrow-up" disabled={voteStatus === "voting"} title="Upvote this PR">
+          <button onClick={() => handleVote("+1")} className={`vote-arrow vote-arrow-up ${userVote === "up" ? "vote-arrow-active" : ""}`} disabled={voteStatus === "voting"} title={userVote === "up" ? "You upvoted" : "Upvote this PR"}>
             ▲
           </button>
 
@@ -101,7 +106,7 @@ export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net Score"
             )}
           </div>
 
-          <button onClick={() => handleVote("-1")} className="vote-arrow vote-arrow-down" disabled={voteStatus === "voting"} title="Downvote this PR">
+          <button onClick={() => handleVote("-1")} className={`vote-arrow vote-arrow-down ${userVote === "down" ? "vote-arrow-active" : ""}`} disabled={voteStatus === "voting"} title={userVote === "down" ? "You downvoted" : "Downvote this PR"}>
             ▼
           </button>
 
