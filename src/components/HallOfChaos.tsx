@@ -1,42 +1,33 @@
-import { getMergedPRs } from "@/lib/github";
+import { fetchMergedPRs } from "@/lib/prData";
 import { HallOfChaosCard } from "./HallOfChaosCard";
 
 export async function HallOfChaos() {
-  let prs;
-  let error = null;
+  const result = await fetchMergedPRs();
 
-  try {
-    prs = await getMergedPRs();
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch merged PRs";
-  }
-
-  if (error) {
+  if (!result.ok) {
     return (
-      <div>
-        {error}
+      <div className="hall-error-container">
+        <strong>{result.error}</strong>
         <br />
-        Try refreshing the page in a minute.
+        <span>Try refreshing the page in a minute.</span>
       </div>
     );
   }
 
-  if (!prs || prs.length === 0) {
+  if (result.data.length === 0) {
     return (
-      <div>
-        No merged PRs yet.
+      <div className="hall-empty-container">
+        <strong>No merged PRs yet.</strong>
         <br />
-        The first winner will be immortalized here!
+        <span>The first winner will be immortalized here!</span>
       </div>
     );
   }
 
   return (
-    <div className="mt-4">
-      {prs.map((pr) => (
-        <div key={pr.number} style={{ marginBottom: '20px' }}>
-          <HallOfChaosCard pr={pr} />
-        </div>
+    <div className="hall-container">
+      {result.data.map((pr) => (
+        <HallOfChaosCard key={pr.number} pr={pr} />
       ))}
     </div>
   );

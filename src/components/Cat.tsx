@@ -48,10 +48,31 @@ export function Cat() {
   const [isFlipped, setIsFlipped] = useState(false);
   // Track if cat has been manually positioned (dragged)
   const [hasBeenDragged, setHasBeenDragged] = useState(false);
+  const [isMidiPlayerOpen, setIsMidiPlayerOpen] = useState(true);
 
   const catRef = useRef<HTMLDivElement>(null);
   const dragOffset = useRef({ x: 0, y: 0 });
   const lastX = useRef(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const checkRadioOpen = () => {
+      setIsMidiPlayerOpen(Boolean(document.querySelector(".gta-radio-container")));
+    };
+
+    checkRadioOpen();
+
+    const observer = new MutationObserver(() => {
+      checkRadioOpen();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Animate ASCII frames
   useEffect(() => {
@@ -148,38 +169,125 @@ export function Cat() {
 
   // When midi player closes (and cat hasn't been dragged), make the cat fall
   useEffect(() => {
-    if (!hasBeenDragged && catRef.current) {
-      const screenHeight = window.innerHeight;
-      const catHeight = catRef.current.getBoundingClientRect().height;
-      const statusBarHeight = 22;
+    if (isMidiPlayerOpen || hasBeenDragged || !catRef.current) return;
 
-      // First rAF: set position to where the cat currently is (on top of player)
-      // This converts from bottom-based positioning to top-based transform
-      let innerFrameId: number;
-      const frameId = requestAnimationFrame(() => {
-        const startY = screenHeight - 200 - catHeight; // 200px is the bottom offset
-        setPosition({ x: 20, y: startY });
+    const screenHeight = window.innerHeight;
+    const catHeight = catRef.current.getBoundingClientRect().height;
+    const statusBarHeight = 22;
 
-        // Second rAF: animate to the bottom after the starting position is painted
-        innerFrameId = requestAnimationFrame(() => {
-          setIsSettling(true);
-          // Fall to sit on top of the status bar
-          const targetY = screenHeight - catHeight - statusBarHeight;
-          setPosition({ x: 20, y: targetY });
-        });
+    // First rAF: set position to where the cat currently is (on top of player)
+    // This converts from bottom-based positioning to top-based transform
+    let innerFrameId: number;
+    const frameId = requestAnimationFrame(() => {
+      const startY = screenHeight - 200 - catHeight; // 200px is the bottom offset
+      setPosition({ x: 20, y: startY });
+
+      // Second rAF: animate to the bottom after the starting position is painted
+      innerFrameId = requestAnimationFrame(() => {
+        setIsSettling(true);
+        // Fall to sit on top of the status bar
+        const targetY = screenHeight - catHeight - statusBarHeight;
+        setPosition({ x: 20, y: targetY });
       });
+    });
 
-      const timerId = setTimeout(() => {
-        setIsSettling(false);
-      }, 600);
+    const timerId = setTimeout(() => {
+      setIsSettling(false);
+    }, 600);
 
-      return () => {
-        cancelAnimationFrame(frameId);
-        cancelAnimationFrame(innerFrameId);
-        clearTimeout(timerId);
-      };
+    return () => {
+      cancelAnimationFrame(frameId);
+      cancelAnimationFrame(innerFrameId);
+      clearTimeout(timerId);
+    };
+  }, [isMidiPlayerOpen, hasBeenDragged]);
+
+  // When midi player opens (and cat hasn't been dragged), place the cat on top of the radio
+  // and animate it running across the top surface.
+  useEffect(() => {
+    if (!isMidiPlayerOpen || hasBeenDragged || !catRef.current) return;
+    const catEl = catRef.current;
+
+    const getAnchorRect = (): DOMRect | null => {
+      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
+      const clippy = document.querySelector(".clippy-container") as HTMLElement | null;
+
+      if (!radio && !clippy) return null;
+      if (!radio) return clippy?.getBoundingClientRect() ?? null;
+
+      const radioSide = radio.dataset.chaosSide;
+      const radioCollapsed = radio.classList.contains("gta-radio-collapsed");
+
+      const clippyOnSameSide =
+        !!clippy &&
+        (clippy.dataset.chaosSide === radioSide || !clippy.dataset.chaosSide);
+
+      // When collapsed, perch above Clippy if available on the same side.
+      if (radioCollapsed && clippyOnSameSide && clippy) {
+        return clippy.getBoundingClientRect();
+      }
+
+      // Expanded radio is the main perch target.
+      return radio.getBoundingClientRect();
+    };
+
+    const initialAnchor = getAnchorRect();
+    if (!initialAnchor) {
+      const screenHeight = window.innerHeight;
+      const catHeight = catEl.getBoundingClientRect().height;
+      setPosition({ x: 20, y: screenHeight - 200 - catHeight });
+      return;
     }
-  }, [hasBeenDragged]);
+
+    const initialCatRect = catEl.getBoundingClientRect();
+    const initialTopY = Math.max(0, initialAnchor.top - initialCatRect.height);
+    let x = initialAnchor.left;
+
+    setPosition({ x, y: initialTopY });
+
+    let dir = 1; // 1 = right, -1 = left
+    setIsFlipped(false);
+    let last = performance.now();
+
+    const speed = 120; // px per second
+
+    const step = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      const anchorRect = getAnchorRect();
+      const catRect = catEl.getBoundingClientRect();
+
+      if (!anchorRect) {
+        rafRef.current = requestAnimationFrame(step);
+        return;
+      }
+
+      const topY = Math.max(0, anchorRect.top - catRect.height);
+      const minX = anchorRect.left;
+      const maxX = Math.max(minX, anchorRect.left + anchorRect.width - catRect.width);
+
+      x += dir * speed * dt;
+      if (x <= minX) {
+        x = minX;
+        dir = 1;
+        setIsFlipped(false);
+      } else if (x >= maxX) {
+        x = maxX;
+        dir = -1;
+        setIsFlipped(true);
+      }
+      setPosition({ x, y: topY });
+      rafRef.current = requestAnimationFrame(step);
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    };
+  }, [isMidiPlayerOpen, hasBeenDragged]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -223,6 +331,7 @@ export function Cat() {
   // Determine default position based on midi player state
   const getDefaultPositionClass = () => {
     if (position) return "top-0 left-0"; // being dragged or fallen
+    if (isMidiPlayerOpen) return ""; // player open, use style positioning
     return "bottom-0 left-5"; // player closed, sit at bottom-left
   };
 
@@ -237,7 +346,7 @@ export function Cat() {
       `}
       style={{
         // When not dragged and player is open, position on top of the player
-        ...(!position ? {
+        ...(!position && isMidiPlayerOpen ? {
           bottom: "200px", // above the midi player
           left: "20px",
         } : {}),

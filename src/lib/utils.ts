@@ -1,3 +1,11 @@
+/** Replaces the URL with a rickroll ~10% of the time. Evaluated at render, not on click. */
+export function chooseURL(url: string): string {
+  if (Math.random() <= 0.10) {
+    return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  }
+  return url;
+}
+
 /**
  * Strips emojis and other Unicode symbols from text, leaving only ASCII characters.
  */

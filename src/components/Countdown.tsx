@@ -1,84 +1,50 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Fragment } from "react";
+import { useCountdown, pad } from "@/hooks/useCountdown";
 
-function getNextMergeTime(): Date {
-  const now = new Date();
-  const target = new Date(now);
-
-  // Set to 19:00:00 UTC today
-  target.setUTCHours(19, 0, 0, 0);
-
-  // If we've already passed 19:00 UTC today, use 19:00 UTC tomorrow
-  if (now.getTime() >= target.getTime()) {
-    target.setUTCDate(target.getUTCDate() + 1);
-  }
-
-  return target;
-}
-
-function getTimeRemaining(target: Date): {
-  hours: number;
-  minutes: number;
-  seconds: number;
-  milliseconds: number;
-} {
-  const now = new Date();
-  const diff = Math.max(0, target.getTime() - now.getTime());
-
-  const milliseconds = diff % 1000;
-  const seconds = Math.floor((diff / 1000) % 60);
-  const minutes = Math.floor((diff / 1000 / 60) % 60);
-  const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
-
-  return { hours, minutes, seconds, milliseconds };
-}
-
-function pad(n: number, count: number = 2): string {
-  return n.toString().padStart(count, "0");
+function CountdownDigit({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="countdown-digit-box">
+      <div className="countdown-digit-value">{value}</div>
+      <div className="countdown-digit-label">{label}</div>
+    </div>
+  );
 }
 
 export function Countdown() {
-  const [target, setTarget] = useState(() => getNextMergeTime());
-  const [time, setTime] = useState(() => getTimeRemaining(target));
-  const [mounted, setMounted] = useState(false);
+  const { days, hours, minutes, seconds, mounted } = useCountdown();
 
-  useEffect(() => {
-    setMounted(true);
-    const interval = setInterval(() => {
-      const now = new Date();
-      // If we've passed the target time, recalculate for the next day
-      if (now.getTime() >= target.getTime()) {
-        const newTarget = getNextMergeTime();
-        setTarget(newTarget);
-        setTime(getTimeRemaining(newTarget));
-      } else {
-        setTime(getTimeRemaining(target));
-      }
-    }, 53); // just a prime number
-
-    return () => clearInterval(interval);
-  }, [target]);
-
-  if (!mounted) {
-    return (
-      <div>
-        <div>NEXT MERGE COUNTDOWN</div>
-        <div>
-          -- DAYS : -- HOURS : -- MINS : -- SECS
-        </div>
-        <div>&nbsp;</div>
-      </div>
-    );
-  }
+  const digits: { value: string; label: string }[] = mounted
+    ? [
+        { value: String(days), label: "Days" },
+        { value: pad(hours), label: "Hours" },
+        { value: pad(minutes), label: "Mins" },
+        { value: pad(seconds), label: "Secs" },
+      ]
+    : [
+        { value: "--", label: "Days" },
+        { value: "--", label: "Hours" },
+        { value: "--", label: "Mins" },
+        { value: "--", label: "Secs" },
+      ];
 
   return (
-    <div>
-      <div>NEXT MERGE COUNTDOWN</div>
-      <div>
-        {pad(time.hours)} HOURS : {pad(time.minutes)} MINS : {pad(time.seconds)} SECS : {pad(time.milliseconds, 3)} MS
+    <div className="countdown-container">
+      <div className="countdown-header-bar">
+        <div className="countdown-header">Next Merge Countdown</div>
       </div>
-      <div>&nbsp;</div>
+      <div className="countdown-digits-row">
+        {digits.map((digit, i) => (
+          <Fragment key={digit.label}>
+            {i > 0 && <span className="countdown-separator">:</span>}
+            <CountdownDigit value={digit.value} label={digit.label} />
+          </Fragment>
+        ))}
+      </div>
+      <div className="countdown-footer-bar">
+        <div className="countdown-footer">Vote now — time is running out!</div>
+      </div>
     </div>
   );
 }

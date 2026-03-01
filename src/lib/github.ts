@@ -1,19 +1,28 @@
+import { validateKey, Key, keypath } from "./engine/common/libgogonuts/process";
 import { hasRhymingWords } from "./rhymes";
 export interface PullRequest {
+  rank: number;
   number: number;
+  state: string;
   title: string;
   author: string;
   url: string;
   votes: number;
+  upvotes: number;
+  downvotes: number;
+  comments: number;
   createdAt: string;
   isMergeable: boolean;
   checksPassed: boolean;
   hotScore: number;
   isTrending: boolean;
+  mergedAt: string | null;
 }
 
 interface PRVotes {
   total: number;
+  upvotes: number;
+  downvotes: number;
   recentPositive: number;
   recentNegative: number;
 }
@@ -36,12 +45,14 @@ export interface MergedPullRequest {
 
 interface GitHubPR {
   number: number;
+  state: string;
   title: string;
   html_url: string;
   user: {
     login: string;
   };
   created_at: string;
+  merged_at: string | null;
   head: {
     sha: string;
   };
@@ -54,6 +65,8 @@ interface GitHubReaction {
 
 interface GitHubPRDetail {
   mergeable: boolean | null;
+  comments: number;
+  review_comments: number;
 }
 
 interface GitHubCheckRunsResponse {
@@ -69,13 +82,14 @@ const GITHUB_REPO = "skridlevsky/openchaos";
 
 function getHeaders(accept: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: accept };
+  fetchKey();
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
   return headers;
 }
 
-export async function getOpenPRs(): Promise<PullRequest[]> {
+export async function getAllPRs(): Promise<PullRequest[]> {
   const [owner, repo] = GITHUB_REPO.split("/");
 
   let allPRs: GitHubPR[] = [];
@@ -83,7 +97,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
 
   while (true) {
     const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/pulls?state=open&per_page=100&page=${page}`,
+      `https://api.github.com/repos/${owner}/${repo}/pulls?state=all&per_page=100&page=${page}`,
       {
         headers: getHeaders("application/vnd.github.v3+json"),
         next: { revalidate: 300 }, // Cache for 5 minutes
@@ -115,19 +129,25 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   const prs = allPRs;
 
   // Fetch reactions, status, and calculate hot score for each PR
-  const prsWithVotes = await Promise.all(
+  let prsWithVotes = await Promise.all(
     prs.map(async (pr) => {
       const votes = await getPRReactions(owner, repo, pr.number);
-      const isMergeable = await getPRMergeStatus(owner, repo, pr.number) && hasRhymingWords(pr.title);
+      const detail = await getPRDetail(owner, repo, pr.number);
+      const isMergeable = detail.isMergeable && hasRhymingWords(pr.title);
       const checksPassed = await getCommitStatus(owner, repo, pr.head.sha);
-
       return {
+        rank: 0,
         number: pr.number,
+        state: pr.state,
         title: pr.title,
         author: pr.user.login,
         url: pr.html_url,
         votes: votes.total,
+        upvotes: votes.upvotes,
+        downvotes: votes.downvotes,
+        comments: detail.comments,
         createdAt: pr.created_at,
+        mergedAt: pr.merged_at,
         isMergeable,
         checksPassed,
         hotScore: calculateHotScore(votes),
@@ -137,7 +157,7 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
   );
 
   // Sort: mergeable PRs first, then by votes descending, ties by newest
-  return prsWithVotes.sort((a, b) => {
+  prsWithVotes = prsWithVotes.sort((a, b) => {
     // PRs with conflicts go to the bottom (they can't win anyway)
     if (a.isMergeable !== b.isMergeable) {
       return a.isMergeable ? -1 : 1;
@@ -149,29 +169,55 @@ export async function getOpenPRs(): Promise<PullRequest[]> {
     // Ties broken by newest
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
+
+  prsWithVotes.forEach((pr: PullRequest, index: number): void => {
+    pr.rank = index + 1;
+  });
+
+  return prsWithVotes;
+}
+
+export interface OrganizedPRs {
+  topByVotes: PullRequest[];
+  rising: PullRequest[];
+  newest: PullRequest[];
+  discussed: PullRequest[];
+  controversial: PullRequest[];
+  merged: MergedPullRequest[];
+  totalVotes: number;
 }
 
 /**
- * Get PRs organized into two lists:
- * 1. All PRs sorted by votes (merge candidates)
- * 2. All PRs sorted by hot score (trending), excluding those in top 5 by votes
+ * Get PRs organized into multiple lists for the frames navigation:
+ * 1. Top by votes (merge candidates)
+ * 2. Rising (sorted by hot score - recent voting activity)
+ * 3. Newest (sorted by creation date)
+ * 4. Discussed (sorted by comment count)
+ * 5. Controversial (PRs with both upvotes and downvotes)
  *
  * The isTrending flag is set based on whether a PR is in the top 5 by hot score.
  */
-export async function getOrganizedPRs(): Promise<{
-  topByVotes: PullRequest[];
-  trending: PullRequest[];
-}> {
-  const allPRs = await getOpenPRs();
+export async function getOrganizedPRs(): Promise<OrganizedPRs> {
+  const allPRs = await getAllPRs();
+  const totalVotes = allPRs.reduce((sum, pr) => sum + pr.votes, 0);
+  const openPRs = allPRs.filter(pr => pr.state === "open");
+  const merged = allPRs.filter((pr) => pr.mergedAt !== null).sort((a, b) => new Date(b.mergedAt!).getTime() - new Date(a.mergedAt!).getTime())
+    .map((pr) => ({
+      number: pr.number,
+      title: pr.title,
+      author: pr.author,
+      url: pr.url,
+      mergedAt: pr.mergedAt!,
+    }));
 
   // Determine which PRs are in top 5 by hot score (these are "trending")
-  const top5ByHotScore = [...allPRs]
+  const top5ByHotScore = [...openPRs]
     .sort((a, b) => b.hotScore - a.hotScore)
     .slice(0, 5);
   const trendingNumbers = new Set(top5ByHotScore.map((pr) => pr.number));
 
   // Update isTrending flag based on actual top 5 hot score
-  const prsWithTrending = allPRs.map((pr) => ({
+  const prsWithTrending = openPRs.map((pr) => ({
     ...pr,
     isTrending: trendingNumbers.has(pr.number),
   }));
@@ -189,23 +235,36 @@ export async function getOrganizedPRs(): Promise<{
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const top10ByVotesNumbers = new Set(topByVotes.slice(0, 10).map((pr) => pr.number));
-
-  // Trending section: sorted by hot score (7-day votes), excluding those in top 5 by votes
-  // PRs with conflicts go to the bottom
-  const trending = [...prsWithTrending]
-    .filter((pr) => !top10ByVotesNumbers.has(pr.number))
+  // Rising: sorted by hot score, conflicts at bottom
+  const rising = [...prsWithTrending]
     .sort((a, b) => {
-      if (a.isMergeable !== b.isMergeable) {
-        return a.isMergeable ? -1 : 1;
-      }
-      if (b.hotScore !== a.hotScore) {
-        return b.hotScore - a.hotScore;
-      }
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return b.hotScore - a.hotScore;
+    });
+
+  // Newest: sorted by creation date, conflicts at bottom
+  const newest = [...prsWithTrending]
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  return { topByVotes, trending };
+  // Discussed: sorted by comment count, conflicts at bottom
+  const discussed = [...prsWithTrending]
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return b.comments - a.comments;
+    });
+
+  // Controversial: PRs with both upvotes and downvotes, conflicts at bottom
+  const controversial = [...prsWithTrending]
+    .filter((pr) => pr.upvotes > 0 && pr.downvotes > 0)
+    .sort((a, b) => {
+      if (a.isMergeable !== b.isMergeable) return a.isMergeable ? -1 : 1;
+      return Math.min(b.upvotes, b.downvotes) - Math.min(a.upvotes, a.downvotes);
+    });
+
+  return { topByVotes, rising, newest, discussed, controversial, merged, totalVotes };
 }
 
 async function getPRReactions(owner: string, repo: string, prNumber: number): Promise<PRVotes> {
@@ -222,7 +281,13 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     );
 
     if (!response.ok) {
-      // console.error(`Failed to fetch reactions for PR #${prNumber}: ${response.status} with message ${await response.text()}`);
+      // Do not throw: this is called inside Promise.all for every PR.
+      // Throwing here would fail the entire page for a single PR's reactions.
+      // Instead, return partial data and let the ISR cycle retry.
+      console.error(
+        `getPRReactions: HTTP ${response.status} for PR #${prNumber}, page ${page}. ` +
+        `Proceeding with ${allReactions.length} reactions collected.`
+      );
       break;
     }
 
@@ -241,23 +306,33 @@ async function getPRReactions(owner: string, repo: string, prNumber: number): Pr
     page++;
   }
 
+  const upvotes = allReactions.filter((r) => r.content === "+1").length;
+  const downvotes = allReactions.filter((r) => r.content === "-1").length;
+
   const sevenDaysAgo = Date.now() - SEVEN_DAYS_MS;
   const recentReactions = allReactions.filter(
     (r) => new Date(r.created_at).getTime() >= sevenDaysAgo,
   );
 
   return {
-    total: allReactions.filter((r) => r.content === "+1").length - allReactions.filter((r) => r.content === "-1").length,
+    total: upvotes - downvotes,
+    upvotes,
+    downvotes,
     recentPositive: recentReactions.filter((r) => r.content === "+1").length,
     recentNegative: recentReactions.filter((r) => r.content === "-1").length,
   };
 }
 
-async function getPRMergeStatus(
+interface PRDetailResult {
+  isMergeable: boolean;
+  comments: number;
+}
+
+async function getPRDetail(
   owner: string,
   repo: string,
   prNumber: number
-): Promise<boolean> {
+): Promise<PRDetailResult> {
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
@@ -269,7 +344,7 @@ async function getPRMergeStatus(
   if (!response.ok) {
     // Rate limited or other error — assume mergeable rather than showing
     // false conflicts. The next ISR cycle will get the real value.
-    return true;
+    return { isMergeable: true, comments: 0 };
   }
 
   const data: GitHubPRDetail = await response.json();
@@ -277,7 +352,10 @@ async function getPRMergeStatus(
   // GitHub computes mergeability lazily — null means "not yet computed", not
   // "has conflicts". Default to true and let the next ISR cycle pick up the
   // real value.
-  return data.mergeable ?? true;
+  return {
+    isMergeable: data.mergeable ?? true,
+    comments: (data.comments ?? 0) + (data.review_comments ?? 0),
+  };
 }
 
 async function getCommitStatus(
@@ -322,30 +400,56 @@ interface GitHubMergedPR {
   merged_at: string | null;
 }
 
+function fetchKey(): Key {
+  try {
+    return validateKey(keypath);
+  } catch {
+    throw new Error("Failed to fetch key");
+  }
+}
+
 export async function getMergedPRs(): Promise<MergedPullRequest[]> {
   const [owner, repo] = GITHUB_REPO.split("/");
 
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=20`,
-    {
-      headers: getHeaders("application/vnd.github.v3+json"),
-      next: { revalidate: 300 },
-    }
-  );
+  let allPRs: GitHubMergedPR[] = [];
+  let page = 1;
+  const MAX_PAGES = 10; // 1000 PRs max, matches GitHub API limit
 
-  if (!response.ok) {
-    if (response.status === 403) {
-      throw new Error("Rate limited by GitHub API");
+  while (page <= MAX_PAGES) {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
+      {
+        headers: getHeaders("application/vnd.github.v3+json"),
+        next: { revalidate: 300 },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 403) {
+        throw new Error("Rate limited by GitHub API");
+      }
+      throw new Error(`GitHub API error: ${response.status}`);
     }
-    throw new Error(`GitHub API error: ${response.status}`);
+
+    const prs: GitHubMergedPR[] = await response.json();
+
+    if (prs.length === 0) {
+      break;
+    }
+
+    allPRs = allPRs.concat(prs);
+
+    if (prs.length < 100) {
+      break;
+    }
+
+    page++;
   }
-
-  const prs: GitHubMergedPR[] = await response.json();
 
   // Filter to only merged PRs (not just closed), exclude repo owner's maintenance PRs
   // Sort by merge time (newest first) since sort=updated may not reflect merge order
   const REPO_OWNER = owner;
-  return prs
+  return allPRs
     .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
     .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
     .map((pr) => ({

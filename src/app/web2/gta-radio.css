@@ -1,0 +1,336 @@
+/* Web2 GTA Radio Styles */
+:root,
+[data-theme="light"] {
+  --gta-radio-bg: #fffffe;
+  --gta-radio-border: #d9e2f5;
+  --gta-radio-shadow: rgba(15, 23, 42, 0.12);
+  --gta-radio-highlight: #0f62fe;
+  --gta-radio-accent: #1aa0ff;
+  --gta-radio-muted: #54617a;
+  --gta-radio-glow: #7aa6ff;
+  --gta-radio-play-bg: linear-gradient(180deg, #5aa0ff 0%, #2f6aff 100%);
+  --gta-radio-stop-bg: linear-gradient(180deg, #ff7a7a 0%, #ff3c3c 100%);
+  --gta-radio-panel: #f5f7ff;
+  --gta-radio-panel-secondary: #eef2ff;
+  --gta-radio-text: #0f172a;
+}
+
+[data-theme="dark"] {
+  --gta-radio-bg: #151927;
+  --gta-radio-border: #2c3146;
+  --gta-radio-shadow: rgba(15, 23, 42, 0.75);
+  --gta-radio-highlight: #8ad0ff;
+  --gta-radio-accent: #57b0ff;
+  --gta-radio-muted: #a6b1d3;
+  --gta-radio-glow: #a7c2ff;
+  --gta-radio-play-bg: linear-gradient(180deg, #7ab9ff 0%, #3f87ff 100%);
+  --gta-radio-stop-bg: linear-gradient(180deg, #ff7a7a 0%, #ff3c3c 100%);
+  --gta-radio-panel: #1b1f32;
+  --gta-radio-panel-secondary: #252a44;
+  --gta-radio-text: #f8fafc;
+}
+
+.gta-radio-container {
+  position: fixed;
+  bottom: 20px;
+  font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+  z-index: 1000;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.gta-radio-container.gta-radio-collapsed {
+  transform: translateY(80px);
+  opacity: 0.6;
+}
+
+.gta-radio-container.gta-radio-right {
+  right: 24px;
+}
+
+.gta-radio-container.gta-radio-left {
+  left: 24px;
+}
+
+.gta-radio-overlay {
+  background: var(--gta-radio-bg);
+  border: 1px solid var(--gta-radio-border);
+  border-radius: 18px;
+  box-shadow: 0 18px 35px var(--gta-radio-shadow);
+  padding: 12px 16px;
+  min-width: 360px;
+  max-width: 480px;
+  color: var(--gta-radio-text);
+}
+
+.gta-radio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--gta-radio-border);
+  margin-bottom: 12px;
+}
+
+.gta-radio-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--gta-radio-muted);
+}
+
+.gta-radio-header-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.gta-radio-header-btn,
+.gta-radio-close-btn {
+  background: var(--gta-radio-panel);
+  color: var(--gta-radio-text);
+  border: 1px solid var(--gta-radio-border);
+  padding: 3px 8px;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all 0.2s ease;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.gta-radio-header-btn:hover,
+.gta-radio-close-btn:hover {
+  border-color: var(--gta-radio-highlight);
+  color: var(--gta-radio-highlight);
+  box-shadow: 0 0 0 1px var(--gta-radio-highlight);
+}
+
+.gta-radio-display {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  background: var(--gta-radio-panel-secondary);
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--gta-radio-border);
+}
+
+.gta-radio-logo-container {
+  width: 64px;
+  height: 64px;
+  background: var(--gta-radio-panel);
+  border: 1px solid var(--gta-radio-border);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.gta-radio-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gta-radio-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.gta-radio-station-name {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.gta-radio-status {
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gta-radio-muted);
+}
+
+.gta-radio-playing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gta-radio-accent);
+  animation: pulse 1s infinite;
+}
+
+.gta-radio-loading {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--gta-radio-highlight);
+  animation: pulse 1s infinite;
+}
+
+.gta-radio-stopped {
+  color: #ff6a6a;
+}
+
+.gta-radio-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+}
+
+.gta-radio-equalizer span {
+  width: 3px;
+  background: var(--gta-radio-glow);
+  border-radius: 2px;
+  animation: equalizer 0.6s ease-in-out infinite;
+}
+
+.gta-radio-equalizer span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.gta-radio-equalizer span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes equalizer {
+  0%, 100% { height: 3px; }
+  50% { height: 12px; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.gta-radio-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.gta-radio-control-btn {
+  color: var(--gta-radio-text);
+  border: none;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  background: var(--gta-radio-panel);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.4);
+}
+
+.gta-radio-control-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(15, 23, 42, 0.15);
+}
+
+.gta-radio-control-btn:active:not(:disabled) {
+  background: var(--gta-radio-panel-secondary);
+}
+
+.gta-radio-play-btn {
+  grid-column: span 2;
+  background: var(--gta-radio-play-bg);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+}
+
+.gta-radio-nav-btn {
+  font-size: 10px;
+}
+
+.gta-radio-station-list {
+  background: var(--gta-radio-panel);
+  border: 1px solid var(--gta-radio-border);
+  border-radius: 14px;
+  padding: 6px;
+  max-height: 170px;
+  overflow-y: auto;
+}
+
+.gta-radio-list-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gta-radio-muted);
+  padding: 6px;
+  border-bottom: 1px solid var(--gta-radio-border);
+  margin-bottom: 6px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.gta-radio-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gta-radio-list-item {
+  background: var(--gta-radio-panel-secondary);
+  color: var(--gta-radio-text);
+  border: 1px solid transparent;
+  padding: 6px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gta-radio-list-item:hover {
+  border-color: var(--gta-radio-highlight);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+}
+
+.gta-radio-list-item.active {
+  background: var(--gta-radio-accent);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+}
+
+.gta-radio-station-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.gta-radio-station-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gta-radio-station-list::-webkit-scrollbar-thumb {
+  background: var(--gta-radio-border);
+  border-radius: 4px;
+}
+
+.gta-radio-station-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gta-radio-highlight);
+}
+
+@media (max-width: 640px) {
+  .gta-radio-overlay {
+    min-width: 220px;
+    max-width: 300px;
+    padding: 10px;
+  }
+  .gta-radio-container {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 10px;
+  }
+  .gta-radio-display {
+    gap: 8px;
+  }
+  .gta-radio-logo-container {
+    width: 52px;
+    height: 52px;
+  }
+  .gta-radio-station-list {
+    max-height: 140px;
+  }
+}

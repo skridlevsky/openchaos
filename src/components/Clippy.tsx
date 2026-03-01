@@ -2,48 +2,8 @@
 
 import { useState, useEffect } from "react";
 
-const CLIPPY_ASCII_FRAMES = [
-  `  __
-  /  \\
-  |  |
-  @  @
-  |  |
-  || |
-  || |
-  |\\_|
-  \\__\\`,
-  `  __
-  /  \\
-  |  |
-  -  -
-  |  |
-  || |
-  || |
-  |\\_|
-  \\__\\`,
-  `  __
-  /  \\
-  |  |
-  @  @
-  |  |
-  || |
-  || |
-  |\\_|
-  \\__\\`,
-  `  __
-  /  \\
-  |  |
-  @  @
-  |  |
-  || |
-  || |
-  |\\_|
-  \\__\\`,
-];
-
 const CLIPPY_TIPS = [
   "It looks like you're trying to vote on a PR! Would you like help with that?",
-  "Did you know? The top-voted PR gets merged every day at 09:00 UTC!",
   "TIP: Thumbs up 👍 = good. Thumbs down 👎 = bad. You're welcome!",
   "I see you're browsing PRs. Have you considered submitting your own?",
   "Fun fact: This website was definitely NOT made in Microsoft FrontPage 2000.",
@@ -74,56 +34,31 @@ const CLIPPY_TIPS = [
     "Con you Meow for me?",
     "Con you Meow Meow?",
     "Con you Meow Meow for me?",
+  "Hey there! 👋 The top-voted PR gets merged daily at 19:00 UTC.",
+  "Pro tip: Only 👍 and 👎 reactions count as votes. Blog about it!",
+  "Submit a PR to join the chaos. It's like editing a wiki, but with more merge conflicts.",
+  "IMPORTANT: PRs with merge conflicts won't win. Keep your branch rebased!",
+  "This site is powered by Next.js and AJAX. Web 2.0 is the future!",
+  "Have you Dugg this page yet? Don't forget to bookmark it on del.icio.us!",
+  "You should totally add us to your RSS reader. We have a feed!", // meow meow
+  "Remember when every site had a BETA badge? Oh wait, we still do.",
+  "Fun fact: This site runs on Web 2.0 technology. It's all about the rounded corners.",
+  "Want to contribute? Fork the repo, submit a PR, and let the community decide!",
+  "The community decides which PRs get merged. It's like Digg, but for code.",
+  "Did you know you can vote on PRs directly on GitHub? It's very Web 2.0.",
+  "Tag cloud not interactive enough? Try submitting a PR to make it better!",
+  "This site is in perpetual BETA. Just like Gmail was for five years.",
+  "Is your startup idea disrupting something? Submit a PR about it.",
+  "We don't have a podcast yet, but we're thinking about it. Stay tuned!",
+  "Don't forget to StumbleUpon this page. Wait, does that still work?",
 ];
 
 function getRandomTip(currentIndex: number): number {
-  let newIndex;
+  let newIndex: number;
   do {
     newIndex = Math.floor(Math.random() * CLIPPY_TIPS.length);
   } while (newIndex === currentIndex && CLIPPY_TIPS.length > 1);
   return newIndex;
-}
-
-function wrapText(text: string, maxWidth: number): string[] {
-  const words = text.split(" ");
-  const lines: string[] = [];
-  let currentLine = "";
-
-  for (const word of words) {
-    if (currentLine.length + word.length + 1 <= maxWidth) {
-      currentLine += (currentLine ? " " : "") + word;
-    } else {
-      if (currentLine) lines.push(currentLine);
-      currentLine = word;
-    }
-  }
-  if (currentLine) lines.push(currentLine);
-
-  return lines;
-}
-
-function createSpeechBubble(text: string, maxWidth: number = 40): string {
-  const lines = wrapText(text, maxWidth);
-  const maxLineLength = Math.max(...lines.map((line) => line.length), 10);
-  const width = maxLineLength + 4; // padding on each side
-
-  let bubble = `┌${"─".repeat(width)}┐\n`;
-  
-  for (const line of lines) {
-    const paddedLine = line.padEnd(maxLineLength+2, " ");
-    bubble += `│ ${paddedLine} │\n`;
-  }
-  
-  // Add button row with proper spacing - ensure enough padding on the right
-  const buttonText = `  [OK]  [Don't show tips]  `;
-  const buttonRowPadded = buttonText.padEnd(maxLineLength+2, " ");
-  bubble += `│ ${buttonRowPadded} │\n`;
-  bubble += `└${"─".repeat(width)}┘\n`;
-  // Arrow on the right side - align to right edge of bubble
-  const arrowOffset = width - 2; // Position arrow near right edge
-  bubble += `${" ".repeat(arrowOffset)}\\/\n`; // pointer pointing down on the right
-
-  return bubble;
 }
 
 export function Clippy() {
@@ -133,10 +68,33 @@ export function Clippy() {
   );
   const [isDismissed, setIsDismissed] = useState(false);
   const [showClippy, setShowClippy] = useState(true);
-  const [currentFrame, setCurrentFrame] = useState(0);
+  const [alignment, setAlignment] = useState<"left" | "right">("right");
 
   useEffect(() => {
-    // Show Clippy after a delay
+    const opposite = (side: "left" | "right") => (side === "left" ? "right" : "left");
+
+    const syncFromRadioDom = () => {
+      const radio = document.querySelector(".gta-radio-container") as HTMLElement | null;
+      const side = radio?.dataset.chaosSide;
+      if (side === "left" || side === "right") {
+        setAlignment(opposite(side));
+      }
+    };
+
+    syncFromRadioDom();
+
+    const handleRadioLayout = (event: Event) => {
+      const customEvent = event as CustomEvent<{ side?: "left" | "right" }>;
+      if (customEvent.detail?.side === "left" || customEvent.detail?.side === "right") {
+        setAlignment(opposite(customEvent.detail.side));
+      }
+    };
+
+    window.addEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
+    return () => window.removeEventListener("openchaos:radio-layout", handleRadioLayout as EventListener);
+  }, []);
+
+  useEffect(() => {
     const showTimer = setTimeout(() => {
       setIsVisible(true);
     }, 3000);
@@ -145,16 +103,6 @@ export function Clippy() {
   }, []);
 
   useEffect(() => {
-    // Animate ASCII frames
-    const interval = setInterval(() => {
-      setCurrentFrame((prev) => (prev + 1) % CLIPPY_ASCII_FRAMES.length);
-    }, 500); // Change frame every 500ms
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    // Rotate tips periodically
     const tipInterval = setInterval(() => {
       if (!isDismissed && isVisible) {
         setCurrentTip((prev) => getRandomTip(prev));
@@ -165,7 +113,6 @@ export function Clippy() {
   }, [isDismissed, isVisible]);
 
   useEffect(() => {
-    // Clippy always comes back (of course)
     if (isDismissed) {
       const comeBackTimer = setTimeout(() => {
         setIsDismissed(false);
@@ -180,9 +127,8 @@ export function Clippy() {
     setIsDismissed(true);
   };
 
-  const handleHideClippy = () => {
+  const handleHide = () => {
     setShowClippy(false);
-    // Clippy respects your wishes... for about 30 seconds
     setTimeout(() => {
       setShowClippy(true);
       setIsDismissed(false);
@@ -193,125 +139,37 @@ export function Clippy() {
 
   return (
     <div
+      className={`web2-chat-widget web2-chat-widget-${alignment}`}
+      data-chaos-side={alignment}
       style={{
-        position: "fixed",
-        bottom: "80px",
-        right: "20px",
-        zIndex: 9998,
-        fontFamily: "Courier New, monospace",
+        right: alignment === "right" ? "20px" : undefined,
+        left: alignment === "left" ? "20px" : undefined,
       }}
     >
-      {/* Speech Bubble */}
       {isVisible && !isDismissed && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "140px",
-            right: "0",
-            fontFamily: "Courier New, monospace",
-            fontSize: "12px",
-            lineHeight: "1.2",
-            color: "var(--foreground)",
-            whiteSpace: "pre",
-            animation: "clippy-bounce 0.3s ease-out",
-          }}
-        >
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <pre
-              className="font-mono text-xs leading-tight whitespace-pre"
-              style={{
-                margin: 0,
-                color: "var(--foreground)",
-              }}
-            >
-              {createSpeechBubble(CLIPPY_TIPS[currentTip])}
-            </pre>
-            {/* Clickable button areas over ASCII art */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "1.2em",
-                left: "0.5ch",
-                width: "4ch",
-                height: "1.2em",
-                cursor: "pointer",
-                zIndex: 1,
-              }}
-              onClick={handleDismiss}
-              title="OK"
-            />
-            <div
-              style={{
-                position: "absolute",
-                bottom: "1.2em",
-                left: "7ch",
-                width: "14ch",
-                height: "1.2em",
-                cursor: "pointer",
-                zIndex: 1,
-              }}
-              onClick={handleHideClippy}
-              title="Don't show tips"
-            />
+        <div className="web2-chat-bubble web2-chat-bubble-border">
+          <p className="web2-chat-message">
+            {CLIPPY_TIPS[currentTip]}
+          </p>
+
+          <div className="web2-chat-actions">
+            <button onClick={handleDismiss} className="web2-chat-btn">
+              OK
+            </button>
+            <button onClick={handleHide} className="web2-chat-btn">
+              Don&apos;t show tips
+            </button>
           </div>
         </div>
       )}
 
-      {/* Clippy Character */}
-      <div
+      <button
         onClick={() => setIsDismissed(false)}
-        style={{
-          cursor: "pointer",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          animation: "clippy-idle 2s ease-in-out infinite",
-        }}
-        title="Click me for help!"
+        className="web2-chat-trigger"
+        title="Need help?"
       >
-        <pre
-          className="font-mono text-xs leading-tight whitespace-pre text-center"
-          style={{
-            margin: 0,
-            color: "var(--foreground)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {CLIPPY_ASCII_FRAMES[currentFrame]}
-        </pre>
-      </div>
-
-      <style jsx>{`
-        @keyframes clippy-bounce {
-          0% {
-            transform: scale(0.8) translateY(10px);
-            opacity: 0;
-          }
-          50% {
-            transform: scale(1.05) translateY(-5px);
-          }
-          100% {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-          }
-        }
-
-        @keyframes clippy-idle {
-          0%,
-          100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          25% {
-            transform: translateY(-3px) rotate(-2deg);
-          }
-          75% {
-            transform: translateY(-3px) rotate(2deg);
-          }
-        }
-      `}</style>
+        ?
+      </button>
     </div>
   );
 }
