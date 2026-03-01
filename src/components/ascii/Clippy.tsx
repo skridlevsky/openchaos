@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const CLIPPY_ASCII_FRAMES = [
   `  __
@@ -66,6 +66,13 @@ const CLIPPY_TIPS = [
   "Did you know you can 'pet cat' in the terminal? The cat loves it. Mostly.",
 ];
 
+const TERMINAL_TIPS = [
+  "I see you opened the terminal! Try 'hack' to breach the mainframe. I won't tell anyone.",
+  "The terminal knows things. Type 'clippy' if you miss me. Type 'kill clippy' if you don't.",
+  "Pro tip: Type 'play startup' in the terminal for a blast from the past.",
+  "Did you know you can 'pet cat' in the terminal? The cat loves it. Mostly.",
+];
+
 function getRandomTip(currentIndex: number): number {
   let newIndex;
   do {
@@ -125,6 +132,7 @@ export function Clippy() {
   const [showClippy, setShowClippy] = useState(true);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [forcedTip, setForcedTip] = useState<string | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     // Show Clippy after a delay
@@ -169,6 +177,8 @@ export function Clippy() {
 
   // Listen for terminal events
   useEffect(() => {
+    let triggerTimer: ReturnType<typeof setTimeout>;
+
     const handleTrigger = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setShowClippy(true);
@@ -176,25 +186,24 @@ export function Clippy() {
       setIsDismissed(false);
       if (detail?.tip) {
         setForcedTip(detail.tip);
-        const t = setTimeout(() => setForcedTip(null), 12000);
-        return () => clearTimeout(t);
+        clearTimeout(triggerTimer);
+        triggerTimer = setTimeout(() => setForcedTip(null), 12000);
       }
     };
 
     const handleHide = () => {
       setShowClippy(false);
-      const t = setTimeout(() => {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = setTimeout(() => {
         setShowClippy(true);
         setIsDismissed(false);
         setForcedTip(null);
       }, 30000);
-      return () => clearTimeout(t);
     };
 
     const handleTerminalOpened = () => {
-      // Show a terminal-specific tip when terminal opens
-      const terminalTipStart = CLIPPY_TIPS.length - 4; // index of first terminal tip
-      setCurrentTip(terminalTipStart + Math.floor(Math.random() * 4));
+      const tip = TERMINAL_TIPS[Math.floor(Math.random() * TERMINAL_TIPS.length)];
+      setForcedTip(tip);
       setIsDismissed(false);
       setIsVisible(true);
     };
@@ -203,6 +212,8 @@ export function Clippy() {
     window.addEventListener("chaos:hide-clippy", handleHide);
     window.addEventListener("chaos:terminal-opened", handleTerminalOpened);
     return () => {
+      clearTimeout(triggerTimer);
+      clearTimeout(hideTimerRef.current);
       window.removeEventListener("chaos:trigger-clippy", handleTrigger);
       window.removeEventListener("chaos:hide-clippy", handleHide);
       window.removeEventListener("chaos:terminal-opened", handleTerminalOpened);
@@ -217,7 +228,8 @@ export function Clippy() {
   const handleHideClippy = () => {
     setShowClippy(false);
     // Clippy respects your wishes... for about 30 seconds
-    setTimeout(() => {
+    clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => {
       setShowClippy(true);
       setIsDismissed(false);
     }, 30000);

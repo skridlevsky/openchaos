@@ -232,6 +232,23 @@ export function ChaosTerminal() {
     scrollToBottom();
   }, [lines, scrollToBottom]);
 
+  const runAnimatedSequence = useCallback(
+    (steps: string[], delay: number, onStep?: (line: string, index: number) => void) => {
+      setIsAnimating(true);
+      const session = sessionRef.current;
+      steps.forEach((line, i) => {
+        const t = setTimeout(() => {
+          if (sessionRef.current !== session) return;
+          addLines(line);
+          onStep?.(line, i);
+          if (i === steps.length - 1) setIsAnimating(false);
+        }, (i + 1) * delay);
+        timersRef.current.push(t);
+      });
+    },
+    [addLines]
+  );
+
   // Hydration guard
   useEffect(() => {
     setMounted(true);
@@ -358,9 +375,7 @@ export function ChaosTerminal() {
           break;
 
         case lower === "rm -rf /": {
-          setIsAnimating(true);
-          const session = sessionRef.current;
-          const rmSteps = [
+          runAnimatedSequence([
             "rm: removing /usr/share/sanity...",
             "rm: removing /var/log/good-decisions...",
             "rm: removing /home/stability...",
@@ -369,22 +384,12 @@ export function ChaosTerminal() {
             "",
             "rm: cannot remove '/chaos': Operation not permitted",
             "Chaos cannot be destroyed. It can only be transformed.",
-          ];
-          rmSteps.forEach((line, i) => {
-            const t = setTimeout(() => {
-              if (sessionRef.current !== session) return;
-              addLines(line);
-              if (i === rmSteps.length - 1) setIsAnimating(false);
-            }, (i + 1) * 400);
-            timersRef.current.push(t);
-          });
+          ], 400);
           break;
         }
 
         case lower === "ping chaos": {
-          setIsAnimating(true);
-          const session = sessionRef.current;
-          const pings = [
+          runAnimatedSequence([
             "PING chaos (127.0.0.666): 56 data bytes",
             "64 bytes from chaos: time=42ms",
             "64 bytes from chaos: time=666ms",
@@ -394,15 +399,7 @@ export function ChaosTerminal() {
             "",
             "--- chaos ping statistics ---",
             "6 packets transmitted, ??? received, NaN% packet loss",
-          ];
-          pings.forEach((line, i) => {
-            const t = setTimeout(() => {
-              if (sessionRef.current !== session) return;
-              addLines(line);
-              if (i === pings.length - 1) setIsAnimating(false);
-            }, (i + 1) * 500);
-            timersRef.current.push(t);
-          });
+          ], 500);
           break;
         }
 
@@ -483,8 +480,6 @@ export function ChaosTerminal() {
         }
 
         case lower === "doom" || lower === "play doom": {
-          setIsAnimating(true);
-          const session = sessionRef.current;
           const doomSteps = [
             "Loading DOOM.WAD...",
             "Initializing idTech 1 engine...",
@@ -494,19 +489,13 @@ export function ChaosTerminal() {
             "",
             "DOOM is ready. Opening portal...",
           ];
-          doomSteps.forEach((line, i) => {
-            const t = setTimeout(() => {
-              if (sessionRef.current !== session) return;
-              addLines(line);
-              if (i === doomSteps.length - 1) {
-                setIsAnimating(false);
-                const w = window.open("/doom.html", "_blank");
-                if (!w) {
-                  addLines("ERROR: Popup blocked. Allow popups to slay demons.");
-                }
+          runAnimatedSequence(doomSteps, 400, (_line, i) => {
+            if (i === doomSteps.length - 1) {
+              const w = window.open("/doom.html", "_blank");
+              if (!w) {
+                addLines("ERROR: Popup blocked. Allow popups to slay demons.");
               }
-            }, (i + 1) * 400);
-            timersRef.current.push(t);
+            }
           });
           break;
         }
@@ -548,8 +537,8 @@ export function ChaosTerminal() {
           addLines("*ppffrrrrtttt*");
           try {
             (window as unknown as Record<string, { play?: () => void }>).fartscroll?.play?.();
-          } catch {
-            // fartscroll not loaded
+          } catch (e) {
+            console.log("fartscroll:", e);
           }
           break;
         }
@@ -567,8 +556,13 @@ export function ChaosTerminal() {
             milestone: () => soundPlayer.playMilestone(),
           };
           if (sounds[soundName]) {
-            sounds[soundName]();
-            addLines(`Now playing: ${soundName}`);
+            try {
+              sounds[soundName]();
+              addLines(`Now playing: ${soundName}`);
+            } catch (e) {
+              console.log(`Sound playback failed for ${soundName}:`, e);
+              addLines(`Failed to play: ${soundName} (audio may be blocked by browser)`);
+            }
           } else {
             addLines(
               `Unknown sound: ${soundName}`,
@@ -579,9 +573,7 @@ export function ChaosTerminal() {
         }
 
         case lower === "hack": {
-          setIsAnimating(true);
-          const session = sessionRef.current;
-          const hackSteps = [
+          runAnimatedSequence([
             "Initiating hack sequence...",
             "Bypassing firewall... [OK]",
             "Injecting SQL into mainframe...",
@@ -592,35 +584,31 @@ export function ChaosTerminal() {
             "ACCESS GRANTED",
             "",
             "Just kidding. You hacked nothing.",
-          ];
-          hackSteps.forEach((line, i) => {
-            const t = setTimeout(() => {
-              if (sessionRef.current !== session) return;
-              addLines(line);
-              if (line === "ACCESS GRANTED") {
-                const root = document.documentElement;
-                root.style.transition = "filter 0.15s";
-                root.style.filter = "invert(1) hue-rotate(180deg)";
-                const revertT = setTimeout(() => {
-                  if (sessionRef.current !== session) return;
-                  root.style.filter = "";
-                  root.style.transition = "";
-                }, 300);
-                timersRef.current.push(revertT);
-              }
-              if (i === hackSteps.length - 1) setIsAnimating(false);
-            }, (i + 1) * 500);
-            timersRef.current.push(t);
+          ], 500, (line) => {
+            if (line === "ACCESS GRANTED") {
+              const session = sessionRef.current;
+              const root = document.documentElement;
+              root.style.transition = "filter 0.15s";
+              root.style.filter = "invert(1) hue-rotate(180deg)";
+              const revertT = setTimeout(() => {
+                if (sessionRef.current !== session) return;
+                root.style.filter = "";
+                root.style.transition = "";
+              }, 300);
+              timersRef.current.push(revertT);
+            }
           });
           break;
         }
 
         case lower === "barrel roll": {
           addLines("Initiating barrel roll...");
+          const session = sessionRef.current;
           const root = document.documentElement;
           root.style.transition = "transform 1s ease-in-out";
           root.style.transform = "rotate(360deg)";
           const t = setTimeout(() => {
+            if (sessionRef.current !== session) return;
             root.style.transform = "";
             root.style.transition = "";
           }, 1100);
@@ -634,7 +622,7 @@ export function ChaosTerminal() {
           );
       }
     },
-    [addLines, closeTerminal]
+    [addLines, closeTerminal, runAnimatedSequence]
   );
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
