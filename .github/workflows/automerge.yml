@@ -182,8 +182,12 @@ jobs:
                   owner, repo, ref: detail.data.head.sha
                 });
 
-                if (statuses.data.state === 'pending' || statuses.data.state === 'failure' || statuses.data.state === 'error') {
+                if (statuses.data.state === 'failure' || statuses.data.state === 'error') {
                   console.log(`  PR #${pr.number} has ${statuses.data.state} commit status — skipping.`);
+                  continue;
+                }
+                if (statuses.data.state === 'pending' && statuses.data.total_count > 0) {
+                  console.log(`  PR #${pr.number} has ${statuses.data.total_count} pending commit status(es) — skipping.`);
                   continue;
                 }
 
