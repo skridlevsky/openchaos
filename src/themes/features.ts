@@ -23,3 +23,5 @@ export const THEME_FEATURES = {
 // web2 layout:      midiPlayer
 // web2 page:        controlledChaos (+ clippy, cat, cursorTrail, statusBar via Web2Layout)
 // newspaper:        (none currently — contributors can add any)
+// geocities layout: clippy(image), cat, midiPlayer, cursorTrail, statusBar
+// geocities page:   guestbook, treeGame, doom, webCounter (via IE6Layout)
