@@ -79,6 +79,31 @@
   display: inline-block;
 }
 
+.museum-artwork-frame-emoji {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.museum-emoji {
+  font-size: 6rem;
+  line-height: 1;
+}
+
+.museum-emoji-tappable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.museum-emoji-tappable:hover {
+  background: #f2ede4;
+}
+
+.museum-emoji-tappable:active {
+  background: #ebe6dc;
+}
+
 .museum-iframe-frame {
   position: relative;
   width: 100%;

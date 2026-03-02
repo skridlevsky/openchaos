@@ -13,11 +13,11 @@ export const THEME_FEATURES = {
   statusBar:       { description: "Scrolling status messages", location: "layout" },
   midiPlayer:      { description: "Retro MIDI music player", location: "layout" },
   worldChaos:      { description: "Real-time world chaos data display", location: "page" },
-  fartscroll:      { description: "Fart sounds on scroll", location: "layout" },
+  fartscroll:      { description: "Fart sounds on scroll", location: "page" },
 } as const;
 
 // Current feature distribution:
-// root layout:      fartscroll (all themes)
+// museum page:      fartscroll
 // ascii layout:     clippy(ascii), cat, midiPlayer
 // ascii page:       controlledChaos
 // web2 layout:      midiPlayer

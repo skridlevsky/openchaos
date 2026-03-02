@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
-import { Fartscroll } from "@/components/Fartscroll";
 
 const chaoticEmojis = [
   "🎯", "🎲", "⚡", "🔥", "💥", "🎪", "🎭", "🎨", "🚀", "⭐", "💫", "🌪️",
@@ -33,7 +32,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
-        <Fartscroll />
       </body>
     </html>
   );
