@@ -5,6 +5,8 @@ import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
 import { chooseURL } from "@/lib/utils";
+import { useThemePath } from "@/context/ThemePathContext";
+import { getAuthorProfileHref } from "@/lib/userProfile";
 
 interface PRCardProps {
   pr: PullRequest;
@@ -13,6 +15,8 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net" }: PRCardProps) {
+  const themePath = useThemePath();
+  const authorHref = getAuthorProfileHref(themePath, pr.author);
   const {
     cardRef, voteStatus, optimisticVotes, feedbackMessage, showTooltip, showShake,
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
@@ -100,7 +104,7 @@ export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net" }: PR
       {/* Line 2: by @author · time */}
       <div>
         &nbsp;&nbsp;&nbsp;&nbsp;by{" "}
-        <a href={`https://github.com/${pr.author}`} target="_blank" rel="noopener noreferrer" className="pr-card-author-link">
+        <a href={authorHref} className="pr-card-author-link">
           @{pr.author}
         </a>{" "}
         · <TimeAgo isoDate={pr.createdAt} />

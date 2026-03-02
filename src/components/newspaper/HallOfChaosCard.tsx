@@ -3,9 +3,10 @@ import { stripEmojis } from "@/lib/utils";
 
 interface HallOfChaosCardProps {
   pr: MergedPullRequest;
+  authorHref?: string;
 }
 
-export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
+export function HallOfChaosCard({ pr, authorHref }: HallOfChaosCardProps) {
   const parsedDate = new Date(pr.mergedAt);
   const mergedDate = isNaN(parsedDate.getTime())
     ? "Date unknown"
@@ -15,6 +16,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
         day: "numeric",
         year: "numeric",
       });
+  const link = authorHref ?? `https://github.com/${pr.author}`;
 
   return (
     <div className="np-archive-card">
@@ -29,11 +31,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
           </div>
           <div className="np-archive-meta">
             by{" "}
-            <a
-              href={`https://github.com/${pr.author}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={link}>
               @{pr.author}
             </a>
             {" \u00B7 "}

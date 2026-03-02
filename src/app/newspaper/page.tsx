@@ -26,7 +26,7 @@ export default function NewspaperHome() {
       <hr className="np-rule-single" />
 
       <Suspense fallback={<div className="np-loading">Searching the morgue files...</div>}>
-        <HallOfChaos />
+        <HallOfChaos themePath="newspaper" />
       </Suspense>
     </NewspaperLayout>
   );

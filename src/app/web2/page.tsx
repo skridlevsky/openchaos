@@ -26,7 +26,7 @@ export default function Web2Home() {
           </div>
           <div className="web2-section-body">
             <Suspense fallback={<Web2LoadingSpinner text="Loading history..." />}>
-              <HallOfChaos />
+              <HallOfChaos themePath="web2" />
             </Suspense>
           </div>
         </div>

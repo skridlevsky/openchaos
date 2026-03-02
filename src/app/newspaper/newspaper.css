@@ -839,3 +839,12 @@
     gap: 4px;
   }
 }
+.user-profile-title {
+  font-size: 2.5rem;
+  margin-bottom:0.5rem;
+  font-weight: 700;
+  font-family: var(--np-headline-font);
+  color: var(--np-ink);
+  letter-spacing: 0.04em;
+  line-height: 1;
+}

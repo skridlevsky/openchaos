@@ -333,7 +333,7 @@ async function getPRDetail(
   repo: string,
   prNumber: number
 ): Promise<PRDetailResult> {
-  const response = await fetch(
+    const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}`,
     {
       headers: getHeaders("application/vnd.github.v3+json"),
@@ -459,4 +459,18 @@ export async function getMergedPRs(): Promise<MergedPullRequest[]> {
       url: pr.html_url,
       mergedAt: pr.merged_at!,
     }));
+}
+
+export interface PRsByAuthor {
+  open: PullRequest[];
+  merged: MergedPullRequest[];
+}
+
+/** Get open and merged PRs for a single author (GitHub login). Comparison is case-insensitive. */
+export async function getPRsByAuthor(username: string): Promise<PRsByAuthor> {
+  const lower = username.toLowerCase();
+  const [organized, merged] = await Promise.all([getOrganizedPRs(), getMergedPRs()]);
+  const open = organized.topByVotes.filter((pr) => pr.author.toLowerCase() === lower);
+  const mergedByAuthor = merged.filter((pr) => pr.author.toLowerCase() === lower);
+  return { open, merged: mergedByAuthor };
 }

@@ -1,7 +1,12 @@
 import { fetchMergedPRs } from "@/lib/prData";
 import { HallOfChaosCard } from "./HallOfChaosCard";
+import { getAuthorProfileHref } from "@/lib/userProfile";
 
-export async function HallOfChaos() {
+interface HallOfChaosProps {
+  themePath?: string;
+}
+
+export async function HallOfChaos({ themePath = "" }: HallOfChaosProps = {}) {
   const result = await fetchMergedPRs();
 
   if (!result.ok) {
@@ -27,7 +32,11 @@ export async function HallOfChaos() {
   return (
     <div className="hall-container">
       {result.data.map((pr) => (
-        <HallOfChaosCard key={pr.number} pr={pr} />
+        <HallOfChaosCard
+          key={pr.number}
+          pr={pr}
+          authorHref={themePath ? getAuthorProfileHref(themePath, pr.author) : undefined}
+        />
       ))}
     </div>
   );

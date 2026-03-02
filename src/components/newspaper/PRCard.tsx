@@ -5,6 +5,8 @@ import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
 import { chooseURL } from "@/lib/utils";
+import { useThemePath } from "@/context/ThemePathContext";
+import { getAuthorProfileHref } from "@/lib/userProfile";
 
 const NEWSPAPER_VOTING_OPTIONS = {
   confettiColors: ["#8b0000", "#8b7355", "#1a1a1a", "#c4a55a", "#4a0000", "#d4c5a9"],
@@ -29,6 +31,8 @@ interface PRCardProps {
 }
 
 export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreLabel = "Net Score" }: PRCardProps) {
+  const themePath = useThemePath();
+  const authorHref = getAuthorProfileHref(themePath, pr.author);
   const {
     cardRef, voteStatus, optimisticVotes, feedbackMessage, showTooltip, showShake,
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
@@ -88,7 +92,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
         <div className="np-banner-headline">{pr.title}</div>
         <div className="np-banner-byline">
           by{" "}
-          <a href={`https://github.com/${pr.author}`} target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>@{pr.author}</a>
+          <a href={authorHref} style={{ color: "inherit" }}>@{pr.author}</a>
           {" \u00B7 "}<TimeAgo isoDate={pr.createdAt} />{" \u00B7 "}<span className="np-article-number">#{pr.number}</span>
         </div>
         <div className="np-banner-votes">{ballotBox}</div>
@@ -119,7 +123,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
           </div>
           <div className="np-article-byline">
             by{" "}
-            <a href={`https://github.com/${pr.author}`} target="_blank" rel="noopener noreferrer">@{pr.author}</a>
+            <a href={authorHref}>@{pr.author}</a>
             {" \u00B7 "}<TimeAgo isoDate={pr.createdAt} />{" \u00B7 "}<span className="np-article-number">#{pr.number}</span>
           </div>
           <a href={linkHref} target="_blank" rel="noopener noreferrer" className="np-article-link" suppressHydrationWarning>Read Full Story &rarr;</a>

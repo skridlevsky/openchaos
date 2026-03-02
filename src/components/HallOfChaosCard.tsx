@@ -2,9 +2,11 @@ import type { MergedPullRequest } from "@/lib/github";
 
 interface HallOfChaosCardProps {
   pr: MergedPullRequest;
+  authorHref?: string;
 }
 
-export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
+export function HallOfChaosCard({ pr, authorHref }: HallOfChaosCardProps) {
+  const link = authorHref ?? `https://github.com/${pr.author}`;
   const mergedDate = new Date(pr.mergedAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -31,9 +33,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
           <div className="hall-card-meta">
             by{" "}
             <a
-              href={`https://github.com/${pr.author}`}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={link}
               className="hall-card-author-link"
             >
               @{pr.author}

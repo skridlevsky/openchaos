@@ -1,3 +1,4 @@
+import { ThemePathProvider } from "@/context/ThemePathContext";
 import "./newspaper.css";
 
 export default function NewspaperLayout({
@@ -5,5 +6,9 @@ export default function NewspaperLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <ThemePathProvider themePath="newspaper">
+      {children}
+    </ThemePathProvider>
+  );
 }

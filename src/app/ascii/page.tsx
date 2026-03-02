@@ -53,7 +53,7 @@ export default function AsciiHome() {
               </div>
             }
           >
-            <HallOfChaos />
+            <HallOfChaos themePath="ascii" />
           </Suspense>
         </div>
       </div>
