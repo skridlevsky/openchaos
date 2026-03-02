@@ -1393,6 +1393,27 @@ center {
   background: linear-gradient(to bottom, #c05a40 0%, #a04a30 100%);
 }
 
+/* Vote arrow active (user has voted) */
+.vote-arrow-up.vote-arrow-active {
+  box-shadow: 0 0 8px 2px rgba(106, 168, 79, 0.6), inset 0 0 4px rgba(106, 168, 79, 0.3);
+  border-color: #6aa84f;
+}
+
+.vote-arrow-down.vote-arrow-active {
+  box-shadow: 0 0 8px 2px rgba(212, 101, 74, 0.6), inset 0 0 4px rgba(212, 101, 74, 0.3);
+  border-color: #d4654a;
+}
+
+[data-theme="dark"] .vote-arrow-up.vote-arrow-active {
+  box-shadow: 0 0 8px 2px rgba(74, 120, 48, 0.7), inset 0 0 4px rgba(74, 120, 48, 0.4);
+  border-color: #4a7830;
+}
+
+[data-theme="dark"] .vote-arrow-down.vote-arrow-active {
+  box-shadow: 0 0 8px 2px rgba(176, 74, 48, 0.7), inset 0 0 4px rgba(176, 74, 48, 0.4);
+  border-color: #b04a30;
+}
+
 /* Vote Count */
 .vote-count {
   user-select: none;

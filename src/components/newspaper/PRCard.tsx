@@ -4,6 +4,8 @@ import type { PullRequest } from "@/lib/github";
 import { hasRhymingWords } from "@/lib/rhymes";
 import { TimeAgo } from "@/components/TimeAgo";
 import { useVoting } from "@/hooks/useVoting";
+import { useUserVote } from "@/contexts/VoteStatusContext";
+import { reactionToVote } from "@/lib/votes";
 import { chooseURL } from "@/lib/utils";
 import { useThemePath } from "@/context/ThemePathContext";
 import { getAuthorProfileHref } from "@/lib/userProfile";
@@ -33,10 +35,14 @@ interface PRCardProps {
 export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreLabel = "Net Score" }: PRCardProps) {
   const themePath = useThemePath();
   const authorHref = getAuthorProfileHref(themePath, pr.author);
+  const { userVote, updateVoteStatus } = useUserVote(pr.number);
   const {
     cardRef, voteStatus, optimisticVotes, feedbackMessage, showTooltip, showShake,
     showCelebration, errorDetails, canRetry, isAuthenticated, handleVote, retryLastVote, setShowTooltip,
-  } = useVoting(pr, NEWSPAPER_VOTING_OPTIONS);
+  } = useVoting(pr, {
+    ...NEWSPAPER_VOTING_OPTIONS,
+    onVoteSuccess: (prNumber, reaction) => updateVoteStatus(prNumber, reactionToVote(reaction)),
+  });
   const linkHref = chooseURL(pr.url);
   const isSixtySeven = pr.votes === 67 || pr.votes === -67;
   const isLeading = pr.rank === 1 && distinguishLeading;
@@ -52,7 +58,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
 
   const ballotBox = (
     <div className="np-ballot" style={{ position: "relative" }}>
-      <button onClick={() => handleVote("+1")} className="np-ballot-btn" disabled={voteStatus === "voting"} title="Cast YEA ballot">
+      <button onClick={() => handleVote("+1")} className={`np-ballot-btn ${userVote === "up" ? "np-ballot-voted" : ""}`} disabled={voteStatus === "voting"} title={userVote === "up" ? "You voted YEA" : "Cast YEA ballot"}>
         YEA
       </button>
       <div style={{ position: "relative" }} onMouseEnter={() => setShowTooltip(true)} onMouseLeave={() => setShowTooltip(false)}>
@@ -66,7 +72,7 @@ export function PRCard({ pr, isBanner = false, distinguishLeading = true, scoreL
           </div>
         )}
       </div>
-      <button onClick={() => handleVote("-1")} className="np-ballot-btn" disabled={voteStatus === "voting"} title="Cast NAY ballot">
+      <button onClick={() => handleVote("-1")} className={`np-ballot-btn ${userVote === "down" ? "np-ballot-voted" : ""}`} disabled={voteStatus === "voting"} title={userVote === "down" ? "You voted NAY" : "Cast NAY ballot"}>
         NAY
       </button>
       {feedbackMessage && (

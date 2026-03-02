@@ -391,6 +391,14 @@
   cursor: wait;
 }
 
+.np-ballot-btn.np-ballot-voted {
+  font-weight: 900;
+  border-width: 2px;
+  border-color: var(--np-gold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .np-ballot-count {
   font-family: var(--np-headline-font);
   font-weight: 900;

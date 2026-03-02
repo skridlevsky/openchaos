@@ -38,7 +38,10 @@ jobs:
             // Rhyming title check — mirrors src/lib/rhymes.ts
             let rhymesWith;
             try {
-              const mod = await import('rhymes-with');
+              const { createRequire } = await import('node:module');
+              const localRequire = createRequire(process.cwd() + '/package.json');
+              const resolvedPath = localRequire.resolve('rhymes-with');
+              const mod = await import(resolvedPath);
               rhymesWith = mod.default;
               if (typeof rhymesWith !== 'function') {
                 throw new Error(`Expected default export to be a function, got ${typeof rhymesWith}`);

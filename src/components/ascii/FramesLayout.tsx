@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import type { PullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
+import { VoteStatusProvider } from "@/contexts/VoteStatusContext";
 import { PRCard } from "./PRCard";
 
 const ASCII_TABS = [
@@ -62,30 +64,37 @@ interface Props {
 }
 
 export function FramesLayout(props: Props) {
+  const prNumbers = useMemo(
+    () => [...new Set([...props.topByVotes, ...props.rising, ...props.newest, ...props.discussed, ...props.controversial].map(pr => pr.number))],
+    [props.topByVotes, props.rising, props.newest, props.discussed, props.controversial],
+  );
+
   return (
-    <SharedFramesLayout
-      {...props}
-      tabs={ASCII_TABS}
-      ExpandableSection={AsciiExpandable}
-      renderTabs={(tabs, activeSection, setActiveSection) => (
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {tabs.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`bg-transparent border-none cursor-pointer p-0 text-inherit whitespace-nowrap ${
-                  activeSection === item.id ? "font-bold no-underline" : "font-normal underline"
-                }`}
-                style={{ fontSize: "inherit", fontFamily: "inherit" }}
-              >
-                [{item.icon}] {item.label}
-              </button>
-            ))}
+    <VoteStatusProvider prNumbers={prNumbers}>
+      <SharedFramesLayout
+        {...props}
+        tabs={ASCII_TABS}
+        ExpandableSection={AsciiExpandable}
+        renderTabs={(tabs, activeSection, setActiveSection) => (
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {tabs.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`bg-transparent border-none cursor-pointer p-0 text-inherit whitespace-nowrap ${
+                    activeSection === item.id ? "font-bold no-underline" : "font-normal underline"
+                  }`}
+                  style={{ fontSize: "inherit", fontFamily: "inherit" }}
+                >
+                  [{item.icon}] {item.label}
+                </button>
+              ))}
+            </div>
+            <div>{"-".repeat(72)}</div>
           </div>
-          <div>{"-".repeat(72)}</div>
-        </div>
-      )}
-    />
+        )}
+      />
+    </VoteStatusProvider>
   );
 }
