@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import type { PullRequest } from "@/lib/github";
+import type { PullRequest, MergedPullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
+import { ExpandableHallSection } from "@/components/shared/ExpandableHallSection";
 import { VoteStatusProvider } from "@/contexts/VoteStatusContext";
 import { PRCard } from "./PRCard";
+import { HallOfChaosCard } from "./HallOfChaosCard";
 import { ChaosPointCounter } from "./ChaosPointCounter";
 
 const WEB2_TABS = [
@@ -14,6 +16,7 @@ const WEB2_TABS = [
   { id: "controversial" as const, label: "Controversial" },
   { id: "discussed" as const, label: "Discussed" },
   { id: "new" as const, label: "Newest" },
+  { id: "hall" as const, label: "Hall of Chaos" },
 ];
 
 function Web2Expandable({ prs, allowDistinguish = false, scoreLabel }: { prs: PullRequest[]; allowDistinguish?: boolean; scoreLabel?: string }) {
@@ -31,12 +34,27 @@ function Web2Expandable({ prs, allowDistinguish = false, scoreLabel }: { prs: Pu
   );
 }
 
+function Web2HallSection({ prs }: { prs: MergedPullRequest[] }) {
+  return (
+    <div className="web2-section-body">
+      <ExpandableHallSection
+        prs={prs}
+        CardComponent={HallOfChaosCard}
+        className="pr-list-section"
+        buttonClassName="pr-list-expand-button"
+        emptyMessage={<div style={{ textAlign: "center", padding: "24px" }}><strong>No merged PRs yet.</strong><br /><span>The first winner will be immortalized here!</span></div>}
+      />
+    </div>
+  );
+}
+
 interface Props {
   topByVotes: PullRequest[];
   rising: PullRequest[];
   newest: PullRequest[];
   discussed: PullRequest[];
   controversial: PullRequest[];
+  merged: MergedPullRequest[];
 }
 
 export function Web2FramesLayout(props: Props & { chaosPts?: number }) {
@@ -51,6 +69,7 @@ export function Web2FramesLayout(props: Props & { chaosPts?: number }) {
         {...props}
         tabs={WEB2_TABS}
         ExpandableSection={Web2Expandable}
+        HallSection={Web2HallSection}
         className="web2-section"
         renderTabs={(tabs, activeSection, setActiveSection) => (
           <div className="web2-pr-tabs">

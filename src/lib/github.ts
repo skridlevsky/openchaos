@@ -201,7 +201,8 @@ export async function getOrganizedPRs(): Promise<OrganizedPRs> {
   const allPRs = await getAllPRs();
   const totalVotes = allPRs.reduce((sum, pr) => sum + pr.votes, 0);
   const openPRs = allPRs.filter(pr => pr.state === "open");
-  const merged = allPRs.filter((pr) => pr.mergedAt !== null).sort((a, b) => new Date(b.mergedAt!).getTime() - new Date(a.mergedAt!).getTime())
+  const [owner] = GITHUB_REPO.split("/");
+  const merged = allPRs.filter((pr) => pr.mergedAt !== null && pr.author !== owner).sort((a, b) => new Date(b.mergedAt!).getTime() - new Date(a.mergedAt!).getTime())
     .map((pr) => ({
       number: pr.number,
       title: pr.title,
@@ -390,16 +391,6 @@ async function getCommitStatus(
   );
 }
 
-interface GitHubMergedPR {
-  number: number;
-  title: string;
-  html_url: string;
-  user: {
-    login: string;
-  };
-  merged_at: string | null;
-}
-
 function fetchKey(): Key {
   try {
     return validateKey(keypath);
@@ -408,55 +399,3 @@ function fetchKey(): Key {
   }
 }
 
-export async function getMergedPRs(): Promise<MergedPullRequest[]> {
-  const [owner, repo] = GITHUB_REPO.split("/");
-
-  let allPRs: GitHubMergedPR[] = [];
-  let page = 1;
-  const MAX_PAGES = 10; // 1000 PRs max, matches GitHub API limit
-
-  while (page <= MAX_PAGES) {
-    const response = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`,
-      {
-        headers: getHeaders("application/vnd.github.v3+json"),
-        next: { revalidate: 300 },
-      }
-    );
-
-    if (!response.ok) {
-      if (response.status === 403) {
-        throw new Error("Rate limited by GitHub API");
-      }
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
-
-    const prs: GitHubMergedPR[] = await response.json();
-
-    if (prs.length === 0) {
-      break;
-    }
-
-    allPRs = allPRs.concat(prs);
-
-    if (prs.length < 100) {
-      break;
-    }
-
-    page++;
-  }
-
-  // Filter to only merged PRs (not just closed), exclude repo owner's maintenance PRs
-  // Sort by merge time (newest first) since sort=updated may not reflect merge order
-  const REPO_OWNER = owner;
-  return allPRs
-    .filter((pr) => pr.merged_at !== null && pr.user.login !== REPO_OWNER)
-    .sort((a, b) => new Date(b.merged_at!).getTime() - new Date(a.merged_at!).getTime())
-    .map((pr) => ({
-      number: pr.number,
-      title: pr.title,
-      author: pr.user.login,
-      url: pr.html_url,
-      mergedAt: pr.merged_at!,
-    }));
-}

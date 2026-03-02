@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 
-export type Section = "votes" | "rising" | "new" | "discussed" | "controversial";
+export type Section = "votes" | "rising" | "new" | "discussed" | "controversial" | "hall";
 
-const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial"];
+const VALID_SECTIONS: Section[] = ["votes", "rising", "new", "discussed", "controversial", "hall"];
 
 export function useSectionNav(defaultSection: Section = "votes") {
   const [activeSection, setActiveSection] = useState<Section>(defaultSection);

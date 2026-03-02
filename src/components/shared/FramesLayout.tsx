@@ -1,7 +1,7 @@
 "use client";
 
 import { type ComponentType, type ReactNode } from "react";
-import type { PullRequest } from "@/lib/github";
+import type { PullRequest, MergedPullRequest } from "@/lib/github";
 import { useSectionNav, type Section } from "@/hooks/useSectionNav";
 
 interface TabItem {
@@ -16,8 +16,10 @@ interface FramesLayoutProps {
   newest: PullRequest[];
   discussed: PullRequest[];
   controversial: PullRequest[];
+  merged?: MergedPullRequest[];
   tabs: TabItem[];
   ExpandableSection: ComponentType<{ prs: PullRequest[]; allowDistinguish?: boolean; sectionLabel?: string; scoreLabel?: string }>;
+  HallSection?: ComponentType<{ prs: MergedPullRequest[] }>;
   renderBanner?: (pr: PullRequest) => ReactNode;
   separator?: ReactNode;
   renderTabs: (tabs: TabItem[], activeSection: Section, setActiveSection: (s: Section) => void) => ReactNode;
@@ -32,6 +34,8 @@ export function FramesLayout({
   controversial,
   tabs,
   ExpandableSection,
+  HallSection,
+  merged,
   renderBanner,
   separator,
   renderTabs,
@@ -55,7 +59,24 @@ export function FramesLayout({
         return discussed;
       case "controversial":
         return controversial;
+      default:
+        return [];
     }
+  }
+
+  function renderContent(): ReactNode {
+    if (activeSection === "hall" && HallSection && merged) {
+      return <HallSection prs={merged} />;
+    }
+
+    return (
+      <ExpandableSection
+        prs={getSectionPRs()}
+        allowDistinguish={activeSection === "votes"}
+        sectionLabel={tabs.find((t) => t.id === activeSection)?.label}
+        scoreLabel={activeSection === "rising" ? "Hot Score" : "Net Score"}
+      />
+    );
   }
 
   return (
@@ -63,12 +84,7 @@ export function FramesLayout({
       {renderTabs(tabs, activeSection, setActiveSection)}
       {leadingPR && renderBanner && renderBanner(leadingPR)}
       {leadingPR && separator}
-      <ExpandableSection
-        prs={getSectionPRs()}
-        allowDistinguish={activeSection === "votes"}
-        sectionLabel={tabs.find((t) => t.id === activeSection)?.label}
-        scoreLabel={activeSection === "rising" ? "Hot Score" : "Net Score"}
-      />
+      {renderContent()}
     </div>
   );
 }

@@ -40,7 +40,7 @@ const CLIPPY_TIPS = [
   "IMPORTANT: PRs with merge conflicts won't win. Keep your branch rebased!",
   "This site is powered by Next.js and AJAX. Web 2.0 is the future!",
   "Have you Dugg this page yet? Don't forget to bookmark it on del.icio.us!",
-  "You should totally add us to your RSS reader. We have a feed!", // meow meow
+  "You should totally add us to your RSS reader. We have a feed!",
   "Remember when every site had a BETA badge? Oh wait, we still do.",
   "Fun fact: This site runs on Web 2.0 technology. It's all about the rounded corners.",
   "Want to contribute? Fork the repo, submit a PR, and let the community decide!",

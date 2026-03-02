@@ -3,7 +3,7 @@ import { Countdown } from "@/components/ascii/Countdown";
 import { ControlledChaos } from "@/components/ControlledChaos";
 import { PRList } from "@/components/ascii/PRList";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { HallOfChaos } from "@/components/ascii/HallOfChaos";
+
 import { AuthButton } from "@/components/AuthButton";
 import { GuyFieri } from "@/components/GuyFieri";
 
@@ -41,21 +41,6 @@ export default function AsciiHome() {
           </Suspense>
         </div>
 
-        <div>
-          HALL OF CHAOS - PAST WINNERS
-          <br />
-          ----------------------------
-          <br />
-          <Suspense
-            fallback={
-              <div>
-                Loading history... Please Wait...
-              </div>
-            }
-          >
-            <HallOfChaos />
-          </Suspense>
-        </div>
       </div>
     </>
   );

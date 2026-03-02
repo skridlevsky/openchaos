@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import type { PullRequest } from "@/lib/github";
+import type { PullRequest, MergedPullRequest } from "@/lib/github";
 import { FramesLayout as SharedFramesLayout } from "@/components/shared/FramesLayout";
 import { ExpandablePRSection } from "@/components/shared/ExpandablePRSection";
+import { ExpandableHallSection } from "@/components/shared/ExpandableHallSection";
 import { VoteStatusProvider } from "@/contexts/VoteStatusContext";
 import { PRCard } from "./PRCard";
+import { HallOfChaosCard } from "./HallOfChaosCard";
 
 const NEWSPAPER_TABS = [
   { id: "votes" as const, label: "FRONT PAGE" },
@@ -13,6 +15,7 @@ const NEWSPAPER_TABS = [
   { id: "controversial" as const, label: "LETTERS TO THE EDITOR" },
   { id: "discussed" as const, label: "TOWN HALL" },
   { id: "new" as const, label: "LATE EDITION" },
+  { id: "hall" as const, label: "THE ARCHIVES" },
 ];
 
 function NewspaperExpandable({ prs, allowDistinguish = false, scoreLabel }: { prs: PullRequest[]; allowDistinguish?: boolean; scoreLabel?: string }) {
@@ -30,12 +33,26 @@ function NewspaperExpandable({ prs, allowDistinguish = false, scoreLabel }: { pr
   );
 }
 
+function NewspaperHallSection({ prs }: { prs: MergedPullRequest[] }) {
+  return (
+    <ExpandableHallSection
+      prs={prs}
+      CardComponent={HallOfChaosCard}
+      emptyMessage={<div className="np-empty">No stories have gone to press yet. The first edition awaits!</div>}
+      expandLabel={(count) => `Continue Reading (${count} articles)`}
+      collapseLabel="Return to Front Page"
+      buttonClassName="np-expand-btn"
+    />
+  );
+}
+
 interface Props {
   topByVotes: PullRequest[];
   rising: PullRequest[];
   newest: PullRequest[];
   discussed: PullRequest[];
   controversial: PullRequest[];
+  merged: MergedPullRequest[];
 }
 
 export function FramesLayout(props: Props) {
@@ -50,6 +67,7 @@ export function FramesLayout(props: Props) {
         {...props}
         tabs={NEWSPAPER_TABS}
         ExpandableSection={NewspaperExpandable}
+        HallSection={NewspaperHallSection}
         renderBanner={(pr) => <PRCard pr={pr} isBanner />}
         separator={<hr className="np-rule-double" />}
         renderTabs={(tabs, activeSection, setActiveSection) => (

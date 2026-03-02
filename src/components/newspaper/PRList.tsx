@@ -13,7 +13,7 @@ export async function PRList() {
     );
   }
 
-  const { topByVotes, rising, newest, discussed, controversial } = result.data;
+  const { topByVotes, rising, newest, discussed, controversial, merged } = result.data;
 
   if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (
@@ -30,6 +30,7 @@ export async function PRList() {
       newest={newest}
       discussed={discussed}
       controversial={controversial}
+      merged={merged}
     />
   );
 }

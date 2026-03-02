@@ -44,6 +44,7 @@ export async function PRList() {
       newest={newest}
       discussed={discussed}
       controversial={controversial}
+      merged={merged}
       chaosPts={chaosPts}
     />
   );
