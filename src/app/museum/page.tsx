@@ -12,6 +12,7 @@ export default function MuseumPage() {
       <header className="museum-header">
         <h1 className="museum-title">OpenChaos Museum</h1>
         <p className="museum-subtitle">Permanent Collection</p>
+        <p className="museum-subtitle">No cats allowed (except guide cats).</p>
         <nav className="museum-nav">
           <Link href="/">Home</Link>
         </nav>
