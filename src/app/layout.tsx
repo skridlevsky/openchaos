@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import "./globals.css";
+import { WelcomePopup } from "@/components/WelcomePopup";
 
 const chaoticEmojis = [
   "🎯", "🎲", "⚡", "🔥", "💥", "🎪", "🎭", "🎨", "🚀", "⭐", "💫", "🌪️",
@@ -32,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
+        <WelcomePopup />
       </body>
     </html>
   );

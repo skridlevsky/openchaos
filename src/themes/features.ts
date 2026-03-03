@@ -14,9 +14,11 @@ export const THEME_FEATURES = {
   midiPlayer:      { description: "Retro MIDI music player", location: "layout" },
   worldChaos:      { description: "Real-time world chaos data display", location: "page" },
   fartscroll:      { description: "Fart sounds on scroll", location: "page" },
+  welcomePopup:    { description: "One-time welcome popup for first-time visitors", location: "root layout" },
 } as const;
 
 // Current feature distribution:
+// root layout:      welcomePopup (all themes)
 // museum page:      fartscroll
 // ascii layout:     clippy(ascii), cat, midiPlayer
 // ascii page:       controlledChaos
