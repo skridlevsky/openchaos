@@ -6,8 +6,12 @@ function getNextMergeTime(): Date {
   const now = new Date();
   const target = new Date(now);
   target.setUTCHours(19, 0, 0, 0);
+  // Merge happens weekly on Saturday (day 6) at 19:00 UTC
+  const day = target.getUTCDay();
+  const daysUntilSaturday = (6 - day + 7) % 7;
+  target.setUTCDate(target.getUTCDate() + daysUntilSaturday);
   if (now.getTime() >= target.getTime()) {
-    target.setUTCDate(target.getUTCDate() + 1);
+    target.setUTCDate(target.getUTCDate() + 7);
   }
   return target;
 }
