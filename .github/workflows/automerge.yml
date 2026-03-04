@@ -1,8 +1,8 @@
-name: Merge top-voted PR daily
+name: Merge top-voted PR weekly
 
 on:
   schedule:
-    - cron: "0 19 * * *"
+    - cron: "0 19 * * 6"
   workflow_dispatch:
 
 permissions:
@@ -134,8 +134,8 @@ jobs:
             // Iterate through ranked PRs, merge the first mergeable one
             for (let rank = 0; rank < rankedPRs.length; rank++) {
               const pr = rankedPRs[rank];
-              if (pr.votes <= 0) {
-                console.log(`PR #${pr.number} has ${pr.votes} net votes — stopping (no positive-vote PRs remain).`);
+              if (pr.votes < 10) {
+                console.log(`PR #${pr.number} has ${pr.votes} net votes — stopping (minimum 10 net votes required).`);
                 break;
               }
 
@@ -220,7 +220,7 @@ jobs:
 
                 try {
                   const body = [
-                    `This PR won the daily race,`,
+                    `This PR won the weekly race,`,
                     `Merged with chaos, grace, and pace!`,
                     ``,
                     `**Votes:** +${pr.votes} net (${pr.thumbsUp} :+1: / ${pr.thumbsDown} :-1:)`,
@@ -241,5 +241,5 @@ jobs:
               }
             }
 
-            console.log("\nNo mergeable PR with positive votes found.");
-            core.warning("Daily merge did not occur: no mergeable PR with positive votes and a rhyming title was found.");
+            console.log("\nNo mergeable PR with 10+ net votes found.");
+            core.warning("Weekly merge did not occur: no mergeable PR with 10+ net votes and a rhyming title was found.");

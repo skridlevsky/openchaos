@@ -34,7 +34,7 @@ const CLIPPY_TIPS = [
     "Con you Meow for me?",
     "Con you Meow Meow?",
     "Con you Meow Meow for me?",
-  "Hey there! 👋 The top-voted PR gets merged daily at 19:00 UTC.",
+  "Hey there! 👋 The top-voted PR gets merged every Saturday at 19:00 UTC. Minimum 10 votes!",
   "Pro tip: Only 👍 and 👎 reactions count as votes. Blog about it!",
   "Submit a PR to join the chaos. It's like editing a wiki, but with more merge conflicts.",
   "IMPORTANT: PRs with merge conflicts won't win. Keep your branch rebased!",
