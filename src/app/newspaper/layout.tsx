@@ -1,4 +1,5 @@
 import { ThemePathProvider } from "@/context/ThemePathContext";
+import { WelcomePopup } from "@/components/WelcomePopup";
 import "./newspaper.css";
 
 export default function NewspaperLayout({
@@ -9,6 +10,7 @@ export default function NewspaperLayout({
   return (
     <ThemePathProvider themePath="newspaper">
       {children}
+      <WelcomePopup variant="newspaper" />
     </ThemePathProvider>
   );
 }
