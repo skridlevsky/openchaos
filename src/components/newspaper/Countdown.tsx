@@ -3,11 +3,11 @@
 import { useCountdown, pad } from "@/hooks/useCountdown";
 
 export function Countdown() {
-  const { hours, minutes, seconds, mounted } = useCountdown();
+  const { days, hours, minutes, seconds, mounted } = useCountdown();
 
   const display = mounted
-    ? `${pad(hours)} HOURS : ${pad(minutes)} MINUTES : ${pad(seconds)} SECONDS`
-    : "-- HOURS : -- MINUTES : -- SECONDS";
+    ? `${days} DAYS : ${pad(hours)} HOURS : ${pad(minutes)} MINUTES : ${pad(seconds)} SECONDS`
+    : "-- DAYS : -- HOURS : -- MINUTES : -- SECONDS";
 
   return (
     <div className="np-countdown-wrap">

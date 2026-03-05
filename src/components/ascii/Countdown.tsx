@@ -3,10 +3,10 @@
 import { useCountdown, pad } from "@/hooks/useCountdown";
 
 export function Countdown() {
-  const { hours, minutes, seconds, milliseconds, mounted } = useCountdown(53);
+  const { days, hours, minutes, seconds, milliseconds, mounted } = useCountdown(53);
 
   const display = mounted
-    ? `${pad(hours)} HOURS : ${pad(minutes)} MINS : ${pad(seconds)} SECS : ${pad(milliseconds, 3)} MS`
+    ? `${days} DAYS : ${pad(hours)} HOURS : ${pad(minutes)} MINS : ${pad(seconds)} SECS : ${pad(milliseconds, 3)} MS`
     : "-- DAYS : -- HOURS : -- MINS : -- SECS";
 
   return (
