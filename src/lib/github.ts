@@ -201,8 +201,7 @@ export async function getOrganizedPRs(): Promise<OrganizedPRs> {
   const allPRs = await getAllPRs();
   const totalVotes = allPRs.reduce((sum, pr) => sum + pr.votes, 0);
   const openPRs = allPRs.filter(pr => pr.state === "open");
-  const [owner] = GITHUB_REPO.split("/");
-  const merged = allPRs.filter((pr) => pr.mergedAt !== null && pr.author !== owner).sort((a, b) => new Date(b.mergedAt!).getTime() - new Date(a.mergedAt!).getTime())
+  const merged = allPRs.filter((pr) => pr.mergedAt !== null && pr.number !== 86).sort((a, b) => new Date(b.mergedAt!).getTime() - new Date(a.mergedAt!).getTime())
     .map((pr) => ({
       number: pr.number,
       title: pr.title,
