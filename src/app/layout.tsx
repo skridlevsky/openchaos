@@ -16,7 +16,7 @@ function getChaoticEmoji(): string {
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "OpenChaos.dev",
-    description: "A self-evolving open source project. Every day, the community votes on PRs, and the winner gets merged.",
+    description: "A self-evolving open source project. Every week, the community votes on PRs, and the winner gets merged.",
     icons: {
       icon: getChaoticEmoji(),
     },

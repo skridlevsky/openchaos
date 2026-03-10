@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const STATUS_MESSAGES = [
   "Welcome to OpenChaos.dev — powered by AJAX and community votes",
-  "Top-voted PR gets merged daily at 19:00 UTC!",
+  "Top-voted PR gets merged every Saturday at 19:00 UTC! Minimum 10 votes!",
   "Built with Next.js — because Ruby on Rails was too mainstream",
   "Now with 100% more rounded corners and drop shadows",
   "Add us to your Blogroll! openchaos.dev",

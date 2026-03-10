@@ -1,6 +1,6 @@
 const TICKER_MESSAGES = [
   "EXTRA! EXTRA! Community votes decide what code ships next!",
-  "BULLETIN: Daily merge occurs at 19:00 UTC sharp — cast your ballot!",
+  "BULLETIN: Weekly merge occurs Saturday 19:00 UTC sharp — cast your ballot!",
   "DISPATCH: OpenChaos — the self-evolving open source experiment",
   "FLASH: PRs with most votes get merged — democracy in action!",
   "NOTICE: Merge conflicts disqualify — keep your branches clean!",

@@ -25,7 +25,7 @@ export function Web2Layout({ children }: Web2LayoutProps) {
         {/* Announcement Bar */}
         <div className="web2-announcement-bar">
           <span className="web2-announcement-text">
-            Welcome to OpenChaos.dev — The community-driven, self-evolving open source project! Vote on PRs. Winner gets merged daily at 19:00 UTC.
+            Welcome to OpenChaos.dev — The community-driven, self-evolving open source project! Vote on PRs. Winner gets merged every Saturday at 19:00 UTC. Minimum 10 votes required.
           </span>
         </div>
         <Web2BetaBadge />

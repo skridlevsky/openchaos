@@ -22,8 +22,8 @@ export function Web2Footer() {
         </div>
       </div>
       <div className="web2-footer-bottom">
-        <p>OpenChaos.dev — A self-evolving open source project. Vote on PRs. Winner gets merged daily.</p>
-        <p style={{ marginTop: '4px' }}>Updated daily at 19:00 UTC · Webmaster: skridlevsky@geocities.com</p>
+        <p>OpenChaos.dev — A self-evolving open source project. Vote on PRs. Winner gets merged weekly.</p>
+        <p style={{ marginTop: '4px' }}>Updated every Saturday at 19:00 UTC · Webmaster: skridlevsky@geocities.com</p>
       </div>
     </footer>
   );
