@@ -30,9 +30,15 @@ export function ThemeToggle() {
     return <div className="w-8 h-8" />;
   }
 
+  const toggleTheme = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setIsDark(newTheme === "dark");
+    document.documentElement.setAttribute("data-theme", newTheme);
+  };
+
   return (
     <button
-      onClick={() => alert("No.")}
+      onClick={toggleTheme}
       className="web2-theme-toggle"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
