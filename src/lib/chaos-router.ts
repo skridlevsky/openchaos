@@ -1,4 +1,4 @@
-export const ROUTE_GROUPS = ['ascii', 'web2', 'newspaper'] as const;
+export const ROUTE_GROUPS = ['ascii', 'web2', 'newspaper', 'vaporwave'] as const;
 export type RouteGroup = (typeof ROUTE_GROUPS)[number];
 
 export function pickRandomVariant(): RouteGroup {

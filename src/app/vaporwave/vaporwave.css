@@ -1,0 +1,684 @@
+/* Vaporwave Theme — neon dreams on a dark grid */
+
+:root,
+[data-theme="light"] {
+  --background: #0a0014;
+  --foreground: #e0d0ff;
+  --neon-pink: #ff71ce;
+  --neon-cyan: #01cdfe;
+  --neon-purple: #b967ff;
+  --neon-yellow: #fffb96;
+  --neon-magenta: #ff00aa;
+  --card-bg: rgba(20, 5, 40, 0.85);
+  --card-border: rgba(185, 103, 255, 0.4);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Grid background */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(185, 103, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(185, 103, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanlines */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.vw-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Title ── */
+.vw-title {
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-align: center;
+  margin-bottom: 4px;
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan), var(--neon-purple));
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: vw-gradient-shift 4s ease infinite;
+  position: relative;
+}
+
+.vw-title::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.4;
+  filter: blur(3px);
+}
+
+@keyframes vw-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.vw-subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--neon-purple);
+  margin-bottom: 24px;
+  opacity: 0.8;
+}
+
+/* ── Countdown ── */
+.vw-countdown {
+  text-align: center;
+  margin-bottom: 28px;
+  padding: 16px;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.vw-countdown::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 4px;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan), var(--neon-purple));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.vw-countdown-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  margin-bottom: 8px;
+}
+
+.vw-countdown-time {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--neon-pink);
+  text-shadow: 0 0 10px rgba(255, 113, 206, 0.5), 0 0 30px rgba(255, 113, 206, 0.2);
+}
+
+.vw-countdown-sep {
+  color: var(--neon-purple);
+  opacity: 0.6;
+  margin: 0 4px;
+}
+
+/* ── Tabs ── */
+.vw-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--card-bg);
+  border-radius: 4px;
+  border: 1px solid var(--card-border);
+}
+
+.vw-tab {
+  flex: 1;
+  min-width: fit-content;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--foreground);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-align: center;
+}
+
+.vw-tab:hover {
+  background: rgba(185, 103, 255, 0.1);
+  border-color: var(--card-border);
+}
+
+.vw-tab-active {
+  background: linear-gradient(135deg, rgba(255, 113, 206, 0.2), rgba(1, 205, 254, 0.2));
+  border-color: var(--neon-purple);
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(1, 205, 254, 0.4);
+}
+
+/* ── PR Card ── */
+.vw-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.vw-card:hover {
+  border-color: var(--neon-purple);
+  box-shadow: 0 0 16px rgba(185, 103, 255, 0.15);
+}
+
+.vw-card-leading {
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 20px rgba(255, 113, 206, 0.2);
+}
+
+.vw-card-leading::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 4px;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--neon-pink), var(--neon-cyan));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.vw-card-conflict {
+  opacity: 0.5;
+  border-color: rgba(185, 103, 255, 0.15);
+}
+
+.vw-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.vw-card-rank {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--neon-purple);
+  min-width: 32px;
+  text-align: right;
+  line-height: 1.2;
+}
+
+.vw-card-title-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.vw-card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--foreground);
+  word-wrap: break-word;
+}
+
+.vw-card-title a {
+  color: var(--foreground);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.vw-card-title a:hover {
+  color: var(--neon-cyan);
+}
+
+.vw-card-pr-num {
+  color: var(--neon-purple);
+  opacity: 0.7;
+  font-size: 0.85rem;
+  margin-left: 6px;
+}
+
+.vw-card-meta {
+  font-size: 0.8rem;
+  color: var(--foreground);
+  opacity: 0.6;
+  margin-top: 2px;
+}
+
+.vw-card-meta a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+}
+
+.vw-card-meta a:hover {
+  text-decoration: underline;
+}
+
+.vw-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+.vw-badge-leading {
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-magenta));
+  color: #fff;
+}
+
+.vw-badge-trending {
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+  color: #fff;
+}
+
+.vw-badge-conflict {
+  background: rgba(255, 60, 60, 0.2);
+  color: #ff6666;
+  border: 1px solid rgba(255, 60, 60, 0.3);
+}
+
+/* ── Voting ── */
+.vw-vote-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.vw-vote-score {
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--neon-yellow);
+  min-width: 40px;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(255, 251, 150, 0.3);
+  position: relative;
+}
+
+.vw-vote-btn {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  border-radius: 3px;
+  color: var(--foreground);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 1rem;
+  font-family: inherit;
+  padding: 0;
+}
+
+.vw-vote-btn:hover:not(:disabled) {
+  border-color: var(--neon-purple);
+  background: rgba(185, 103, 255, 0.1);
+}
+
+.vw-vote-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.vw-vote-btn-active-up {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  background: rgba(1, 205, 254, 0.1);
+  box-shadow: 0 0 8px rgba(1, 205, 254, 0.2);
+}
+
+.vw-vote-btn-active-down {
+  border-color: var(--neon-pink);
+  color: var(--neon-pink);
+  background: rgba(255, 113, 206, 0.1);
+  box-shadow: 0 0 8px rgba(255, 113, 206, 0.2);
+}
+
+.vw-vote-label {
+  font-size: 0.7rem;
+  color: var(--foreground);
+  opacity: 0.5;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.vw-feedback {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  margin-top: 8px;
+  border-radius: 3px;
+  background: rgba(185, 103, 255, 0.1);
+  border: 1px solid var(--card-border);
+  color: var(--neon-cyan);
+}
+
+.vw-feedback-retry {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--neon-purple);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--neon-purple);
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.vw-feedback-retry:hover {
+  background: rgba(185, 103, 255, 0.15);
+}
+
+/* ── Tooltip ── */
+.vw-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--neon-purple);
+  border-radius: 3px;
+  background: rgba(10, 0, 20, 0.95);
+  color: var(--neon-cyan);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+/* ── Hall of Chaos Card ── */
+.vw-hall-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.vw-hall-card:hover {
+  border-color: var(--neon-cyan);
+}
+
+.vw-hall-num {
+  font-weight: 800;
+  color: var(--neon-purple);
+  opacity: 0.6;
+  font-size: 0.85rem;
+}
+
+.vw-hall-title {
+  font-weight: 600;
+  color: var(--foreground);
+  flex: 1;
+}
+
+.vw-hall-title a {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.vw-hall-title a:hover {
+  color: var(--neon-cyan);
+}
+
+.vw-hall-meta {
+  font-size: 0.75rem;
+  color: var(--foreground);
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+/* ── Hall of Chaos section ── */
+.vw-hall-section {
+  margin-top: 32px;
+}
+
+/* ── Section Header ── */
+.vw-section-header {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--neon-purple);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* ── Auth button overrides ── */
+.auth-button {
+  background: transparent;
+  border: 1px solid var(--neon-purple);
+  border-radius: 3px;
+  color: var(--neon-cyan);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.auth-button:hover {
+  background: rgba(185, 103, 255, 0.15);
+  border-color: var(--neon-cyan);
+}
+
+.auth-button-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.auth-button-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-avatar {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--neon-purple);
+  border-radius: 3px;
+}
+
+.auth-username {
+  color: var(--neon-cyan);
+}
+
+.auth-button-logout {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+/* ── Show more/less button ── */
+.vw-expand-btn {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  border-radius: 3px;
+  color: var(--neon-purple);
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.vw-expand-btn:hover {
+  border-color: var(--neon-purple);
+  background: rgba(185, 103, 255, 0.1);
+}
+
+/* ── Links ── */
+.vw-container a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.vw-container a:hover {
+  color: var(--neon-pink);
+  text-decoration: underline;
+}
+
+/* ── Celebration effects ── */
+.confetti-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  pointer-events: none;
+  z-index: 100;
+  animation: vw-confetti-fall 1.5s ease-out forwards;
+}
+
+@keyframes vw-confetti-fall {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x, 50px), var(--y, 120px)) rotate(720deg) scale(0.3);
+  }
+}
+
+.star-burst {
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+  font-size: 16px;
+  animation: vw-star-burst 0.8s ease-out forwards;
+}
+
+@keyframes vw-star-burst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x, 30px), var(--y, -30px)) scale(1.8);
+  }
+}
+
+.shake-67-animation {
+  animation: vw-shake 0.5s ease-in-out;
+}
+
+@keyframes vw-shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-6px) rotate(-1deg); }
+  30% { transform: translateX(6px) rotate(1deg); }
+  50% { transform: translateX(-4px) rotate(-0.5deg); }
+  70% { transform: translateX(4px) rotate(0.5deg); }
+  90% { transform: translateX(-2px); }
+}
+
+.celebrate-animation {
+  animation: vw-celebrate 0.6s ease-in-out;
+}
+
+@keyframes vw-celebrate {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.03); filter: brightness(1.3); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* ── Error / Empty states ── */
+.vw-message-box {
+  text-align: center;
+  padding: 24px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  background: var(--card-bg);
+  color: var(--foreground);
+}
+
+.vw-message-box strong {
+  color: var(--neon-pink);
+}
+
+/* ── Top bar ── */
+.vw-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .vw-title {
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+  }
+
+  .vw-tabs {
+    flex-direction: column;
+  }
+
+  .vw-card-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vw-card-rank {
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  .vw-countdown-time {
+    font-size: 1.3rem;
+  }
+}
