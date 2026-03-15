@@ -12,6 +12,7 @@ import { Web2RssIcon } from "./Web2RssIcon";
 import { Web2TagCloud } from "./Web2TagCloud";
 import { Web2SocialBookmarks } from "./Web2SocialBookmarks";
 import { Web2DiggCounter } from "./Web2DiggCounter";
+import { BadgeDisplay } from "./BadgeDisplay";
 
 interface Web2LayoutProps {
   children: ReactNode;
@@ -81,6 +82,13 @@ export function Web2Layout({ children }: Web2LayoutProps) {
                     >
                       OpenChaos Museum
                     </a>
+                    <a
+                      href="/achievements"
+                      className="guestbook-button"
+                      style={{ textAlign: 'center', margin: 0, display: 'block', textDecoration: 'none', background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)', color: '#1a1a2e', fontWeight: 'bold' }}
+                    >
+                      🏅 Your Badges
+                    </a>
                   </div>
                 </div>
 
@@ -89,6 +97,9 @@ export function Web2Layout({ children }: Web2LayoutProps) {
 
                 {/* Digg-style Vote Counter */}
                 <Web2DiggCounter />
+
+                {/* Achievement Badges */}
+                <BadgeDisplay compact />
 
                 {/* Social Bookmarks */}
                 <Web2SocialBookmarks />

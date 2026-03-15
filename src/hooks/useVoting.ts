@@ -158,6 +158,22 @@ export function useVoting(pr: PullRequest, options: VotingOptions = {}): VotingS
         setVoteStatus("success");
         setFeedbackMessage(reaction === "+1" ? feedbackMessages.upvote : feedbackMessages.downvote);
         try { onVoteSuccess?.(pr.number, reaction); } catch (e) { console.error("onVoteSuccess callback failed:", e); }
+        
+        // Record vote achievement
+        try {
+          const STORAGE_KEY = 'openchaos_achievements';
+          const saved = localStorage.getItem(STORAGE_KEY);
+          let data: any = saved ? JSON.parse(saved) : { stats: { totalVotes: 0, prsSubmitted: 0, prsWon: 0, votingStreak: 0, lastVoteDate: null, daysVoted: 0 }, achievements: [] };
+          const today = new Date().toISOString().split('T')[0];
+          const lastVote: string | null = data.stats.lastVoteDate;
+          if (lastVote) {
+            const diffDays = Math.floor((new Date(today).getTime() - new Date(lastVote).getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) { } else if (diffDays === 1) { data.stats.votingStreak += 1; data.stats.daysVoted += 1; } else { data.stats.votingStreak = 1; data.stats.daysVoted += 1; }
+          } else { data.stats.votingStreak = 1; data.stats.daysVoted = 1; }
+          data.stats.totalVotes += 1;
+          data.stats.lastVoteDate = today;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) { console.debug('Could not record vote achievement:', e); }
 
         playSound(() => reaction === "+1" ? soundPlayer.playUpvote() : soundPlayer.playDownvote());
         playSound(() => soundPlayer.playSuccess());
