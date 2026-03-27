@@ -1,0 +1,158 @@
+/* Museum theme */
+.museum {
+  min-height: 100vh;
+  background: #f5f0e8;
+  color: #2c2419;
+  font-family: "Cormorant Garamond", "Times New Roman", Times, serif;
+}
+
+.museum-header {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  border-bottom: 1px solid #c4b8a8;
+}
+
+.museum-title {
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0;
+  color: #3d3428;
+}
+
+.museum-subtitle {
+  font-size: 0.95rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 0.35rem 0 1rem;
+  color: #6b5d4f;
+}
+
+.museum-nav {
+  font-size: 0.9rem;
+}
+
+.museum-nav a {
+  color: #5c4a3a;
+  text-decoration: none;
+}
+
+.museum-nav a:hover {
+  text-decoration: underline;
+}
+
+.museum-nav-sep {
+  margin: 0 0.5rem;
+  color: #a09080;
+}
+
+.museum-main {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+.museum-exhibit {
+  background: #fffef9;
+  border: 1px solid #d8d0c4;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 12px rgba(44, 36, 25, 0.06);
+}
+
+.museum-exhibit:last-child {
+  margin-bottom: 0;
+}
+
+.museum-artwork-frame {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #faf8f4;
+  border: 1px solid #e8e2d8;
+}
+
+.museum-artwork {
+  width: 200px;
+  height: auto;
+  display: inline-block;
+}
+
+.museum-artwork-frame-emoji {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.museum-emoji {
+  font-size: 6rem;
+  line-height: 1;
+}
+
+.museum-emoji-tappable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.museum-emoji-tappable:hover {
+  background: #f2ede4;
+}
+
+.museum-emoji-tappable:active {
+  background: #ebe6dc;
+}
+
+.museum-iframe-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 1.5rem;
+  background: #1a1a1a;
+  border: 1px solid #e8e2d8;
+  overflow: hidden;
+}
+
+.museum-iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.museum-label {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #3d3428;
+}
+
+.museum-label-name {
+  font-weight: 600;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+
+.museum-label-material {
+  color: #5c5246;
+}
+
+.museum-label-date {
+  color: #6b5d4f;
+  margin-top: 0.15rem;
+}
+
+.museum-label-credit {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: #8a7d6d;
+}
+
+.museum-footer {
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: #8a7d6d;
+  border-top: 1px solid #c4b8a8;
+}

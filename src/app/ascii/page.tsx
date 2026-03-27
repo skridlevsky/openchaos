@@ -28,12 +28,8 @@ export default function AsciiHome() {
       <GuyFieri />
       <div>
         <div>
-          <AuthButton /> <a href="doom.html">[Play DOOM]</a>
+          <AuthButton /> <a href="/museum">[OpenChaos Museum]</a>
           <br /><br />
-          <pre className="dickbutt">
-            8===D (‿|‿)
-          </pre>
-          <br />
           <Suspense
             fallback={
               <div>

@@ -1,23 +1,16 @@
-import { getOrganizedPRs } from "@/lib/github";
+import { fetchOrganizedPRs } from "@/lib/prData";
 import { FramesLayout } from "./FramesLayout";
 
 export async function PRList() {
-  let data;
-  let error = null;
+  const result = await fetchOrganizedPRs();
 
-  try {
-    data = await getOrganizedPRs();
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Failed to fetch PRs";
-  }
-
-  if (error) {
+  if (!result.ok) {
     return (
       <table width="90%" border={1} cellPadding={10} className="page-error-table">
         <tbody>
           <tr>
             <td className="page-error-cell">
-              <b>{error}</b>
+              <b>{result.error}</b>
               <br />
               <span>Try refreshing the page in a minute.</span>
             </td>
@@ -27,7 +20,7 @@ export async function PRList() {
     );
   }
 
-  const { topByVotes, rising, newest, discussed, controversial } = data!;
+  const { topByVotes, rising, newest, discussed, controversial } = result.data;
 
   if (topByVotes.length === 0 && rising.length === 0 && newest.length === 0) {
     return (

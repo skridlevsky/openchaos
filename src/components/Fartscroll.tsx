@@ -3,15 +3,6 @@
 import Script from "next/script";
 import { useEffect, useState, useRef } from "react";
 
-declare global {
-  interface Window {
-    fartscroll?: {
-      (pixels: number): void;
-      play: (position?: number) => void;
-    };
-  }
-}
-
 // configure after how many scrolled pixels fart sounds will play
 const FARTSCROLL_TRIGGER_DISTANCE_PX = 400;
 
@@ -65,12 +56,18 @@ export function Fartscroll() {
         ie6ContentArea.addEventListener('scroll', playFartOnScroll, false);
       } else {
         // Normal layout: use the built-in fartscroll.js hopefully someone will get rid of this weird IE6 thing
-        try {
-          if (window.fartscroll) {
-            window.fartscroll(FARTSCROLL_TRIGGER_DISTANCE_PX);
+        const fartscroll = (window as unknown as {
+          fartscroll?:
+            | ((pixels: number) => void)
+            | { play?: (position?: number) => void };
+        }).fartscroll;
+
+        if (typeof fartscroll === "function") {
+          try {
+            fartscroll(FARTSCROLL_TRIGGER_DISTANCE_PX);
+          } catch {
+            // Silently catch any errors
           }
-        } catch (error) {
-          // Silently catch any errors
         }
       }
     };

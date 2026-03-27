@@ -43,7 +43,7 @@ const CLIPPY_ASCII_FRAMES = [
 
 const CLIPPY_TIPS = [
   "It looks like you're trying to vote on a PR! Would you like help with that?",
-  "Did you know? The top-voted PR gets merged every day at 19:00 UTC!",
+  "Did you know? The top-voted PR gets merged every Saturday at 19:00 UTC!",
   "TIP: Thumbs up 👍 = good. Thumbs down 👎 = bad. You're welcome!",
   "I see you're browsing PRs. Have you considered submitting your own?",
   "Fun fact: This website was definitely NOT made in Microsoft FrontPage 2000.",

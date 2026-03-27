@@ -50,7 +50,7 @@ export function HallOfChaosCard({ pr }: HallOfChaosCardProps) {
             View on GitHub →
           </a>
         </div>
-        <div className="hall-card-trophy-section" title="Daily merge winner">
+        <div className="hall-card-trophy-section" title="Weekly merge winner">
           <span className="hall-card-trophy-emoji">
             🏆
           </span>

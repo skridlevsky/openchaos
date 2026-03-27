@@ -2,7 +2,7 @@
 
 **[openchaos.dev](https://openchaos.dev)**
 
-A self-evolving open source project. Each day, the community votes on PRs, and the top-voted one is merged.
+A self-evolving open source project. Each week, the community votes on PRs, and the top-voted one is merged.
 
 **The website IS the repo. The repo IS the website.**
 
@@ -12,7 +12,7 @@ A self-evolving open source project. Each day, the community votes on PRs, and t
 2. Community votes via reactions on the PR:
   - 👍 (Thumbs Up) counts as +1
   - 👎 (Thumbs Down) counts as -1
-3. Every **day at 19:00 UTC**, the most-voted PR gets merged
+3. Every **Saturday at 19:00 UTC**, the most-voted PR gets merged
 4. Vercel auto-deploys
 5. Repeat forever
 
@@ -38,9 +38,12 @@ Your pitch will be displayed on your PR card. Keep it concise (max 256 character
 - **Ties favor the New**: If scores are equal, the **newest PR** (created most recently) wins
 - **Must have rhyming words**: Only PRs that contain **two rhyming words** in the title are eligible for merge (e.g., "botch" and "watch")
 - **CI must pass**: If the build fails, the PR is not eligible
+- **Minimum 10 net votes**: PRs need at least 10 net votes to be eligible. If nothing qualifies, nothing merges that week.
 - **No merge conflicts**: PRs with conflicts at merge time are skipped; the next highest PR wins
 - **No malware**: Maintainer can reject obviously malicious content
-- Any time the maintainer pushes code to main without following the community voting process indicated above, he must post to his X account "I'm a naughty boy" with a link to the Github commit page.
+
+- **Note on RULES.md**: The RULES.md file is deprecated and no longer maintained. All current rules are documented here in the README.
+- Any time the maintainer pushes code to main without following the community voting process indicated above, he must post to his X account "I'm a naughty boy" with a link to the Github commit page. 
 
 ## What Can Be Changed
 
