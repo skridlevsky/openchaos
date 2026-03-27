@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Countdown } from "@/components/ascii/Countdown";
 import { ControlledChaos } from "@/components/ControlledChaos";
 import { PRList } from "@/components/ascii/PRList";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { EnhancedThemeToggle } from "@/components/EnhancedThemeToggle";
 import { HallOfChaos } from "@/components/ascii/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
 import { GuyFieri } from "@/components/GuyFieri";
@@ -20,8 +20,8 @@ export default function AsciiHome() {
   return (
     <>
     <pre >{title}</pre>
-      <div className="absolute top-8 right-4">
-        <ThemeToggle />
+      <div className="absolute top-8 right-4 z-10">
+        <EnhancedThemeToggle />
       </div>
       <Countdown />
       <ControlledChaos />

@@ -12,6 +12,7 @@ import { Web2RssIcon } from "./Web2RssIcon";
 import { Web2TagCloud } from "./Web2TagCloud";
 import { Web2SocialBookmarks } from "./Web2SocialBookmarks";
 import { Web2DiggCounter } from "./Web2DiggCounter";
+import { EnhancedThemeToggle } from "./EnhancedThemeToggle";
 
 interface Web2LayoutProps {
   children: ReactNode;
@@ -52,6 +53,14 @@ export function Web2Layout({ children }: Web2LayoutProps) {
 
               {/* Sidebar */}
               <div className="web2-col-sidebar">
+                {/* Theme Toggle Widget */}
+                <div className="web2-widget">
+                  <div className="web2-widget-header">Theme Settings</div>
+                  <div className="web2-widget-body">
+                    <EnhancedThemeToggle />
+                  </div>
+                </div>
+
                 {/* Action Buttons Widget */}
                 <div className="web2-widget">
                   <div className="web2-widget-header">Get Involved</div>

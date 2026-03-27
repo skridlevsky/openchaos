@@ -20,6 +20,29 @@
   100% { transform: rotate(0deg); }
 }
 
+/* Theme transition animations */
+@keyframes theme-switch {
+  0% { opacity: 0.5; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(147, 51, 234, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(147, 51, 234, 0.6); }
+}
+
+.theme-transition {
+  transition: all 0.3s ease-in-out;
+}
+
+.theme-switch-animation {
+  animation: theme-switch 0.3s ease-out;
+}
+
+.glow-animation {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
 .sixseven-shake {
   animation: sixseven-shake 0.7s ease-in-out infinite;
   transform-origin: center;
