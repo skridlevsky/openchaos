@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { HallOfChaos } from "@/components/ascii/HallOfChaos";
 import { AuthButton } from "@/components/AuthButton";
 import { GuyFieri } from "@/components/GuyFieri";
+import { TypingSpeedTest } from "@/components/ascii/TypingSpeedTest";
 
 const title = `
   ___                 ___ _
@@ -26,6 +27,7 @@ export default function AsciiHome() {
       <Countdown />
       <ControlledChaos />
       <GuyFieri />
+      <TypingSpeedTest />
       <div>
         <div>
           <AuthButton /> <a href="/museum">[OpenChaos Museum]</a>

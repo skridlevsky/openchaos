@@ -107,3 +107,121 @@ pre {
 .vote-button-down {
   border-color: #ff0000;
 }
+
+/* Typing Speed Test */
+.type-test-container {
+  border: 3px double #00ff00;
+  padding: 12px;
+  margin: 16px 0;
+  max-width: 72ch;
+}
+
+.type-test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #00ff00;
+  padding-bottom: 8px;
+}
+
+.type-test-title {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.type-test-new-btn {
+  background: none;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.type-test-new-btn:hover {
+  background: #00ff00;
+  color: #000000;
+}
+
+.type-test-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+  color: #00ff00;
+  font-size: 13px;
+}
+
+.type-test-passage {
+  background: #001100;
+  border: 1px solid #004400;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  letter-spacing: 0.5px;
+}
+
+.type-pending {
+  color: #006600;
+}
+
+.type-correct {
+  color: #00ff00;
+}
+
+.type-wrong {
+  color: #ff0000;
+  background: #330000;
+  text-decoration: underline;
+}
+
+.type-test-input {
+  width: 100%;
+  background: #000000;
+  border: 1px solid #00ff00;
+  color: #00ff00;
+  font-family: 'Courier New', 'Courier', monospace;
+  font-size: 13px;
+  padding: 8px;
+  resize: none;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.type-test-input:focus {
+  border-color: #00ff00;
+  box-shadow: 0 0 4px #00ff00;
+}
+
+.type-test-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #008800;
+}
+
+.type-test-results {
+  padding: 12px;
+  border: 1px solid #00ff00;
+  background: #001100;
+}
+
+.type-result-title {
+  color: #00ff00;
+  font-weight: bold;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.type-result-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.type-result-value {
+  font-weight: bold;
+  color: #00ff00;
+}
