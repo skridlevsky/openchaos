@@ -83,13 +83,6 @@ export function PRCard({ pr, distinguishLeading = true, scoreLabel = "Net Score"
               💬 <em>{pr.pitch}</em>
             </div>
           )}
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pr-card-link"
-            suppressHydrationWarning
-          >
           <a href={url} target="_blank" rel="noopener noreferrer" className="pr-card-link" suppressHydrationWarning>
             View &amp; Vote on GitHub →
           </a>
